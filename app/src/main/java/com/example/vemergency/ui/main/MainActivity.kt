@@ -16,6 +16,6 @@ class MainActivity : AppCompatActivity() {
 
         //Initialize the bottom navigation view
         //create bottom navigation view object
-        binding.bottomNavigationView.setupWithNavController(findNavController(R.id.nav_fragment))
+        binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
     }
 }
