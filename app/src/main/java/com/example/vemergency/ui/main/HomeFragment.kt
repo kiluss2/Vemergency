@@ -1,5 +1,6 @@
 package com.example.vemergency.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.vemergency.databinding.FragmentHomeBinding
+import com.example.vemergency.ui.navigation.NavigationActivity
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -21,9 +23,15 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-
+        setUpOnClickView()
 
         return binding.root
+    }
+
+    private fun setUpOnClickView() {
+        binding.btnFind.setOnClickListener {
+            startActivity(Intent(activity, NavigationActivity::class.java))
+        }
     }
 
     override fun onDestroyView() {
