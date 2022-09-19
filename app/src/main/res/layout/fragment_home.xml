@@ -1,12 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white_lotion">
 
-    <!-- TODO: Update blank fragment layout -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="30dp"
+        app:cardCornerRadius="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivAccount"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_account_avatar" />
+    </androidx.cardview.widget.CardView>
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="home" />
+        android:id="@+id/tvAccountMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:text="@string/app_name"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/cardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cardView"
+        app:layout_constraintTop_toTopOf="@+id/cardView" />
 
-</FrameLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginVertical="20dp"
+        android:background="@drawable/bg_frame_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/ivNearBy"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginVertical="10dp"
+            android:background="@drawable/ic_circle_in_circle"
+            app:layout_constraintBottom_toTopOf="@id/btnFind"
+            app:layout_constraintStart_toStartOf="@+id/btnFind"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvNearBy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:text="found 5 places near by"
+            android:textSize="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/ivNearBy"
+            app:layout_constraintEnd_toEndOf="@+id/btnFind"
+            app:layout_constraintStart_toEndOf="@id/ivNearBy"
+            app:layout_constraintTop_toTopOf="@+id/ivNearBy" />
+
+        <Button
+            android:id="@+id/btnFind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/button_text_find"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivNearBy"
+            tools:layout_editor_absoluteX="15dp"
+            android:layout_marginBottom="10dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
