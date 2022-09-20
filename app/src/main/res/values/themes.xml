@@ -3,7 +3,7 @@
     <style name="Theme.Vemergency" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/yellow_orange</item>
-        <item name="colorPrimaryVariant">@color/yellow_mustard</item>
+        <item name="colorPrimaryVariant">@color/yellow_orange</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/blue_crayola</item>
