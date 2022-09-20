@@ -1,60 +1,89 @@
 package com.example.vemergency.ui.login
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.vemergency.R
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.example.vemergency.databinding.FragmentSignupBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SignupFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SignupFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _binding: FragmentSignupBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_signup, container, false)
+    ): View {
+        _binding = FragmentSignupBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SignupFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SignupFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        //signupApi = RetrofitClient.getInstance(requireContext()).getClientUnAuthorize().create(BookService::class.java)
+        binding.btnSignUp.setOnClickListener {
+            binding.loading.visibility = View.VISIBLE
+            performSignUp()
+        }
+    }
+
+    private fun performSignUp() {
+//        val username = edtUsername.text.toString()
+//        val password = edtPassword.text.toString()
+//        val passwordConfirm = edtPasswordConfirm.text.toString()
+//        if (password != "" && username !="" &&passwordConfirm != "") {
+//            if (password == passwordConfirm) {
+//                signupApi.register(createJsonRequestBody(
+//                    "username" to username, "password" to password)).enqueue(object : Callback<Account?> {
+//                    override fun onResponse(
+//                        call: Call<Account?>,
+//                        response: Response<Account?>
+//                    ) {
+//                        if (response.isSuccessful) {
+//                            val registerResponse = response.body()
+//                            loadingProgressBar.visibility = View.GONE
+//                            edtUsername.text.clear()
+//                            edtPassword.text.clear()
+//                            edtPasswordConfirm.text.clear()
+//                            showToast("Register successfully!")
+//                            navigateToLoginFragment()
+//                            Log.e("onResponse: ", registerResponse.toString())
+//                        } else {
+//                            loadingProgressBar.visibility = View.GONE
+//                            showToast(response.body().toString())
+//                        }
+//                    }
+//
+//                    override fun onFailure(call: Call<Account?>, t: Throwable) {
+//                        loadingProgressBar.visibility = View.GONE
+//                        Toast.makeText(requireContext(), t.message, Toast.LENGTH_LONG).show()
+//                    }
+//                })
+//            }
+//        } else {
+//            Toast.makeText(requireContext(), "Please fill all field", Toast.LENGTH_LONG).show()
+//        }
+    }
+
+//    private fun createJsonRequestBody(vararg params : Pair<String, Any>) =
+//        RequestBody.create(
+//            okhttp3.MediaType.parse("application/json; charset=utf-8"),
+//            JSONObject(mapOf(*params)).toString())
+
+    private fun navigateToLoginFragment() {
+        (activity as LoginActivity).viewPager.currentItem = 0
+    }
+
+    private fun showToast(string: String) {
+        val appContext = context?.applicationContext ?: return
+        Toast.makeText(appContext, string, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

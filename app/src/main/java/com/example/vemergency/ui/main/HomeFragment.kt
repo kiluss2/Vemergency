@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.vemergency.databinding.FragmentHomeBinding
+import com.example.vemergency.ui.login.LoginActivity
 import com.example.vemergency.ui.navigation.NavigationActivity
 
 class HomeFragment : Fragment() {
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -31,6 +33,9 @@ class HomeFragment : Fragment() {
     private fun setUpOnClickView() {
         binding.btnFind.setOnClickListener {
             startActivity(Intent(activity, NavigationActivity::class.java))
+        }
+        binding.ivAccount.setOnClickListener {
+            startActivity(Intent(activity, LoginActivity::class.java))
         }
     }
 

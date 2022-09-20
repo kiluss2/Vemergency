@@ -3,4 +3,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="button_text_find">Find</string>
+    <string name="prompt_username">user name</string>
+    <string name="prompt_password">password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_up">Sign up</string>
+    <string name="prompt_password_confirm">confirm password</string>
 </resources>
