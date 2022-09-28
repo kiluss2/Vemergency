@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.vemergency.databinding.ActivityLoginBinding
 import com.google.android.material.tabs.TabLayoutMediator
-import com.kiluss.bookrate.adapter.LoginPagerAdapter
 
 class LoginActivity : AppCompatActivity() {
 
