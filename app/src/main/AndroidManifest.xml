@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.vemergency">
+    package="com.kiluss.vemergency">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,7 +16,7 @@
         android:theme="@style/Theme.Vemergency"
         tools:targetApi="31">
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name="com.kiluss.vemergency.ui.login.LoginActivity"
             android:exported="false" />
 
         <meta-data
@@ -24,10 +24,10 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".ui.navigation.NavigationActivity"
+            android:name="com.kiluss.vemergency.ui.navigation.NavigationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name="com.kiluss.vemergency.ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

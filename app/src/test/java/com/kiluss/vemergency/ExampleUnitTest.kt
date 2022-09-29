@@ -1,4 +1,4 @@
-package com.example.vemergency
+package com.kiluss.vemergency
 
 import org.junit.Test
 

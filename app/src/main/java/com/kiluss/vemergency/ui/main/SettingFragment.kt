@@ -1,4 +1,4 @@
-package com.example.vemergency.ui.main
+package com.kiluss.vemergency.ui.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.vemergency.databinding.FragmentSettingBinding
+import com.kiluss.vemergency.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null

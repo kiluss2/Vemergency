@@ -1,7 +1,7 @@
-package com.example.vemergency.ui.navigation
+package com.kiluss.vemergency.ui.navigation
 
 import android.app.Application
-import com.example.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.ui.base.BaseViewModel
 
 /**
  * Created by sonlv on 9/19/2022

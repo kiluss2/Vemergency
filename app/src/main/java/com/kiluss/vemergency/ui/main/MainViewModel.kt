@@ -1,7 +1,7 @@
-package com.example.vemergency.ui.main
+package com.kiluss.vemergency.ui.main
 
 import android.app.Application
-import com.example.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.ui.base.BaseViewModel
 
 class MainViewModel(application: Application) : BaseViewModel(application) {
 

@@ -1,9 +1,9 @@
-package com.example.vemergency.ui.login
+package com.kiluss.vemergency.ui.login
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
-import com.example.vemergency.databinding.ActivityLoginBinding
+import com.kiluss.vemergency.databinding.ActivityLoginBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
 class LoginActivity : AppCompatActivity() {

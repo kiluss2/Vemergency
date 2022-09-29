@@ -1,4 +1,4 @@
-package com.example.vemergency.ui.constant
+package com.kiluss.vemergency.ui.constant
 
 /**
  * Created by sonlv on 9/20/2022

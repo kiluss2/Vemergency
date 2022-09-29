@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "993206351008",
+    "project_id": "vemergency",
+    "storage_bucket": "vemergency.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993206351008:android:12bcf5c620e1d02b2f45c5",
+        "android_client_info": {
+          "package_name": "com.kiluss.vemergency"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993206351008-rafgu6fvi5jj0l1aluml9supb1948m0v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kiluss.vemergency",
+            "certificate_hash": "a4e7c658ef7838b42cd6596448bf44da4ac2bec9"
+          }
+        },
+        {
+          "client_id": "993206351008-sfttk91d5j49s4p8u6u29qc3ibo21a80.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzKnHlYlXQ0zOQVhgdA5cV5Noz0SEkliw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993206351008-sfttk91d5j49s4p8u6u29qc3ibo21a80.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

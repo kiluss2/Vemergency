@@ -1,9 +1,9 @@
-package com.example.vemergency.ui.navigation
+package com.kiluss.vemergency.ui.navigation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.vemergency.R
-import com.example.vemergency.databinding.ActivityNavigationBinding
+import com.kiluss.vemergency.R
+import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback

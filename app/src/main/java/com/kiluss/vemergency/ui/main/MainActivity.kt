@@ -1,4 +1,4 @@
-package com.example.vemergency.ui.main
+package com.kiluss.vemergency.ui.main
 
 import android.os.Bundle
 import android.os.Handler
@@ -6,8 +6,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.vemergency.R
-import com.example.vemergency.databinding.ActivityMainBinding
+import com.kiluss.vemergency.R
+import com.kiluss.vemergency.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
