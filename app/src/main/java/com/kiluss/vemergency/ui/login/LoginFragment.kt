@@ -68,6 +68,7 @@ class LoginFragment : Fragment() {
         binding.btnSignIn.setOnClickListener {
             binding.pbLoading.visibility = View.VISIBLE
             performCheckLogin()
+            binding.pbLoading.visibility = View.GONE
         }
     }
 
@@ -85,15 +86,11 @@ class LoginFragment : Fragment() {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "signInWithEmail:failure", task.exception)
-                            Toast.makeText(
-                                activity, "Authentication failed.",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(activity, task.exception?.message, Toast.LENGTH_SHORT).show()
                         }
                     }
             } else {
                 Toast.makeText(requireContext(), "Please fill all field", Toast.LENGTH_LONG).show()
-                pbLoading.visibility = View.GONE
             }
         }
     }

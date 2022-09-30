@@ -7,10 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.kiluss.vemergency.databinding.FragmentSignupBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.databinding.FragmentSignupBinding
 
 class SignupFragment : Fragment() {
 
@@ -34,6 +34,7 @@ class SignupFragment : Fragment() {
         binding.btnSignUp.setOnClickListener {
             binding.loading.visibility = View.VISIBLE
             performSignUp()
+            binding.loading.visibility = View.GONE
         }
     }
 
@@ -42,20 +43,21 @@ class SignupFragment : Fragment() {
             val username = edtUsername.text.toString()
             val password = edtPassword.text.toString()
             val passwordConfirm = edtPasswordConfirm.text.toString()
-            if (password != "" && username !="" &&passwordConfirm != "") {
+            if (password != "" && username != "" && passwordConfirm != "") {
                 if (password == passwordConfirm) {
                     auth.createUserWithEmailAndPassword(username, password)
                         .addOnCompleteListener(requireActivity()) { task ->
                             if (task.isSuccessful) {
                                 // Sign in success, update UI with the signed-in user's information
-                                Toast.makeText(activity, "Success!",
-                                    Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    activity, "Success!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 navigateToLoginFragment()
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("TAG", "createUserWithEmail:failure", task.exception)
-                                Toast.makeText(activity, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show()
+                                Toast.makeText(activity, task.exception?.message, Toast.LENGTH_SHORT).show()
                             }
                         }
                 }
