@@ -9,13 +9,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.kiluss.vemergency.databinding.FragmentLoginBinding
-import com.kiluss.vemergency.ui.constant.SAVED_LOGIN_ACCOUNT_KEY
-import com.kiluss.vemergency.ui.constant.SIGN_IN_KEY
-import com.kiluss.vemergency.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
+import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
+import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
+import com.kiluss.vemergency.databinding.FragmentLoginBinding
+import com.kiluss.vemergency.ui.constant.SAVED_LOGIN_ACCOUNT_KEY
+import com.kiluss.vemergency.ui.constant.SIGN_IN_KEY
+import com.kiluss.vemergency.ui.userprofile.UserProfileActivity
 
 class LoginFragment : Fragment() {
 
@@ -34,16 +37,6 @@ class LoginFragment : Fragment() {
         }
         // Initialize Firebase Auth
         auth = Firebase.auth
-    }
-
-    private fun loginSuccess() {
-        requireActivity().startActivity(
-            Intent(
-                requireActivity(),
-                MainActivity::class.java
-            )
-        )
-        requireActivity().finish()
     }
 
     override fun onCreateView(
@@ -68,7 +61,6 @@ class LoginFragment : Fragment() {
         binding.btnSignIn.setOnClickListener {
             binding.pbLoading.visibility = View.VISIBLE
             performCheckLogin()
-            binding.pbLoading.visibility = View.GONE
         }
     }
 
@@ -83,70 +75,45 @@ class LoginFragment : Fragment() {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("TAG", "signInWithEmail:success")
                             loginSuccess()
+                            binding.pbLoading.visibility = View.GONE
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "signInWithEmail:failure", task.exception)
                             Toast.makeText(activity, task.exception?.message, Toast.LENGTH_SHORT).show()
+                            binding.pbLoading.visibility = View.GONE
                         }
                     }
             } else {
-                Toast.makeText(requireContext(), "Please fill all field", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Please make sure to fill in your email and password",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-//    private fun saveLoginInfo(loginObject: LoginResponse) {
-//        val pref: SharedPreferences =
-//            requireContext().getSharedPreferences(
-//                requireContext().getString(
-//                    R.string.saved_login_account_key
-//                ),
-//                Context.MODE_PRIVATE
-//            )
-//        val editor: SharedPreferences.Editor = pref.edit()
-//        val gson = Gson()
-//        val json = gson.toJson(loginObject)
-//        editor.putString(
-//            requireContext().getString(R.string.saved_login_account_key),
-//            json
-//        ).apply()
-//        editor.putBoolean(
-//            requireContext().getString(R.string.is_sign_in_key),
-//            true
-//        ).apply()
-//    }
-//
-//    private fun createJsonRequestBody(vararg params: Pair<String, Any>) =
-//        RequestBody.create(
-//            okhttp3.MediaType.parse("application/json; charset=utf-8"),
-//            JSONObject(mapOf(*params)).toString()
-//        )
-//
-//    private fun showToastError(response: Response<String?>) {
-//        val responseJsonString = response.errorBody()?.charStream()?.readText().toString()
-//        if (responseJsonString.isNotBlank()) {
-//            if (responseJsonString.contains("errors")) {
-//                val errorString = JSONObject(responseJsonString).getString("errors")
-//                var passwordErrorString = ""
-//                var usernameErrorString = ""
-//                if (errorString.contains("Password")) {
-//                    passwordErrorString = JSONObject(errorString).getString("Password")
-//                    passwordErrorString = passwordErrorString.replace("[\"", "").replace("\"]", "")
-//                }
-//                if (errorString.contains("UserName")) {
-//                    usernameErrorString = JSONObject(errorString).getString("UserName")
-//                    usernameErrorString = usernameErrorString.replace("[\"", "").replace("\"]", "")
-//                }
-//                showLoginFailed("$passwordErrorString $usernameErrorString")
-//            } else {
-//                showLoginFailed(JSONObject(responseJsonString).getString("message"))
-//            }
-//        }
-//    }
-
-    private fun showLoginFailed(errorString: String) {
-        val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_SHORT).show()
+    private fun loginSuccess() {
+        when(activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
+            EXTRA_USER_PROFILE -> {
+                requireActivity().startActivity(
+                    Intent(
+                        requireActivity(),
+                        UserProfileActivity::class.java
+                    )
+                )
+                requireActivity().finish()
+            }
+            EXTRA_CREATE_SHOP -> {
+                requireActivity().startActivity(
+                    Intent(
+                        requireActivity(),
+                        UserProfileActivity::class.java
+                    )
+                )
+                requireActivity().finish()
+            }
+        }
     }
 
     override fun onDestroyView() {

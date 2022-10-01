@@ -34,7 +34,6 @@ class SignupFragment : Fragment() {
         binding.btnSignUp.setOnClickListener {
             binding.loading.visibility = View.VISIBLE
             performSignUp()
-            binding.loading.visibility = View.GONE
         }
     }
 
@@ -48,6 +47,7 @@ class SignupFragment : Fragment() {
                     auth.createUserWithEmailAndPassword(username, password)
                         .addOnCompleteListener(requireActivity()) { task ->
                             if (task.isSuccessful) {
+                                binding.loading.visibility = View.GONE
                                 // Sign in success, update UI with the signed-in user's information
                                 Toast.makeText(
                                     activity, "Success!",
@@ -55,6 +55,7 @@ class SignupFragment : Fragment() {
                                 ).show()
                                 navigateToLoginFragment()
                             } else {
+                                binding.loading.visibility = View.GONE
                                 // If sign in fails, display a message to the user.
                                 Log.w("TAG", "createUserWithEmail:failure", task.exception)
                                 Toast.makeText(activity, task.exception?.message, Toast.LENGTH_SHORT).show()
@@ -67,18 +68,8 @@ class SignupFragment : Fragment() {
         }
     }
 
-//    private fun createJsonRequestBody(vararg params : Pair<String, Any>) =
-//        RequestBody.create(
-//            okhttp3.MediaType.parse("application/json; charset=utf-8"),
-//            JSONObject(mapOf(*params)).toString())
-
     private fun navigateToLoginFragment() {
         (activity as LoginActivity).viewPager.currentItem = 0
-    }
-
-    private fun showToast(string: String) {
-        val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, string, Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
