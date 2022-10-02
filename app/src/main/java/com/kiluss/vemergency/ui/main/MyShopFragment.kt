@@ -48,9 +48,9 @@ class MyShopFragment : Fragment() {
         with(viewModel) {
             progressBarStatus.observe(viewLifecycleOwner) {
                 if (it) {
-                    binding.pbLoading.visibility = View.VISIBLE
+                    showProgressbar()
                 } else {
-                    binding.pbLoading.visibility = View.GONE
+                    hideProgressbar()
                 }
             }
             shop.observe(viewLifecycleOwner) { shop ->
