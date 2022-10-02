@@ -5,5 +5,7 @@ data class User(
     var fullName: String? = null,
     var birthday: String? = null,
     var address: String? = null,
-    var phone: String? = null
+    var phone: String? = null,
+    var reviews: String? = null,
+    var shop: Shop? = null
 )

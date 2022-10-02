@@ -7,17 +7,13 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.google.firebase.auth.FirebaseAuth
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.TEMP_IMAGE
-import com.kiluss.vemergency.constant.USER_NODE
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityUserProfileBinding
 import com.kiluss.vemergency.utils.Utils
@@ -27,11 +23,7 @@ import java.io.File
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityUserProfileBinding
-    private lateinit var databaseReference: DatabaseReference
-    private lateinit var storageReference: StorageReference
-    private lateinit var auth: FirebaseAuth
     private var user: User? = null
-    private var uid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,13 +31,12 @@ class UserProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupView()
-        setupFirebase()
         getUserData()
     }
 
     private fun getUserData() {
-        uid?.let { uid ->
-            databaseReference.child(uid).addValueEventListener(object : ValueEventListener {
+        FirebaseManager.getUid()?.let { uid ->
+            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     user = snapshot.getValue(User::class.java)
                     user?.let { user ->
@@ -61,7 +52,7 @@ class UserProfileActivity : AppCompatActivity() {
                         user.phone?.let {
                             binding.tvPhoneNumber.text = it
                         }
-                        binding.tvEmail.text = auth.currentUser?.email
+                        binding.tvEmail.text = FirebaseManager.getCurrentUser()?.email
                     }
                     hideProgressbar()
                     getAvatar()
@@ -77,27 +68,23 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun getAvatar() {
-        storageReference = FirebaseStorage.getInstance().reference.child(USER_NODE + "/" + auth.currentUser?.uid)
         File("$cacheDir/$TEMP_IMAGE").mkdirs()
-        val localFile = File("$cacheDir/$TEMP_IMAGE/${auth.currentUser?.uid}.jpg")
+        val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
         localFile.createNewFile()
-        storageReference
+        FirebaseManager.getUserAvatarStorageReference()
             .getFile(localFile)
             .addOnCompleteListener {
                 val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
-                Glide.with(this)
-                    .load(bitmap)
-                    .placeholder(R.drawable.ic_account_avatar)
-                    .into(binding.ivProfile)
+                bitmap?.let {
+                    Glide.with(this)
+                        .load(bitmap)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(binding.ivProfile)
+                }
             }.addOnFailureListener {
                 it.printStackTrace()
             }
-    }
-
-    private fun setupFirebase() {
-        databaseReference = FirebaseDatabase.getInstance().getReference(USER_NODE)
-        auth = FirebaseAuth.getInstance()
-        uid = auth.currentUser?.uid
     }
 
     private fun setupView() {
@@ -106,7 +93,7 @@ class UserProfileActivity : AppCompatActivity() {
                 startActivity(Intent(this@UserProfileActivity, EditUserProfileActivity::class.java))
             }
             btnLogout.setOnClickListener {
-                auth.signOut() //End user session
+                FirebaseManager.getAuth()?.signOut() //End user session
                 finish()
             }
         }

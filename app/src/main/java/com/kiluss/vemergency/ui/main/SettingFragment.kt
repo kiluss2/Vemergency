@@ -1,6 +1,5 @@
 package com.kiluss.vemergency.ui.main
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.databinding.FragmentSettingBinding
 
@@ -51,10 +51,13 @@ class SettingFragment : Fragment() {
     private fun observeViewModel() {
         with(viewModel) {
             avatarBitmap.observe(viewLifecycleOwner) {
-                Glide.with(this@SettingFragment)
-                    .load(it)
-                    .placeholder(R.drawable.ic_account_avatar)
-                    .into(binding.profileCircleImageView)
+                it?.let {
+                    Glide.with(this@SettingFragment)
+                        .load(it)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(binding.profileCircleImageView)
+                }
             }
         }
     }

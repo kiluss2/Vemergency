@@ -20,6 +20,7 @@
             android:id="@+id/ivAccount"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:scaleType="centerCrop"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_account_avatar" />
     </androidx.cardview.widget.CardView>

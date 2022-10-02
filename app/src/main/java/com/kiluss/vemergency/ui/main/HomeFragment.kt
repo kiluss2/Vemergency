@@ -8,9 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.kiluss.vemergency.R
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentHomeBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
 import com.kiluss.vemergency.ui.navigation.NavigationActivity
@@ -25,6 +26,7 @@ class HomeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseManager.init()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -34,12 +36,12 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setUpOnClickView()
+        setUpView()
         observeViewModel()
         viewModel.getUserInfo()
     }
 
-    private fun setUpOnClickView() {
+    private fun setUpView() {
         binding.btnFind.setOnClickListener {
             startActivity(Intent(activity, NavigationActivity::class.java))
         }
@@ -61,10 +63,13 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         with(viewModel) {
             avatarBitmap.observe(viewLifecycleOwner) {
-                Glide.with(this@HomeFragment)
-                    .load(it)
-                    .placeholder(R.drawable.ic_account_avatar)
-                    .into(binding.ivAccount)
+                it?.let {
+                    Glide.with(this@HomeFragment)
+                        .load(it)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(binding.ivAccount)
+                }
             }
         }
     }
