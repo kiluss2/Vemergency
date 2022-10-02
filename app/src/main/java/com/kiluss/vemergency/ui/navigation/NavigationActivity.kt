@@ -42,6 +42,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.postDelayed({
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(uman, 16f))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(10F), 1000, null)
-        }, 1000)
+        }, 500)
     }
 }

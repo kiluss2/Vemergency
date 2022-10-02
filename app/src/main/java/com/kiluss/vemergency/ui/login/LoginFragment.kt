@@ -18,6 +18,7 @@ import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.constant.SAVED_LOGIN_ACCOUNT_KEY
 import com.kiluss.vemergency.ui.constant.SIGN_IN_KEY
+import com.kiluss.vemergency.ui.shop.AddNewShopActivity
 import com.kiluss.vemergency.ui.userprofile.UserProfileActivity
 
 class LoginFragment : Fragment() {
@@ -108,7 +109,7 @@ class LoginFragment : Fragment() {
                 requireActivity().startActivity(
                     Intent(
                         requireActivity(),
-                        UserProfileActivity::class.java
+                        AddNewShopActivity::class.java
                     )
                 )
                 requireActivity().finish()

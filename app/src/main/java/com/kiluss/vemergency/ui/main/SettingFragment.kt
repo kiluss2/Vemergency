@@ -1,11 +1,15 @@
 package com.kiluss.vemergency.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.bumptech.glide.Glide
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
@@ -21,13 +25,54 @@ class SettingFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
-
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeViewModel()
+        setupView()
+        viewModel.getUserInfo()
+    }
+
+    private fun setupView() {
+        with(binding) {
+            tvSignOut.setOnClickListener {
+                createSignOutDialog()
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            avatarBitmap.observe(viewLifecycleOwner) {
+                Glide.with(this@SettingFragment)
+                    .load(it)
+                    .placeholder(R.drawable.ic_account_avatar)
+                    .into(binding.profileCircleImageView)
+            }
+        }
+    }
+
+    private fun createSignOutDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Sign out")
+        builder.setMessage("Do you want to sign out")
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+            viewModel.signOut()
+            Glide.with(this@SettingFragment)
+                .load(R.drawable.ic_account_avatar)
+                .into(binding.profileCircleImageView)
+        }
+
+        builder.setNegativeButton(android.R.string.cancel) { _, _ ->
+        }
+        builder.show()
     }
 }

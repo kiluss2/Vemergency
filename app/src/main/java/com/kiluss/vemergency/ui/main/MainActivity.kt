@@ -11,6 +11,7 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.databinding.ActivityMainBinding
+import com.kiluss.vemergency.ui.login.LoginActivity
 import com.kiluss.vemergency.ui.navigation.NavigationActivity
 
 class MainActivity : AppCompatActivity() {
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpOnClickView() {
         binding.fabAddPlace.setOnClickListener {
-            startActivity(Intent(this, NavigationActivity::class.java).apply {
+            startActivity(Intent(this, LoginActivity::class.java).apply {
                 putExtra(
                     LOGIN_FRAGMENT_EXTRA,
                     EXTRA_CREATE_SHOP

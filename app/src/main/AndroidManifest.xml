@@ -22,7 +22,7 @@
         android:theme="@style/Theme.Vemergency"
         tools:targetApi="31">
         <activity
-            android:name=".AddNewShopActivity"
+            android:name=".ui.shop.AddNewShopActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.bumptech.glide.Glide
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.databinding.FragmentHomeBinding
@@ -27,9 +29,14 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        setUpOnClickView()
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setUpOnClickView()
+        observeViewModel()
+        viewModel.getUserInfo()
     }
 
     private fun setUpOnClickView() {
@@ -49,5 +56,16 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            avatarBitmap.observe(viewLifecycleOwner) {
+                Glide.with(this@HomeFragment)
+                    .load(it)
+                    .placeholder(R.drawable.ic_account_avatar)
+                    .into(binding.ivAccount)
+            }
+        }
     }
 }
