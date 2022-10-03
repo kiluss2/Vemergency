@@ -73,11 +73,13 @@ class MyShopFragment : Fragment() {
                 }
             }
             shopImage.observe(viewLifecycleOwner) {
-                Glide.with(requireActivity())
-                    .load(it)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .into(binding.ivCover)
+                activity?.let { it1 ->
+                    Glide.with(it1)
+                        .load(it)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(binding.ivCover)
+                }
             }
         }
     }

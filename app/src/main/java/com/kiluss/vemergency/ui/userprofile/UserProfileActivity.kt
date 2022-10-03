@@ -76,7 +76,7 @@ class UserProfileActivity : AppCompatActivity() {
             .addOnCompleteListener {
                 val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
                 bitmap?.let {
-                    Glide.with(this)
+                    Glide.with(applicationContext)
                         .load(bitmap)
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .skipMemoryCache(true)

@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
@@ -51,14 +52,29 @@ class SettingFragment : Fragment() {
     private fun observeViewModel() {
         with(viewModel) {
             avatarBitmap.observe(viewLifecycleOwner) {
-                it?.let {
-                    Glide.with(this@SettingFragment)
-                        .load(it)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .into(binding.profileCircleImageView)
+                if (FirebaseManager.getCurrentUser() != null) {
+                    it?.let {
+                        Glide.with(this@SettingFragment)
+                            .load(it)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .dontAnimate()
+                            .into(binding.profileCircleImageView)
+                    }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (FirebaseManager.getCurrentUser() == null) {
+            Glide.with(this)
+                .load(R.drawable.ic_account_avatar)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .dontAnimate()
+                .into(binding.profileCircleImageView)
         }
     }
 

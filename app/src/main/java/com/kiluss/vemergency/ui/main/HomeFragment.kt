@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -63,14 +64,29 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         with(viewModel) {
             avatarBitmap.observe(viewLifecycleOwner) {
-                it?.let {
-                    Glide.with(this@HomeFragment)
-                        .load(it)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .into(binding.ivAccount)
+                if (FirebaseManager.getCurrentUser() != null) {
+                    it?.let {
+                        Glide.with(this@HomeFragment)
+                            .load(it)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .dontAnimate()
+                            .into(binding.ivAccount)
+                    }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (FirebaseManager.getCurrentUser() == null) {
+            Glide.with(this@HomeFragment)
+                .load(R.drawable.ic_account_avatar)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .dontAnimate()
+                .into(binding.ivAccount)
         }
     }
 }
