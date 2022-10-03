@@ -1,9 +1,18 @@
 package com.kiluss.vemergency.ui.main
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
@@ -35,7 +44,35 @@ class MyShopFragment : Fragment() {
 
     private fun setUpView() {
         with(binding) {
+            tvPhoneNumber.setOnClickListener {
+                if (this@MyShopFragment.context?.let {
+                        ContextCompat.checkSelfPermission(
+                            it,
+                            android.Manifest.permission.CALL_PHONE
+                        )
+                    } != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this@MyShopFragment.context as Activity, arrayOf(android.Manifest.permission.CALL_PHONE),
+                        0
+                    )
+                } else {
+                    val alertDialog = AlertDialog.Builder(context)
 
+                    alertDialog.apply {
+                        //setIcon(R.drawable.ic_hello)
+                        setTitle("Make a phone call?")
+                        setMessage("Do you want to make a phone call?")
+                        setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
+                            // make phone call
+                            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + tvPhoneNumber.text))
+                            startActivity(intent)
+                        }
+                        setNegativeButton("No") { _, _ ->
+                        }
+                    }.create().show()
+                }
+            }
         }
     }
 
