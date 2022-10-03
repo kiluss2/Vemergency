@@ -1,11 +1,17 @@
 package com.kiluss.vemergency.ui.userprofile
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.database.DataSnapshot
@@ -18,7 +24,6 @@ import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityUserProfileBinding
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
-
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -95,6 +100,33 @@ class UserProfileActivity : AppCompatActivity() {
             btnLogout.setOnClickListener {
                 FirebaseManager.getAuth()?.signOut() //End user session
                 finish()
+            }
+            tvPhoneNumber.setOnClickListener {
+                if (ContextCompat.checkSelfPermission(
+                        this@UserProfileActivity,
+                        android.Manifest.permission.CALL_PHONE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this@UserProfileActivity, arrayOf(android.Manifest.permission.CALL_PHONE),
+                        0
+                    )
+                } else {
+                    val alertDialog = AlertDialog.Builder(this@UserProfileActivity)
+
+                    alertDialog.apply {
+                        //setIcon(R.drawable.ic_hello)
+                        setTitle("Make a phone call?")
+                        setMessage("Do you want to make a phone call?")
+                        setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
+                            // make phone call
+                            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + tvPhoneNumber.text))
+                            startActivity(intent)
+                        }
+                        setNegativeButton("No") { _, _ ->
+                        }
+                    }.create().show()
+                }
             }
         }
     }

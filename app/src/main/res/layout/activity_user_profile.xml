@@ -199,6 +199,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_marginStart="5dp"
+                    android:textColor="@color/blue"
                     android:layout_marginTop="8dp"
                     app:layout_constraintLeft_toRightOf="@+id/tvPhoneNumberLabel"
                     app:layout_constraintTop_toBottomOf="@+id/tvAddressLabel" />

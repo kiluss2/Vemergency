@@ -12,12 +12,8 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
-import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
-import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
-import com.kiluss.vemergency.ui.constant.SAVED_LOGIN_ACCOUNT_KEY
-import com.kiluss.vemergency.ui.constant.SIGN_IN_KEY
 import com.kiluss.vemergency.ui.shop.AddNewShopActivity
 import com.kiluss.vemergency.ui.userprofile.UserProfileActivity
 
@@ -47,12 +43,10 @@ class LoginFragment : Fragment() {
     ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -95,7 +89,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginSuccess() {
-        when(activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
+        when (activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
             EXTRA_USER_PROFILE -> {
                 requireActivity().startActivity(
                     Intent(

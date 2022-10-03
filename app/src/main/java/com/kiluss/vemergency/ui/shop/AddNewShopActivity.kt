@@ -19,16 +19,20 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
+import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
 import com.kiluss.vemergency.ui.main.MainActivity
+import com.kiluss.vemergency.ui.navigation.NavigationActivity
+import com.kiluss.vemergency.ui.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
@@ -39,7 +43,6 @@ class AddNewShopActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var shop = Shop()
     private var user = User()
-
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -56,7 +59,13 @@ class AddNewShopActivity : AppCompatActivity() {
             imageUri = intent?.data
         }
     }
-
+    private val pickLocationFromGalleryForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                var location = result!!.data!!.getParcelableExtra<LatLng>(EXTRA_PICK_LOCATION)
+                binding.tvPickLocation.text = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
+            }
+        }
     private val requestReadPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (!isGranted) {
@@ -80,6 +89,10 @@ class AddNewShopActivity : AppCompatActivity() {
             llCover.setOnClickListener {
                 pickImage()
             }
+            llLocation.setOnClickListener {
+                val intent = Intent(this@AddNewShopActivity, PickLocationActivity::class.java)
+                pickLocationFromGalleryForResult.launch(intent)
+            }
             btnSubmit.setOnClickListener {
                 showProgressbar()
                 shop.name = edtName.text.toString()
@@ -94,16 +107,17 @@ class AddNewShopActivity : AppCompatActivity() {
                                 user = userDb
                                 user.shop = shop
                                 FirebaseManager.getUid()?.let {
-                                    FirebaseManager.getUserInfoDatabaseReference().setValue(user).addOnCompleteListener {
-                                        if (it.isSuccessful) {
-                                            // upload shop image
-                                            uploadShopImage()
-                                        } else {
-                                            hideProgressbar()
-                                            Utils.showShortToast(this@AddNewShopActivity, "Fail to update profile")
-                                            it.exception?.printStackTrace()
+                                    FirebaseManager.getUserInfoDatabaseReference().setValue(user)
+                                        .addOnCompleteListener {
+                                            if (it.isSuccessful) {
+                                                // upload shop image
+                                                uploadShopImage()
+                                            } else {
+                                                hideProgressbar()
+                                                Utils.showShortToast(this@AddNewShopActivity, "Fail to update profile")
+                                                it.exception?.printStackTrace()
+                                            }
                                         }
-                                    }
                                 }
                             }
                         }

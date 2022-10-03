@@ -14,11 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -29,7 +25,6 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
 import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
-
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -42,7 +37,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
         maxWaitTime = 60
     }
-
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
@@ -67,12 +61,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
 
         checkLocationPermission()
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -93,7 +85,14 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.postDelayed({
             mMap.animateCamera(CameraUpdateFactory.zoomTo(10F), 1000, null)
         }, 500)
-
+        mMap.setOnMapClickListener { position ->
+            Toast.makeText(
+                this,
+                "Lat " + position.latitude + " "
+                        + "Long " + position.longitude,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onResume() {
@@ -107,7 +106,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                Looper.getMainLooper()
 //            )
             fusedLocationProvider?.getLastLocation()
-                ?.addOnSuccessListener(this, { location ->
+                ?.addOnSuccessListener(this) { location ->
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         //                        mylatitude = location.latitude
@@ -116,11 +115,11 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         // Logic to handle location object
                         Toast.makeText(
                             this@NavigationActivity,
-                            "Got Location: " + location.toString(),
+                            "Got Location: $location",
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                })
+                }
         }
     }
 
@@ -219,7 +218,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             MY_PERMISSIONS_REQUEST_LOCATION -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(
@@ -232,17 +230,13 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                            locationCallback,
 //                            Looper.getMainLooper()
 //                        )
-
                         // Now check background location
                         checkBackgroundLocation()
                     }
-
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
-
                     // Check if we are in a state where the user has denied the permission and
                     // selected Don't ask again
                     if (!ActivityCompat.shouldShowRequestPermissionRationale(
@@ -263,7 +257,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(
@@ -276,7 +269,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                            locationCallback,
 //                            Looper.getMainLooper()
 //                        )
-
                         Toast.makeText(
                             this,
                             "Granted Background Location Permission",
@@ -284,13 +276,11 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         ).show()
                     }
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
                 }
                 return
-
             }
         }
     }

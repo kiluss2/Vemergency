@@ -25,6 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Vemergency"
         tools:targetApi="31">
+
+        <activity
+            android:name=".ui.navigation.PickLocationActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.shop.AddNewShopActivity"
             android:exported="false">
