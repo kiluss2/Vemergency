@@ -1,7 +1,9 @@
 package com.kiluss.vemergency.data.model
 
-import com.google.android.gms.maps.model.LatLng
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Shop(
     var name: String? = null,
     var address: String? = null,
@@ -12,4 +14,4 @@ data class Shop(
     var review: ArrayList<Review>? = null,
     var user: String? = null,
     var location: LatLng? = null
-)
+) : Parcelable

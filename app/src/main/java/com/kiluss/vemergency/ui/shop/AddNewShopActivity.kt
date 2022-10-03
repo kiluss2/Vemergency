@@ -19,7 +19,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -27,11 +26,11 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
 import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
+import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
 import com.kiluss.vemergency.ui.main.MainActivity
-import com.kiluss.vemergency.ui.navigation.NavigationActivity
 import com.kiluss.vemergency.ui.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
@@ -43,6 +42,7 @@ class AddNewShopActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var shop = Shop()
     private var user = User()
+    private var location: LatLng? = null
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -50,8 +50,7 @@ class AddNewShopActivity : AppCompatActivity() {
     ) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
             val intent = result.data
-            val imagePath =
-                intent?.data?.let { URIPathHelper().getPath(this, it) } ?: ""
+            val imagePath = intent?.data?.let { URIPathHelper().getPath(this, it) } ?: ""
             // handle image from gallery
             val file = File(imagePath)
             val imageBitmap = getFileImageBitmap(file)
@@ -62,16 +61,16 @@ class AddNewShopActivity : AppCompatActivity() {
     private val pickLocationFromGalleryForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == RESULT_OK && result.data != null) {
-                var location = result!!.data!!.getParcelableExtra<LatLng>(EXTRA_PICK_LOCATION)
-                binding.tvPickLocation.text = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
+                val location = result.data?.getParcelableExtra<com.google.android.gms.maps.model.LatLng>(EXTRA_PICK_LOCATION)
+                this.location = LatLng(location?.latitude, location?.longitude)
+                binding.tvLocationPicked.text = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
             }
         }
     private val requestReadPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (!isGranted) {
                 Toast.makeText(
-                    this, getString(R.string.permission_denied),
-                    Toast.LENGTH_SHORT
+                    this, getString(R.string.permission_denied), Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -94,40 +93,56 @@ class AddNewShopActivity : AppCompatActivity() {
                 pickLocationFromGalleryForResult.launch(intent)
             }
             btnSubmit.setOnClickListener {
-                showProgressbar()
-                shop.name = edtName.text.toString()
-                shop.address = edtAddress.text.toString()
-                shop.phone = edtPhone.text.toString()
-                shop.openTime = edtOpenTime.text.toString()
-                shop.website = edtWebsite.text.toString()
-                FirebaseManager.getUid()?.let { uid ->
-                    FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            snapshot.getValue(User::class.java)?.let { userDb ->
-                                user = userDb
-                                user.shop = shop
-                                FirebaseManager.getUid()?.let {
-                                    FirebaseManager.getUserInfoDatabaseReference().setValue(user)
-                                        .addOnCompleteListener {
-                                            if (it.isSuccessful) {
-                                                // upload shop image
-                                                uploadShopImage()
-                                            } else {
-                                                hideProgressbar()
-                                                Utils.showShortToast(this@AddNewShopActivity, "Fail to update profile")
-                                                it.exception?.printStackTrace()
-                                            }
+                if (edtName.text.isEmpty()) {
+                    edtName.error = "Name can not empty"
+                }
+                if (edtAddress.text.isEmpty()) {
+                    edtAddress.error = "Address can not empty"
+                }
+                if (tvLocationPicked.text.isEmpty()) {
+                    Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
+                }
+                if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
+                    showProgressbar()
+                    shop.name = edtName.text.toString()
+                    shop.address = edtAddress.text.toString()
+                    shop.phone = edtPhone.text.toString()
+                    shop.openTime = edtOpenTime.text.toString()
+                    shop.website = edtWebsite.text.toString()
+                    shop.location = location
+                    FirebaseManager.getUid()?.let { uid ->
+                        FirebaseManager.getUserInfoDatabaseReference()
+                            .addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    snapshot.getValue(User::class.java)?.let { userDb ->
+                                        user = userDb
+                                        user.shop = shop
+                                        user.isShopCreated = true
+                                        FirebaseManager.getUid()?.let {
+                                            FirebaseManager.getUserInfoDatabaseReference().setValue(user)
+                                                .addOnCompleteListener {
+                                                    if (it.isSuccessful) {
+                                                        // upload shop image
+                                                        uploadShopImage()
+                                                    } else {
+                                                        hideProgressbar()
+                                                        Utils.showShortToast(
+                                                            this@AddNewShopActivity, "Fail to update profile"
+                                                        )
+                                                        it.exception?.printStackTrace()
+                                                    }
+                                                }
                                         }
+                                    }
                                 }
-                            }
-                        }
 
-                        override fun onCancelled(error: DatabaseError) {
-                            hideProgressbar()
-                            Utils.showShortToast(this@AddNewShopActivity, "Fail to get user information")
-                            Log.e("Main Activity", error.message)
-                        }
-                    })
+                                override fun onCancelled(error: DatabaseError) {
+                                    hideProgressbar()
+                                    Utils.showShortToast(this@AddNewShopActivity, "Fail to get user information")
+                                    Log.e("Main Activity", error.message)
+                                }
+                            })
+                    }
                 }
             }
         }
@@ -136,8 +151,7 @@ class AddNewShopActivity : AppCompatActivity() {
     private fun pickImage() {
         val pickIntent = Intent(Intent.ACTION_PICK)
         pickIntent.setDataAndType(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            "image/*"
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*"
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
@@ -147,16 +161,14 @@ class AddNewShopActivity : AppCompatActivity() {
                 intent.addCategory("android.intent.category.DEFAULT")
                 intent.data = Uri.parse(
                     String.format(
-                        "package:%s",
-                        this.packageName
+                        "package:%s", this.packageName
                     )
                 )
                 requestManageStoragePermission.launch(intent)
             }
         } else {
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 pickImageFromGalleryForResult.launch(pickIntent)

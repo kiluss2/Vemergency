@@ -10,14 +10,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.android.gms.maps.model.LatLng
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
+import com.kiluss.vemergency.ui.navigation.NavigationActivity
 
 class MyShopFragment : Fragment() {
 
@@ -37,9 +40,17 @@ class MyShopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setUpView()
-        observeViewModel()
-        viewModel.getShopData()
+        if (viewModel.getUserData().isShopCreated){
+            binding.clMain.visibility = View.VISIBLE
+            setUpView()
+            observeViewModel()
+            viewModel.getShopData()
+        } else if (FirebaseManager.getCurrentUser() == null){
+            binding.clMain.visibility = View.GONE
+        } else {
+            binding.clMain.visibility = View.GONE
+            binding.tvLoginToManage.text = "Let's create to manage a shop"
+        }
     }
 
     private fun setUpView() {
@@ -107,6 +118,11 @@ class MyShopFragment : Fragment() {
                     it.website?.let {
                         binding.tvWebsite.text = it
                     }
+                }
+                binding.btnGetLocation.setOnClickListener {
+                    startActivity(Intent(this@MyShopFragment.requireContext(), NavigationActivity::class.java).apply {
+                        putExtra(EXTRA_SHOP_LOCATION, shop)
+                    })
                 }
             }
             shopImage.observe(viewLifecycleOwner) {

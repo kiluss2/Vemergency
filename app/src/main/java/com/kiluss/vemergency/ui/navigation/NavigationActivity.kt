@@ -14,7 +14,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -22,8 +26,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
 import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
+import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -31,6 +38,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityNavigationBinding
     private var fusedLocationProvider: FusedLocationProviderClient? = null
+    private lateinit var myShop: Shop
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 30
         fastestInterval = 10
@@ -44,9 +52,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 //The last location in the list is the newest
                 val location = locationList.last()
                 Toast.makeText(
-                    this@NavigationActivity,
-                    "Got Location: " + location.toString(),
-                    Toast.LENGTH_LONG
+                    this@NavigationActivity, "Got Location: " + location.toString(), Toast.LENGTH_LONG
                 ).show()
             }
         }
@@ -68,56 +74,69 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
             mMap.isMyLocationEnabled = true
         }
-//        // Add a marker in Sydney and move the camera
-        val daNang = LatLng(16.0, 108.2)
+        // Add a marker and move the camera
+        var marker = LatLng(0.0, 0.0)
+        var markerTitle = "Marker in Da Nang"
+        var zoom = 10f
+
+        if (intent.getStringExtra(EXTRA_LAUNCH_MAP) != null) {
+            marker = LatLng(16.0, 108.2)
+        } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
+            myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
+            marker = LatLng(myShop.location?.latitude!!, myShop.location?.longitude!!)
+            markerTitle = myShop.name.toString()
+            zoom = 15f
+        }
+
         mMap.addMarker(
-            MarkerOptions()
-                .position(daNang)
-                .title("Marker in Da Nang")
+            MarkerOptions().position(marker).title(markerTitle)
         )
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(daNang, 2f))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker, 2f))
         val handler = Handler()
         handler.postDelayed({
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(10F), 1000, null)
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
         }, 500)
-        mMap.setOnMapClickListener { position ->
-            Toast.makeText(
-                this,
-                "Lat " + position.latitude + " "
-                        + "Long " + position.longitude,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+//        mMap.setOnMapClickListener { position ->
+//            Toast.makeText(
+//                this,
+//                "Lat " + position.latitude + " "
+//                        + "Long " + position.longitude,
+//                Toast.LENGTH_SHORT
+//            ).show()
+//        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
 //            fusedLocationProvider?.requestLocationUpdates(
 //                locationRequest,
 //                locationCallback,
 //                Looper.getMainLooper()
 //            )
-            fusedLocationProvider?.getLastLocation()
-                ?.addOnSuccessListener(this) { location ->
+            fusedLocationProvider?.getLastLocation()?.addOnSuccessListener(this) { location ->
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         //                        mylatitude = location.latitude
                         //                        mylongitude = location.longitude
                         //                        Log.d("chk", "onSuccess: $mylongitude")
                         // Logic to handle location object
-                        Toast.makeText(
-                            this@NavigationActivity,
-                            "Got Location: $location",
-                            Toast.LENGTH_LONG
-                        ).show()
+//                        Toast.makeText(
+//                            this@NavigationActivity,
+//                            "Got Location: $location",
+//                            Toast.LENGTH_LONG
+//                        ).show()
                     }
                 }
         }
@@ -126,10 +145,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onPause() {
         super.onPause()
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            == PackageManager.PERMISSION_GRANTED
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
             fusedLocationProvider?.removeLocationUpdates(locationCallback)
         }
@@ -137,30 +154,25 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                this, Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    this, Manifest.permission.ACCESS_FINE_LOCATION
                 )
             ) {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
-                AlertDialog.Builder(this)
-                    .setTitle("Location Permission Needed")
+                AlertDialog.Builder(this).setTitle("Location Permission Needed")
                     .setMessage("This app needs the Location permission, please accept to use location functionality")
                     .setPositiveButton(
                         "OK"
                     ) { _, _ ->
                         //Prompt the user once explanation has been shown
                         requestLocationPermission()
-                    }
-                    .create()
-                    .show()
+                    }.create().show()
             } else {
                 // No explanation needed, we can request the permission.
                 requestLocationPermission()
@@ -172,8 +184,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun checkBackgroundLocation() {
         if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestBackgroundLocationPermission()
@@ -182,36 +193,28 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun requestLocationPermission() {
         ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
+            this, arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
-            ),
-            MY_PERMISSIONS_REQUEST_LOCATION
+            ), MY_PERMISSIONS_REQUEST_LOCATION
         )
     }
 
     private fun requestBackgroundLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
+                this, arrayOf(
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ),
-                MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
+                ), MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
             )
         } else {
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                MY_PERMISSIONS_REQUEST_LOCATION
+                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSIONS_REQUEST_LOCATION
             )
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
@@ -221,8 +224,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
+                            this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
 //                        fusedLocationProvider?.requestLocationUpdates(
@@ -240,8 +242,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                     // Check if we are in a state where the user has denied the permission and
                     // selected Don't ask again
                     if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
+                            this, Manifest.permission.ACCESS_FINE_LOCATION
                         )
                     ) {
                         startActivity(
@@ -260,8 +261,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
+                            this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
 //                        fusedLocationProvider?.requestLocationUpdates(
@@ -270,9 +270,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                            Looper.getMainLooper()
 //                        )
                         Toast.makeText(
-                            this,
-                            "Granted Background Location Permission",
-                            Toast.LENGTH_LONG
+                            this, "Granted Background Location Permission", Toast.LENGTH_LONG
                         ).show()
                     }
                 } else {

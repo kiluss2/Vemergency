@@ -1,5 +1,6 @@
 package com.kiluss.vemergency.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +11,13 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
+import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
+import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
+import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentSettingBinding
+import com.kiluss.vemergency.ui.login.LoginActivity
 
 class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
@@ -40,6 +46,30 @@ class SettingFragment : Fragment() {
         with(binding) {
             tvSignOut.setOnClickListener {
                 createSignOutDialog()
+            }
+            rlPersonalDetail.setOnClickListener {
+                startActivity(Intent(activity, LoginActivity::class.java).apply {
+                    putExtra(
+                        LOGIN_FRAGMENT_EXTRA,
+                        EXTRA_USER_PROFILE
+                    )
+                })
+            }
+            tvEditProfile.setOnClickListener {
+                startActivity(Intent(activity, LoginActivity::class.java).apply {
+                    putExtra(
+                        LOGIN_FRAGMENT_EXTRA,
+                        EXTRA_EDIT_USER_PROFILE
+                    )
+                })
+            }
+            tvChangePassword.setOnClickListener {
+                startActivity(Intent(activity, LoginActivity::class.java).apply {
+                    putExtra(
+                        LOGIN_FRAGMENT_EXTRA,
+                        EXTRA_CHANGE_PASSWORD
+                    )
+                })
             }
         }
     }

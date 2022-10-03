@@ -10,6 +10,8 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -44,7 +46,9 @@ class HomeFragment : Fragment() {
 
     private fun setUpView() {
         binding.btnFind.setOnClickListener {
-            startActivity(Intent(activity, NavigationActivity::class.java))
+            startActivity(Intent(activity, NavigationActivity::class.java).apply {
+                putExtra(EXTRA_LAUNCH_MAP, "")
+            })
         }
         binding.ivAccount.setOnClickListener {
             startActivity(Intent(activity, LoginActivity::class.java).apply {

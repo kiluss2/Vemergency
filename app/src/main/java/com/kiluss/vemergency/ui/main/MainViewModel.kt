@@ -15,12 +15,15 @@ import com.kiluss.vemergency.constant.SHOP_NODE
 import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
+import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
 
 class MainViewModel(application: Application) : BaseViewModel(application) {
 
+    private var user= User()
+    private var myShop: Shop?=null
     private val _avatarBitmap: MutableLiveData<Bitmap> by lazy {
         MutableLiveData<Bitmap>()
     }
@@ -39,19 +42,33 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val shopImage: LiveData<Bitmap> = _shopImage
 
     internal fun getUserInfo() {
-        FirebaseManager.getCurrentUser()?.let {
-            File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
-            val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
-            localFile.createNewFile()
-            FirebaseManager.getUserAvatarStorageReference()
-                .getFile(localFile)
-                .addOnCompleteListener {
-                    _avatarBitmap.value = BitmapFactory.decodeFile(localFile.absolutePath)
-                }.addOnFailureListener {
-                    it.printStackTrace()
+        FirebaseManager.getUid()?.let { uid ->
+            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    user = snapshot.getValue(User::class.java)!!
+                    FirebaseManager.getCurrentUser()?.let {
+                        File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
+                        val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
+                        localFile.createNewFile()
+                        FirebaseManager.getUserAvatarStorageReference()
+                            .getFile(localFile)
+                            .addOnCompleteListener {
+                                _avatarBitmap.value = BitmapFactory.decodeFile(localFile.absolutePath)
+                            }.addOnFailureListener {
+                                it.printStackTrace()
+                            }
+                    }
                 }
+
+                override fun onCancelled(error: DatabaseError) {
+                    hideProgressbar()
+                    Log.e("Main Activity", error.message)
+                }
+            })
         }
     }
+
+    internal fun getUserData() = user
 
     internal fun signOut() {
         FirebaseManager.getAuth()?.signOut() //End user session
@@ -63,6 +80,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                 .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         _shop.value = snapshot.getValue(Shop::class.java)
+                        myShop = snapshot.getValue(Shop::class.java)
                         hideProgressbar()
                         getShopCover()
                     }
