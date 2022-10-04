@@ -33,6 +33,7 @@ import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 
+
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
@@ -82,23 +83,24 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.isMyLocationEnabled = true
         }
         // Add a marker and move the camera
-        var marker = LatLng(0.0, 0.0)
+        var location = LatLng(0.0, 0.0)
         var markerTitle = "Marker in Da Nang"
         var zoom = 10f
 
         if (intent.getStringExtra(EXTRA_LAUNCH_MAP) != null) {
-            marker = LatLng(16.0, 108.2)
+            location = LatLng(16.0, 108.2)
         } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
             myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
-            marker = LatLng(myShop.location?.latitude!!, myShop.location?.longitude!!)
+            location = LatLng(myShop.location?.latitude!!, myShop.location?.longitude!!)
             markerTitle = myShop.name.toString()
             zoom = 15f
         }
 
-        mMap.addMarker(
-            MarkerOptions().position(marker).title(markerTitle)
-        )
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker, 2f))
+        val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
+        val marker = mMap.addMarker(markerOptions)
+        markerOptions.anchor(0f, 0.5f)
+        marker?.showInfoWindow()
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 2f))
         val handler = Handler()
         handler.postDelayed({
             mMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
@@ -126,19 +128,19 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                Looper.getMainLooper()
 //            )
             fusedLocationProvider?.getLastLocation()?.addOnSuccessListener(this) { location ->
-                    // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
-                        //                        mylatitude = location.latitude
-                        //                        mylongitude = location.longitude
-                        //                        Log.d("chk", "onSuccess: $mylongitude")
-                        // Logic to handle location object
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    //                        mylatitude = location.latitude
+                    //                        mylongitude = location.longitude
+                    //                        Log.d("chk", "onSuccess: $mylongitude")
+                    // Logic to handle location object
 //                        Toast.makeText(
 //                            this@NavigationActivity,
 //                            "Got Location: $location",
 //                            Toast.LENGTH_LONG
 //                        ).show()
-                    }
                 }
+            }
         }
     }
 
