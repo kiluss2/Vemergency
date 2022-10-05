@@ -22,8 +22,8 @@ import java.io.File
 
 class MainViewModel(application: Application) : BaseViewModel(application) {
 
-    private var user= User()
-    private var myShop: Shop?=null
+    private var user = User()
+    private var myShop: Shop? = null
     private val _avatarBitmap: MutableLiveData<Bitmap> by lazy {
         MutableLiveData<Bitmap>()
     }
@@ -45,7 +45,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         FirebaseManager.getUid()?.let { uid ->
             FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    user = snapshot.getValue(User::class.java)!!
+                    snapshot.getValue(User::class.java)?.let { user = it }
                     FirebaseManager.getCurrentUser()?.let {
                         File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
                         val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")

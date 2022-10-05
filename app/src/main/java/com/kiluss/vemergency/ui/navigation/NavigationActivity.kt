@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -40,6 +41,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityNavigationBinding
     private var fusedLocationProvider: FusedLocationProviderClient? = null
     private lateinit var myShop: Shop
+    private val viewModel: NavigationViewModel by viewModels()
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 30
         fastestInterval = 10
@@ -71,10 +73,32 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            allShopLocation.observe(this@NavigationActivity) {
+                showAllShopLocation(it)
+            }
+        }
+    }
+
+    private fun showAllShopLocation(shops: MutableList<Shop>) {
+        shops.forEach { shop ->
+            shop.location?.let {
+                val location = LatLng(shop.location?.latitude!!, shop.location?.longitude!!)
+                val markerTitle = shop.name.toString()
+
+                val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
+                mMap.addMarker(markerOptions)
+            }
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        viewModel.getAllShopLocation()
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION

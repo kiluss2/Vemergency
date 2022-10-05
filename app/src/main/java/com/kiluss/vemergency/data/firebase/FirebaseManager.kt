@@ -3,6 +3,8 @@ package com.kiluss.vemergency.data.firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.kiluss.vemergency.constant.AVATAR
@@ -29,6 +31,7 @@ object FirebaseManager {
     private fun setupFirebase() {
         auth = FirebaseAuth.getInstance()
         uid = auth?.currentUser?.uid
+        databaseReference = Firebase.database.reference
     }
 
     internal fun getAuth() = auth
@@ -39,4 +42,5 @@ object FirebaseManager {
         FirebaseStorage.getInstance().reference.child( auth?.currentUser?.uid + "/" + AVATAR_NODE + "/" + AVATAR)
     internal fun getShopImageStorageReference() =
         FirebaseStorage.getInstance().reference.child( auth?.currentUser?.uid + "/" + SHOP_NODE + "/" + SHOP_COVER)
+    internal fun getDatabaseReference() = databaseReference
 }
