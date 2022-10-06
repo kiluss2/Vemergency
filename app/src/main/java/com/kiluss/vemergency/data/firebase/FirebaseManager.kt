@@ -34,6 +34,12 @@ object FirebaseManager {
         databaseReference = Firebase.database.reference
     }
 
+    internal fun logout() {
+        auth = null
+        uid = null
+        databaseReference = null
+    }
+
     internal fun getAuth() = auth
     internal fun getCurrentUser() = auth?.currentUser
     internal fun getUid() = uid

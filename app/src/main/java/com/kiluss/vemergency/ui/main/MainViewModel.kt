@@ -42,10 +42,14 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val shopImage: LiveData<Bitmap> = _shopImage
 
     internal fun getUserInfo() {
+        FirebaseManager.init()
         FirebaseManager.getUid()?.let { uid ->
             FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(User::class.java)?.let { user = it }
+                    snapshot.getValue(User::class.java)?.let {
+                        user = it
+                        Log.e("user", user.toString())
+                    }
                     FirebaseManager.getCurrentUser()?.let {
                         File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
                         val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
@@ -72,6 +76,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     internal fun signOut() {
         FirebaseManager.getAuth()?.signOut() //End user session
+        FirebaseManager.logout()
     }
 
     internal fun getShopData() {

@@ -118,12 +118,11 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             location = LatLng(myShop.location?.latitude!!, myShop.location?.longitude!!)
             markerTitle = myShop.name.toString()
             zoom = 15f
+            val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
+            mMap.addMarker(markerOptions)
+            markerOptions.anchor(0f, 0.5f)
         }
 
-        val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
-        val marker = mMap.addMarker(markerOptions)
-        markerOptions.anchor(0f, 0.5f)
-        marker?.showInfoWindow()
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 2f))
         val handler = Handler()
         handler.postDelayed({
