@@ -90,7 +90,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 val location = LatLng(shop.location?.latitude!!, shop.location?.longitude!!)
                 val markerTitle = shop.name.toString()
 
-                val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
+                val markerOptions =
+                    MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
                 mMap.addMarker(markerOptions)
             }
         }
