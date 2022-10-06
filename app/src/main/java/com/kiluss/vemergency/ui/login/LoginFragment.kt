@@ -19,6 +19,7 @@ import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.constant.SAVED_LOGIN_ACCOUNT_KEY
 import com.kiluss.vemergency.constant.SIGN_IN_KEY
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.main.ChangePasswordActivity
 import com.kiluss.vemergency.ui.shop.AddNewShopActivity
@@ -76,7 +77,7 @@ class LoginFragment : Fragment() {
                     .addOnCompleteListener(requireActivity()) { task ->
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d("TAG", "signInWithEmail:success")
+                            FirebaseManager.init()
                             loginSuccess()
                             binding.pbLoading.visibility = View.GONE
                         } else {

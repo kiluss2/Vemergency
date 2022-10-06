@@ -10,6 +10,7 @@ import com.google.firebase.database.ValueEventListener
 import com.kiluss.vemergency.constant.USER_NODE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
+import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
 
 /**
@@ -18,7 +19,6 @@ import com.kiluss.vemergency.ui.base.BaseViewModel
 class NavigationViewModel(application: Application) : BaseViewModel(application) {
 
     private var shopLists = mutableListOf<Shop>()
-
     private val _allShopLocation: MutableLiveData<MutableList<Shop>> by lazy {
         MutableLiveData<MutableList<Shop>>()
     }
@@ -30,9 +30,8 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
             override fun onDataChange(snapshot: DataSnapshot) {
                 shopLists.clear()
                 for (data in snapshot.children) {
-                    data.getValue(Shop::class.java)?.let {
-                        shopLists.add(it)
-                        Log.e("Navigation Activity", it.toString())
+                    data.getValue(User::class.java)?.let {
+                        it.shop?.let { it1 -> shopLists.add(it1) }
                     }
                 }
                 _allShopLocation.value = shopLists
@@ -42,6 +41,5 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                 Log.e("Navigation Activity", error.message)
             }
         })
-
     }
 }

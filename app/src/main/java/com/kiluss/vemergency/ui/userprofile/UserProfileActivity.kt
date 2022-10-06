@@ -57,8 +57,8 @@ class UserProfileActivity : AppCompatActivity() {
                         user.phone?.let {
                             binding.tvPhoneNumber.text = it
                         }
-                        binding.tvEmail.text = FirebaseManager.getCurrentUser()?.email
                     }
+                    binding.tvEmail.text = FirebaseManager.getCurrentUser()?.email
                     hideProgressbar()
                     getAvatar()
                 }
@@ -99,6 +99,7 @@ class UserProfileActivity : AppCompatActivity() {
             }
             btnLogout.setOnClickListener {
                 FirebaseManager.getAuth()?.signOut() //End user session
+                FirebaseManager.logout()
                 finish()
             }
             tvPhoneNumber.setOnClickListener {
