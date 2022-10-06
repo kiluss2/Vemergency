@@ -34,9 +34,8 @@ class UserProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        FirebaseManager.init()
         setupView()
-        getUserData()
     }
 
     private fun getUserData() {
@@ -75,6 +74,9 @@ class UserProfileActivity : AppCompatActivity() {
     private fun getAvatar() {
         File("$cacheDir/$TEMP_IMAGE").mkdirs()
         val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
+        if (localFile.exists()) {
+            localFile.delete()
+        }
         localFile.createNewFile()
         FirebaseManager.getUserAvatarStorageReference()
             .getFile(localFile)

@@ -97,7 +97,7 @@ class EditUserProfileActivity : AppCompatActivity() {
                 user.address = edtAddress.text.toString()
                 user.phone = edtPhoneNumber.text.toString()
                 FirebaseManager.getUid()?.let {
-                    FirebaseManager.getUserInfoDatabaseReference().setValue(user).addOnCompleteListener {
+                    FirebaseManager.getUserInfoDatabaseReference()?.setValue(user)?.addOnCompleteListener {
                         if (it.isSuccessful) {
                             // upload avatar picture
                             uploadAvatar()
@@ -191,7 +191,7 @@ class EditUserProfileActivity : AppCompatActivity() {
 
     private fun getUserData() {
         FirebaseManager.getUid()?.let { uid ->
-            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
+            FirebaseManager.getUserInfoDatabaseReference()?.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.getValue(User::class.java)?.let { userDb ->
                         user = userDb

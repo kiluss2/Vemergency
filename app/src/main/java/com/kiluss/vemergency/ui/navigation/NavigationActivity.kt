@@ -91,7 +91,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 val markerTitle = shop.name.toString()
 
                 val markerOptions =
-                    MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
+                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
                 mMap.addMarker(markerOptions)
             }
         }

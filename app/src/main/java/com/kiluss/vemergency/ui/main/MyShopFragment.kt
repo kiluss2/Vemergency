@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.android.gms.maps.model.LatLng
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
@@ -40,16 +39,21 @@ class MyShopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (viewModel.getUserData().isShopCreated){
-            binding.clMain.visibility = View.VISIBLE
-            setUpView()
-            observeViewModel()
-            viewModel.getShopData()
-        } else if (FirebaseManager.getCurrentUser() == null){
+        if (FirebaseManager.getCurrentUser() == null) {
             binding.clMain.visibility = View.GONE
+            binding.tvLoginToManage.visibility = View.VISIBLE
         } else {
-            binding.clMain.visibility = View.GONE
-            binding.tvLoginToManage.text = "Let's create to manage a shop"
+            if (viewModel.getUserData().isShopCreated) {
+                binding.clMain.visibility = View.VISIBLE
+                binding.tvLoginToManage.visibility = View.GONE
+                setUpView()
+                observeViewModel()
+                viewModel.getShopData()
+            } else {
+                binding.clMain.visibility = View.GONE
+                binding.tvLoginToManage.visibility = View.VISIBLE
+                binding.tvLoginToManage.text = "Let's create to manage a shop"
+            }
         }
     }
 
@@ -143,5 +147,10 @@ class MyShopFragment : Fragment() {
 
     private fun hideProgressbar() {
         binding.pbLoading.visibility = View.GONE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getShopData()
     }
 }

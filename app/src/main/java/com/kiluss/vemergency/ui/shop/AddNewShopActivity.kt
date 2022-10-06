@@ -112,15 +112,15 @@ class AddNewShopActivity : AppCompatActivity() {
                     shop.location = location
                     FirebaseManager.getUid()?.let { uid ->
                         FirebaseManager.getUserInfoDatabaseReference()
-                            .addValueEventListener(object : ValueEventListener {
+                            ?.addValueEventListener(object : ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     snapshot.getValue(User::class.java)?.let { userDb ->
                                         user = userDb
                                         user.shop = shop
                                         user.isShopCreated = true
                                         FirebaseManager.getUid()?.let {
-                                            FirebaseManager.getUserInfoDatabaseReference().setValue(user)
-                                                .addOnCompleteListener {
+                                            FirebaseManager.getUserInfoDatabaseReference()?.setValue(user)
+                                                ?.addOnCompleteListener {
                                                     if (it.isSuccessful) {
                                                         // upload shop image
                                                         uploadShopImage()

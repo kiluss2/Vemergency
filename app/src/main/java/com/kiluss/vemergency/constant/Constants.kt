@@ -31,3 +31,6 @@ const val EXTRA_SHOP_LOCATION = "extra_shop_location"
 const val EXTRA_CREATED_SHOP = "extra_created_shop"
 
 const val EXTRA_PICK_LOCATION = "extra_pick_location"
+
+const val SHARED_PREFERENCE_KEY = "shared_prefs_key"
+const val SHARED_PREFERENCE_KEY_CHANGE_USER = "shared_prefs_key"

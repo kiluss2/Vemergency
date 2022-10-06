@@ -1,6 +1,7 @@
 package com.kiluss.vemergency.data.firebase
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
@@ -23,13 +24,13 @@ object FirebaseManager {
     private var uid: String? = null
 
     internal fun init() {
-        if (auth == null) {
+        if (auth == null || user == null) {
             setupFirebase()
         }
     }
 
     private fun setupFirebase() {
-        auth = FirebaseAuth.getInstance()
+        auth = Firebase.auth
         uid = auth?.currentUser?.uid
         databaseReference = Firebase.database.reference
     }
@@ -43,7 +44,7 @@ object FirebaseManager {
     internal fun getAuth() = auth
     internal fun getCurrentUser() = auth?.currentUser
     internal fun getUid() = uid
-    internal fun getUserInfoDatabaseReference() = FirebaseDatabase.getInstance().getReference("$USER_NODE/$uid")
+    internal fun getUserInfoDatabaseReference() = databaseReference!!.child("$USER_NODE/$uid")
     internal fun getUserAvatarStorageReference() =
         FirebaseStorage.getInstance().reference.child( auth?.currentUser?.uid + "/" + AVATAR_NODE + "/" + AVATAR)
     internal fun getShopImageStorageReference() =
