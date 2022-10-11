@@ -39,7 +39,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun getUserData() {
-        FirebaseManager.getUid()?.let { uid ->
+        FirebaseManager.getAuth()?.uid?.let {
             FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     user = snapshot.getValue(User::class.java)

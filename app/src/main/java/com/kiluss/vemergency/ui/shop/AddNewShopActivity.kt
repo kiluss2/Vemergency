@@ -61,7 +61,8 @@ class AddNewShopActivity : AppCompatActivity() {
     private val pickLocationFromGalleryForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == RESULT_OK && result.data != null) {
-                val location = result.data?.getParcelableExtra<com.google.android.gms.maps.model.LatLng>(EXTRA_PICK_LOCATION)
+                val location =
+                    result.data?.getParcelableExtra<com.google.android.gms.maps.model.LatLng>(EXTRA_PICK_LOCATION)
                 this.location = LatLng(location?.latitude, location?.longitude)
                 binding.tvLocationPicked.text = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
             }
@@ -110,17 +111,17 @@ class AddNewShopActivity : AppCompatActivity() {
                     shop.openTime = edtOpenTime.text.toString()
                     shop.website = edtWebsite.text.toString()
                     shop.location = location
-                    FirebaseManager.getUid()?.let { uid ->
+                    FirebaseManager.getAuth()?.uid?.let {
                         FirebaseManager.getUserInfoDatabaseReference()
-                            ?.addValueEventListener(object : ValueEventListener {
+                            .addValueEventListener(object : ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     snapshot.getValue(User::class.java)?.let { userDb ->
                                         user = userDb
                                         user.shop = shop
                                         user.isShopCreated = true
-                                        FirebaseManager.getUid()?.let {
-                                            FirebaseManager.getUserInfoDatabaseReference()?.setValue(user)
-                                                ?.addOnCompleteListener {
+                                        FirebaseManager.getAuth()?.uid?.let {
+                                            FirebaseManager.getUserInfoDatabaseReference().setValue(user)
+                                                .addOnCompleteListener {
                                                     if (it.isSuccessful) {
                                                         // upload shop image
                                                         uploadShopImage()

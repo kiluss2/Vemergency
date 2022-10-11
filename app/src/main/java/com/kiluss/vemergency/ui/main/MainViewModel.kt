@@ -42,9 +42,8 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val shopImage: LiveData<Bitmap> = _shopImage
 
     internal fun getUserInfo() {
-        FirebaseManager.init()
-        FirebaseManager.getUid()?.let { uid ->
-            FirebaseManager.getUserInfoDatabaseReference()?.addValueEventListener(object : ValueEventListener {
+        FirebaseManager.getAuth()?.uid?.let {
+            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.getValue(User::class.java)?.let {
                         user = it
@@ -83,9 +82,9 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     }
 
     internal fun getShopData() {
-        FirebaseManager.getUid()?.let { uid ->
-            FirebaseManager.getUserInfoDatabaseReference()?.child(SHOP_NODE)
-                ?.addValueEventListener(object : ValueEventListener {
+        FirebaseManager.getAuth()?.uid?.let {
+            FirebaseManager.getUserInfoDatabaseReference().child(SHOP_NODE)
+                .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         _shop.value = snapshot.getValue(Shop::class.java)
                         myShop = snapshot.getValue(Shop::class.java)
