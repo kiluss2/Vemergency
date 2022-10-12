@@ -1,6 +1,7 @@
 package com.kiluss.vemergency.ui.main
 
 import android.app.Application
+import android.content.ContentValues.TAG
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -9,6 +10,8 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.SHOP_COVER
 import com.kiluss.vemergency.constant.SHOP_NODE
@@ -24,6 +27,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     private var user = User()
     private var myShop: Shop? = null
+    val db = Firebase.firestore
     private val _avatarBitmap: MutableLiveData<Bitmap> by lazy {
         MutableLiveData<Bitmap>()
     }
@@ -42,11 +46,27 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val shopImage: LiveData<Bitmap> = _shopImage
 
     internal fun getUserInfo() {
+        // Create a new user with a first and last name
+        val user = hashMapOf(
+            "first" to "Ada",
+            "last" to "Lovelace",
+            "born" to 1815
+        )
+        // Add a new document with a generated ID
+        db.collection("users")
+            .add(user)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding document", e)
+            }
+
         FirebaseManager.getAuth()?.uid?.let {
             FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.getValue(User::class.java)?.let {
-                        user = it
+                        this@MainViewModel.user = it
                         Log.e("user", user.toString())
                     }
                     FirebaseManager.getCurrentUser()?.let {
