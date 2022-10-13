@@ -36,4 +36,4 @@ const val SHARED_PREFERENCE_KEY = "shared_prefs_key"
 const val SHARED_PREFERENCE_KEY_CHANGE_USER = "shared_prefs_key"
 
 // firestore
-const val ACCOUNT_COLLECTION = "accounts"
+const val USER_COLLECTION = "users"

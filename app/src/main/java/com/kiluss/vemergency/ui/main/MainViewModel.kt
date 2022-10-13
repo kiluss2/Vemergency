@@ -56,8 +56,8 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         db.collection("users")
             .document("hihi")
             .set(user)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+            .addOnSuccessListener {
+                Log.d(TAG, "DocumentSnapshot added with ID: ")
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "Error adding document", e)

@@ -3,6 +3,7 @@ package com.kiluss.vemergency.ui.userprofile
 import android.Manifest
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -22,26 +23,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.TEMP_IMAGE
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
-import java.util.Calendar
+import java.util.*
 
 class EditUserProfileActivity : AppCompatActivity() {
 
     private var imageUri: Uri? = null
     private var user = User()
+    val db = Firebase.firestore
     private lateinit var binding: ActivityEditUserProfileBinding
-
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -58,7 +60,6 @@ class EditUserProfileActivity : AppCompatActivity() {
             imageUri = intent?.data
         }
     }
-
     private val requestReadPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (!isGranted) {
@@ -97,16 +98,18 @@ class EditUserProfileActivity : AppCompatActivity() {
                 user.address = edtAddress.text.toString()
                 user.phone = edtPhoneNumber.text.toString()
                 FirebaseManager.getAuth()?.uid?.let {
-                    FirebaseManager.getUserInfoDatabaseReference().setValue(user).addOnCompleteListener {
-                        if (it.isSuccessful) {
+                    db.collection(USER_COLLECTION)
+                        .document(it)
+                        .set(user)
+                        .addOnSuccessListener {
                             // upload avatar picture
                             uploadAvatar()
-                        } else {
+                        }
+                        .addOnFailureListener { e ->
                             hideProgressbar()
                             Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
-                            it.exception?.printStackTrace()
+                            Log.e(ContentValues.TAG, "Error adding document", e)
                         }
-                    }
                 }
             }
             ivProfile.setOnClickListener {
@@ -191,10 +194,13 @@ class EditUserProfileActivity : AppCompatActivity() {
 
     private fun getUserData() {
         FirebaseManager.getAuth()?.uid?.let {
-            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(User::class.java)?.let { userDb ->
-                        user = userDb
+            binding.tvEmail.text = FirebaseManager.getAuth()?.currentUser?.email
+            db.collection(USER_COLLECTION)
+                .document(it)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    documentSnapshot.toObject<User>()?.let { result ->
+                        user = result
                         user.fullName?.let {
                             binding.edtFullName.setText(it)
                         }
@@ -207,7 +213,6 @@ class EditUserProfileActivity : AppCompatActivity() {
                         user.phone?.let {
                             binding.edtPhoneNumber.setText(it)
                         }
-                        binding.tvEmail.text = FirebaseManager.getAuth()?.currentUser?.email
                     }
                     val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
                     if (localFile.exists()) {
@@ -222,13 +227,11 @@ class EditUserProfileActivity : AppCompatActivity() {
                     }
                     hideProgressbar()
                 }
-
-                override fun onCancelled(error: DatabaseError) {
+                .addOnFailureListener { exception ->
                     hideProgressbar()
                     Utils.showShortToast(this@EditUserProfileActivity, "Fail to get user information")
-                    Log.e("Main Activity", error.message)
+                    Log.e("Main Activity", exception.message.toString())
                 }
-            })
         }
     }
 }
