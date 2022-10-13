@@ -14,11 +14,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.TEMP_IMAGE
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityUserProfileBinding
@@ -29,6 +30,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityUserProfileBinding
     private var user: User? = null
+    private val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,34 +42,36 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun getUserData() {
         FirebaseManager.getAuth()?.uid?.let {
-            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    user = snapshot.getValue(User::class.java)
-                    user?.let { user ->
-                        user.fullName?.let {
-                            binding.tvFullName.text = it
+            binding.tvEmail.text = FirebaseManager.getCurrentUser()?.email
+            db.collection(USER_COLLECTION)
+                .document(it)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    documentSnapshot.toObject<User>()?.let { result ->
+                        user = result
+                        user?.let { user ->
+                            user.fullName?.let {
+                                binding.tvFullName.text = it
+                            }
+                            user.birthday?.let {
+                                binding.tvBirthDay.text = it
+                            }
+                            user.address?.let {
+                                binding.tvAddress.text = it
+                            }
+                            user.phone?.let {
+                                binding.tvPhoneNumber.text = it
+                            }
                         }
-                        user.birthday?.let {
-                            binding.tvBirthDay.text = it
-                        }
-                        user.address?.let {
-                            binding.tvAddress.text = it
-                        }
-                        user.phone?.let {
-                            binding.tvPhoneNumber.text = it
-                        }
+                        hideProgressbar()
+                        getAvatar()
                     }
-                    binding.tvEmail.text = FirebaseManager.getCurrentUser()?.email
-                    hideProgressbar()
-                    getAvatar()
                 }
-
-                override fun onCancelled(error: DatabaseError) {
+                .addOnFailureListener { exception ->
                     hideProgressbar()
                     Utils.showShortToast(this@UserProfileActivity, "Fail to get user information")
-                    Log.e("Main Activity", error.message)
+                    Log.e("Main Activity", exception.message.toString())
                 }
-            })
         }
     }
 

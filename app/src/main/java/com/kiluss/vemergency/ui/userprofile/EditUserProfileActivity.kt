@@ -42,7 +42,7 @@ class EditUserProfileActivity : AppCompatActivity() {
 
     private var imageUri: Uri? = null
     private var user = User()
-    val db = Firebase.firestore
+    private val db = Firebase.firestore
     private lateinit var binding: ActivityEditUserProfileBinding
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}

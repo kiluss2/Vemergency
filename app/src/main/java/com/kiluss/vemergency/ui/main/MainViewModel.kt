@@ -46,23 +46,6 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val shopImage: LiveData<Bitmap> = _shopImage
 
     internal fun getUserInfo() {
-        // Create a new user with a first and last name
-        val user = hashMapOf(
-            "first" to "Ada",
-            "last" to "Lovelace",
-            "born" to 1815
-        )
-        // Add a new document with a generated ID
-        db.collection("users")
-            .document("hihi")
-            .set(user)
-            .addOnSuccessListener {
-                Log.d(TAG, "DocumentSnapshot added with ID: ")
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-            }
-
         FirebaseManager.getAuth()?.uid?.let {
             FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
