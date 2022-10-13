@@ -36,7 +36,7 @@ import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 class EditUserProfileActivity : AppCompatActivity() {
 
@@ -199,21 +199,24 @@ class EditUserProfileActivity : AppCompatActivity() {
                 .document(it)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
-                    documentSnapshot.toObject<User>()?.let { result ->
-                        user = result
-                        user.fullName?.let {
-                            binding.edtFullName.setText(it)
-                        }
-                        user.birthday?.let {
-                            binding.tvBirthDayPicker.text = it
-                        }
-                        user.address?.let {
-                            binding.edtAddress.setText(it)
-                        }
-                        user.phone?.let {
-                            binding.edtPhoneNumber.setText(it)
+                    if (documentSnapshot.exists()) {
+                        documentSnapshot.toObject<User>()?.let { result ->
+                            user = result
+                            user.fullName?.let {
+                                binding.edtFullName.setText(it)
+                            }
+                            user.birthday?.let {
+                                binding.tvBirthDayPicker.text = it
+                            }
+                            user.address?.let {
+                                binding.edtAddress.setText(it)
+                            }
+                            user.phone?.let {
+                                binding.edtPhoneNumber.setText(it)
+                            }
                         }
                     }
+                    hideProgressbar()
                     val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
                     if (localFile.exists()) {
                         val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
@@ -232,6 +235,10 @@ class EditUserProfileActivity : AppCompatActivity() {
                     Utils.showShortToast(this@EditUserProfileActivity, "Fail to get user information")
                     Log.e("Main Activity", exception.message.toString())
                 }
+            if (FirebaseManager.getAuth()?.uid == null) {
+                hideProgressbar()
+                Utils.showShortToast(this@EditUserProfileActivity, "Fail to get auth")
+            }
         }
     }
 }

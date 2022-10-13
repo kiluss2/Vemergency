@@ -34,6 +34,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        FirebaseManager.init()
         setUpView()
         observeViewModel()
         viewModel.getUserInfo()
@@ -72,6 +73,11 @@ class HomeFragment : Fragment() {
                             .dontAnimate()
                             .into(binding.ivAccount)
                     }
+                }
+            }
+            userInfo.observe(viewLifecycleOwner) {
+                with(binding) {
+                    tvEmail.text = "Welcome ${it.fullName}"
                 }
             }
         }

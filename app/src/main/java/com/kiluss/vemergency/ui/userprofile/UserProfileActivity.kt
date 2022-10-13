@@ -36,7 +36,6 @@ class UserProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        FirebaseManager.init()
         setupView()
     }
 
@@ -47,31 +46,37 @@ class UserProfileActivity : AppCompatActivity() {
                 .document(it)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
-                    documentSnapshot.toObject<User>()?.let { result ->
-                        user = result
-                        user?.let { user ->
-                            user.fullName?.let {
-                                binding.tvFullName.text = it
-                            }
-                            user.birthday?.let {
-                                binding.tvBirthDay.text = it
-                            }
-                            user.address?.let {
-                                binding.tvAddress.text = it
-                            }
-                            user.phone?.let {
-                                binding.tvPhoneNumber.text = it
+                    if (documentSnapshot.exists()) {
+                        documentSnapshot.toObject<User>()?.let { result ->
+                            user = result
+                            user?.let { user ->
+                                user.fullName?.let {
+                                    binding.tvFullName.text = it
+                                }
+                                user.birthday?.let {
+                                    binding.tvBirthDay.text = it
+                                }
+                                user.address?.let {
+                                    binding.tvAddress.text = it
+                                }
+                                user.phone?.let {
+                                    binding.tvPhoneNumber.text = it
+                                }
                             }
                         }
-                        hideProgressbar()
-                        getAvatar()
                     }
+                    hideProgressbar()
+                    getAvatar()
                 }
                 .addOnFailureListener { exception ->
                     hideProgressbar()
                     Utils.showShortToast(this@UserProfileActivity, "Fail to get user information")
-                    Log.e("Main Activity", exception.message.toString())
+                    Log.e("UserProfileActivity", exception.message.toString())
                 }
+        }
+        if (FirebaseManager.getAuth()?.uid == null) {
+            hideProgressbar()
+            Utils.showShortToast(this@UserProfileActivity, "Fail to get auth")
         }
     }
 

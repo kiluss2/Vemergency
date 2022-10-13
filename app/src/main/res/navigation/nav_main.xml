@@ -16,11 +16,6 @@
         android:label="fragment_setting"
         tools:layout="@layout/fragment_setting" />
     <fragment
-        android:id="@+id/myShopFragment"
-        android:name="com.kiluss.vemergency.ui.main.MyShopFragment"
-        android:label="fragment_my_shop"
-        tools:layout="@layout/fragment_my_shop" />
-    <fragment
         android:id="@+id/notificationFragment"
         android:name="com.kiluss.vemergency.ui.main.NotificationFragment"
         android:label="fragment_notification"

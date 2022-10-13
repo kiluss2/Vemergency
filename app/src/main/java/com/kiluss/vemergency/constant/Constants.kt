@@ -37,3 +37,9 @@ const val SHARED_PREFERENCE_KEY_CHANGE_USER = "shared_prefs_key"
 
 // firestore
 const val USER_COLLECTION = "users"
+
+const val SHARE_PREF_ROLE = "share_pref_role"
+const val ROLE_ADMIN = "role_admin"
+const val ROLE_USER = "role_user"
+const val ROLE_SHOP = "role_shop"
+const val ROLE_NAN = "role_nan"

@@ -1,10 +1,15 @@
 package com.kiluss.vemergency.ui.login
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
-import com.kiluss.vemergency.databinding.ActivityLoginBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import com.kiluss.vemergency.constant.ROLE_NAN
+import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
+import com.kiluss.vemergency.databinding.ActivityLoginBinding
+import com.kiluss.vemergency.ui.launcher.PickRoleActivity
+import com.kiluss.vemergency.utils.SharedPrefManager
 
 class LoginActivity : AppCompatActivity() {
 
@@ -27,5 +32,10 @@ class LoginActivity : AppCompatActivity() {
             }
         }.attach()
         supportActionBar?.hide()
+
+        binding.fabChangeRole.setOnClickListener {
+            SharedPrefManager.putString(SHARE_PREF_ROLE, ROLE_NAN)
+            startActivity(Intent(this, PickRoleActivity::class.java))
+        }
     }
 }

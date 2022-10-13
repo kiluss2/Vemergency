@@ -1,41 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/yellow_cyber">
+
+    <ImageView
+        android:id="@+id/ivBackground1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/login_background"
+        app:layout_constraintBottom_toTopOf="@+id/btnAdmin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Choose a role to start using this app"
+        android:textColor="#9D4DFF"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/btnAdmin"
+        app:layout_constraintEnd_toEndOf="@+id/btnAdmin"
+        app:layout_constraintStart_toStartOf="@+id/btnAdmin" />
 
     <Button
         android:id="@+id/btnAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:backgroundTint="@color/blue_crayola"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#4086EF"
         android:text="Admin"
+        app:layout_constraintBottom_toTopOf="@id/btnShop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
         android:id="@+id/btnShop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:backgroundTint="@color/blue_crayola"
-        android:text="Admin"
+        android:backgroundTint="#4086EF"
+        android:text="Shop"
+        app:layout_constraintBottom_toTopOf="@id/btnUser"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnAdmin" />
+        app:layout_constraintTop_toBottomOf="@+id/btnAdmin"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
         android:id="@+id/btnUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:backgroundTint="@color/blue_crayola"
-        android:text="Admin"
+        android:backgroundTint="#4086EF"
+        android:text="User"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnShop" />
+        app:layout_constraintTop_toBottomOf="@+id/btnShop"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <ImageView
+        android:id="@+id/ivBackground2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/login_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnUser" />
 </androidx.constraintlayout.widget.ConstraintLayout>

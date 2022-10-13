@@ -93,6 +93,13 @@ class SettingFragment : Fragment() {
                     }
                 }
             }
+            userInfo.observe(viewLifecycleOwner) {
+                with(binding) {
+                    FirebaseManager.getAuth()?.currentUser?.email?.let {
+                        usernameTextView.text = it
+                    }
+                }
+            }
         }
     }
 

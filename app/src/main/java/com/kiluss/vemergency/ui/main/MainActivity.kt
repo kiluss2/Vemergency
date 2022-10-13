@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent?.getStringExtra(EXTRA_CREATED_SHOP) != null) {
-            binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
+            // binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
         }
     }
 

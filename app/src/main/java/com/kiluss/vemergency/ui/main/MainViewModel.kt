@@ -1,7 +1,6 @@
 package com.kiluss.vemergency.ui.main
 
 import android.app.Application
-import android.content.ContentValues.TAG
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -11,11 +10,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.SHOP_COVER
 import com.kiluss.vemergency.constant.SHOP_NODE
 import com.kiluss.vemergency.constant.TEMP_IMAGE
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
@@ -44,37 +45,41 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<Bitmap>()
     }
     internal val shopImage: LiveData<Bitmap> = _shopImage
+    private val _userInfo: MutableLiveData<User> by lazy {
+        MutableLiveData<User>()
+    }
+    internal val userInfo: LiveData<User> = _userInfo
 
     internal fun getUserInfo() {
         FirebaseManager.getAuth()?.uid?.let {
-            FirebaseManager.getUserInfoDatabaseReference().addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(User::class.java)?.let {
-                        this@MainViewModel.user = it
-                        Log.e("user", user.toString())
-                    }
-                    FirebaseManager.getCurrentUser()?.let {
-                        File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
-                        val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
-                        if (localFile.exists()) {
-                            localFile.delete()
-                        }
-                        localFile.createNewFile()
-                        FirebaseManager.getUserAvatarStorageReference()
-                            .getFile(localFile)
-                            .addOnCompleteListener {
-                                _avatarBitmap.value = BitmapFactory.decodeFile(localFile.absolutePath)
-                            }.addOnFailureListener {
-                                it.printStackTrace()
-                            }
+            db.collection(USER_COLLECTION)
+                .document(it)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    documentSnapshot.toObject<User>()?.let { result ->
+                        user = result
+                        _userInfo.value = user
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
+                .addOnFailureListener { exception ->
                     hideProgressbar()
-                    Log.e("Main Activity", error.message)
+                    Log.e("Main Activity", exception.message.toString())
                 }
-            })
+        }
+        FirebaseManager.getCurrentUser()?.let {
+            File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
+            val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
+            if (localFile.exists()) {
+                localFile.delete()
+            }
+            localFile.createNewFile()
+            FirebaseManager.getUserAvatarStorageReference()
+                .getFile(localFile)
+                .addOnCompleteListener {
+                    _avatarBitmap.value = BitmapFactory.decodeFile(localFile.absolutePath)
+                }.addOnFailureListener {
+                    it.printStackTrace()
+                }
         }
     }
 
