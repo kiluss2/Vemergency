@@ -70,9 +70,11 @@ class SignupFragment : Fragment() {
                                                 activity, "Success!",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            auth.signOut()
                                             navigateToLoginFragment()
                                         }
                                         .addOnFailureListener { e ->
+                                            auth.signOut()
                                             Utils.showShortToast(
                                                 this@SignupFragment.requireContext(),
                                                 "Fail to update profile"
@@ -80,8 +82,8 @@ class SignupFragment : Fragment() {
                                             Log.e(ContentValues.TAG, "Error adding document", e)
                                         }
                                 }
-                                auth.signOut()
                             } else {
+                                auth.signOut()
                                 binding.loading.visibility = View.GONE
                                 // If sign in fails, display a message to the user.
                                 Log.w("TAG", "createUserWithEmail:failure", task.exception)
@@ -90,6 +92,7 @@ class SignupFragment : Fragment() {
                         }
                 }
             } else {
+                auth.signOut()
                 Toast.makeText(requireContext(), "Please fill all field", Toast.LENGTH_LONG).show()
             }
         }
