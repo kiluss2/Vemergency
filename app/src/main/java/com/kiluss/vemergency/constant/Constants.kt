@@ -20,6 +20,7 @@ const val SHOP_NODE = "shop"
 const val SHOP_COVER = "covers"
 const val AVATAR = "avatar"
 const val DEFAULT_ZOOM = 10F
+const val EMPTY_STRING = ""
 
 // navigation activity
 const val MY_PERMISSIONS_REQUEST_LOCATION = 99
@@ -37,9 +38,13 @@ const val SHARED_PREFERENCE_KEY_CHANGE_USER = "shared_prefs_key"
 
 // firestore
 const val USER_COLLECTION = "users"
+const val SHOP_COLLECTION = "shops"
+const val ADMIN_COLLECTION = "admins"
 
 const val SHARE_PREF_ROLE = "share_pref_role"
 const val ROLE_ADMIN = "role_admin"
 const val ROLE_USER = "role_user"
 const val ROLE_SHOP = "role_shop"
 const val ROLE_NAN = "role_nan"
+
+const val DELAY_BACK_TO_EXIT_TIME = 3000L

@@ -12,19 +12,15 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
-import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
-import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
-import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
-import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
-import com.kiluss.vemergency.constant.SAVED_LOGIN_ACCOUNT_KEY
-import com.kiluss.vemergency.constant.SIGN_IN_KEY
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
+import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
 import com.kiluss.vemergency.ui.user.shop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
 import com.kiluss.vemergency.ui.user.userprofile.UserProfileActivity
+import com.kiluss.vemergency.utils.SharedPrefManager
 
 class LoginFragment : Fragment() {
 
@@ -98,30 +94,37 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginSuccess() {
-        when (activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
-            EXTRA_USER_PROFILE -> {
-                requireActivity().startActivity(
-                    Intent(requireActivity(), UserProfileActivity::class.java)
-                )
-                requireActivity().finish()
+        when(SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
+            ROLE_USER -> {
+                when (activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
+                    EXTRA_USER_PROFILE -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), UserProfileActivity::class.java)
+                        )
+                        requireActivity().finish()
+                    }
+                    EXTRA_CREATE_SHOP -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), AddNewShopActivity::class.java)
+                        )
+                        requireActivity().finish()
+                    }
+                    EXTRA_EDIT_USER_PROFILE -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), EditUserProfileActivity::class.java)
+                        )
+                        requireActivity().finish()
+                    }
+                    EXTRA_CHANGE_PASSWORD -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), ChangePasswordActivity::class.java)
+                        )
+                        requireActivity().finish()
+                    }
+                }
             }
-            EXTRA_CREATE_SHOP -> {
-                requireActivity().startActivity(
-                    Intent(requireActivity(), AddNewShopActivity::class.java)
-                )
-                requireActivity().finish()
-            }
-            EXTRA_EDIT_USER_PROFILE -> {
-                requireActivity().startActivity(
-                    Intent(requireActivity(), EditUserProfileActivity::class.java)
-                )
-                requireActivity().finish()
-            }
-            EXTRA_CHANGE_PASSWORD -> {
-                requireActivity().startActivity(
-                    Intent(requireActivity(), ChangePasswordActivity::class.java)
-                )
-                requireActivity().finish()
+            ROLE_SHOP -> {
+                startActivity(Intent(this@LoginFragment.activity, ShopMainActivity::class.java))
             }
         }
     }

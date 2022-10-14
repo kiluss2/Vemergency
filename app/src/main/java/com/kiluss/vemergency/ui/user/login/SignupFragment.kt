@@ -1,5 +1,6 @@
 package com.kiluss.vemergency.ui.user.login
 
+import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,14 +10,19 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.databinding.FragmentSignupBinding
+import com.kiluss.vemergency.utils.SharedPrefManager
+import com.kiluss.vemergency.utils.Utils
 
 class SignupFragment : Fragment() {
 
     private var _binding: FragmentSignupBinding? = null
     private val binding get() = _binding!!
     private lateinit var auth: FirebaseAuth
+    private val db = Firebase.firestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,12 +54,33 @@ class SignupFragment : Fragment() {
                         .addOnCompleteListener(requireActivity()) { task ->
                             if (task.isSuccessful) {
                                 binding.loading.visibility = View.GONE
-                                // Sign in success, update UI with the signed-in user's information
-                                Toast.makeText(
-                                    activity, "Success!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navigateToLoginFragment()
+                                auth.uid?.let {
+                                    var collection = EMPTY_STRING
+                                    when (SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
+                                        ROLE_USER -> collection = USER_COLLECTION
+                                        ROLE_SHOP -> collection = SHOP_COLLECTION
+                                        ROLE_ADMIN -> collection = ADMIN_COLLECTION
+                                    }
+                                    db.collection(collection)
+                                        .document(it)
+                                        .set(HashMap<String, Any>())
+                                        .addOnSuccessListener {
+                                            // Sign in success, update UI with the signed-in user's information
+                                            Toast.makeText(
+                                                activity, "Success!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            navigateToLoginFragment()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Utils.showShortToast(
+                                                this@SignupFragment.requireContext(),
+                                                "Fail to update profile"
+                                            )
+                                            Log.e(ContentValues.TAG, "Error adding document", e)
+                                        }
+                                }
+                                auth.signOut()
                             } else {
                                 binding.loading.visibility = View.GONE
                                 // If sign in fails, display a message to the user.

@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.kiluss.vemergency.constant.ROLE_NAN
+import com.kiluss.vemergency.constant.ROLE_SHOP
 import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.databinding.ActivityPickRoleBinding
+import com.kiluss.vemergency.ui.user.login.LoginActivity
 import com.kiluss.vemergency.ui.user.main.MainActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 
@@ -24,9 +26,13 @@ class PickRoleActivity : AppCompatActivity() {
     }
 
     private fun checkPreviousRole() {
-        when(SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
+        when (SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
             ROLE_USER -> {
                 startActivity(Intent(this@PickRoleActivity, MainActivity::class.java))
+                finish()
+            }
+            ROLE_SHOP -> {
+                startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))
                 finish()
             }
         }
@@ -34,8 +40,12 @@ class PickRoleActivity : AppCompatActivity() {
 
     private fun setupView() {
         with(binding) {
-            btnAdmin.setOnClickListener {  }
-            btnShop.setOnClickListener {  }
+            btnAdmin.setOnClickListener { }
+            btnShop.setOnClickListener {
+                SharedPrefManager.putString(SHARE_PREF_ROLE, ROLE_SHOP)
+                startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))
+                finish()
+            }
             btnUser.setOnClickListener {
                 SharedPrefManager.putString(SHARE_PREF_ROLE, ROLE_USER)
                 startActivity(Intent(this@PickRoleActivity, MainActivity::class.java))

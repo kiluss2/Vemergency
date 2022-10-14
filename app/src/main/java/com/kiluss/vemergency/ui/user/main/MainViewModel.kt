@@ -51,7 +51,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal val userInfo: LiveData<User> = _userInfo
 
     internal fun getUserInfo() {
-        FirebaseManager.getAuth()?.uid?.let {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let {
             db.collection(USER_COLLECTION)
                 .document(it)
                 .get()

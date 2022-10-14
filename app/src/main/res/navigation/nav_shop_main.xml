@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_shop_main">
+
+    <fragment
+        android:id="@+id/myShopFragment"
+        android:name="com.kiluss.vemergency.ui.user.main.MyShopFragment"
+        android:label="MyShopFragment"
+        tools:layout="@layout/fragment_my_shop" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.kiluss.vemergency.ui.user.main.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" />
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.kiluss.vemergency.ui.user.main.NotificationFragment"
+        android:label="fragment_notification"
+        tools:layout="@layout/fragment_notification" />
+</navigation>

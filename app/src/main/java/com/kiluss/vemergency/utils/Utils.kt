@@ -4,11 +4,18 @@ import android.content.Context
 import android.widget.Toast
 
 object Utils {
-    internal fun showShortToast(context: Context, string: String) {
-        Toast.makeText(context, string, Toast.LENGTH_SHORT).show()
+
+    private var toast: Toast? = null
+
+    internal fun showShortToast(context: Context, message: String) {
+        toast?.cancel()
+        toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+        toast?.show()
     }
 
     internal fun showLongToast(context: Context, message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        toast?.cancel()
+        toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
+        toast?.show()
     }
 }
