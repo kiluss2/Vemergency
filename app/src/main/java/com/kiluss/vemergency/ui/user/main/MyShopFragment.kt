@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.main
+package com.kiluss.vemergency.ui.user.main
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -19,7 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
-import com.kiluss.vemergency.ui.navigation.NavigationActivity
+import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 
 class MyShopFragment : Fragment() {
 

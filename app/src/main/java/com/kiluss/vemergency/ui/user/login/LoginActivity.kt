@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.login
+package com.kiluss.vemergency.ui.user.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.kiluss.vemergency.constant.ROLE_NAN
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.databinding.ActivityLoginBinding
-import com.kiluss.vemergency.ui.launcher.PickRoleActivity
+import com.kiluss.vemergency.ui.user.launcher.PickRoleActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 
 class LoginActivity : AppCompatActivity() {

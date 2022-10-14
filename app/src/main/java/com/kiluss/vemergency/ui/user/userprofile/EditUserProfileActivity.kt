@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.userprofile
+package com.kiluss.vemergency.ui.user.userprofile
 
 import android.Manifest
 import android.app.Activity

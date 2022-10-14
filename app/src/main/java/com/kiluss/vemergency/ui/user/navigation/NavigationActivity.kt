@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.navigation
+package com.kiluss.vemergency.ui.user.navigation
 
 import android.Manifest
 import android.content.Intent

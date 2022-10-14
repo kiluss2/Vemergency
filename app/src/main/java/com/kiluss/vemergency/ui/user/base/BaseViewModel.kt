@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.base
+package com.kiluss.vemergency.ui.user.base
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

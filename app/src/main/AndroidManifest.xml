@@ -27,38 +27,38 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".ui.main.ChangePasswordActivity"
+            android:name=".ui.user.main.ChangePasswordActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".ui.navigation.PickLocationActivity"
+            android:name=".ui.user.navigation.PickLocationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.shop.AddNewShopActivity"
+            android:name=".ui.user.shop.AddNewShopActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".ui.userprofile.EditUserProfileActivity"
+            android:name=".ui.user.userprofile.EditUserProfileActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".ui.userprofile.UserProfileActivity"
+            android:name=".ui.user.userprofile.UserProfileActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name="com.kiluss.vemergency.ui.login.LoginActivity"
+            android:name="com.kiluss.vemergency.ui.user.login.LoginActivity"
             android:exported="false" />
 
         <meta-data
@@ -66,14 +66,14 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name="com.kiluss.vemergency.ui.navigation.NavigationActivity"
+            android:name="com.kiluss.vemergency.ui.user.navigation.NavigationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".ui.user.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTask" />
         <activity
-            android:name=".ui.launcher.PickRoleActivity"
+            android:name=".ui.user.launcher.PickRoleActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

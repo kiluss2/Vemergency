@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.login
+package com.kiluss.vemergency.ui.user.login
 
 import android.content.Context
 import android.content.Intent
@@ -21,10 +21,10 @@ import com.kiluss.vemergency.constant.SAVED_LOGIN_ACCOUNT_KEY
 import com.kiluss.vemergency.constant.SIGN_IN_KEY
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
-import com.kiluss.vemergency.ui.main.ChangePasswordActivity
-import com.kiluss.vemergency.ui.shop.AddNewShopActivity
-import com.kiluss.vemergency.ui.userprofile.EditUserProfileActivity
-import com.kiluss.vemergency.ui.userprofile.UserProfileActivity
+import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
+import com.kiluss.vemergency.ui.user.shop.AddNewShopActivity
+import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
+import com.kiluss.vemergency.ui.user.userprofile.UserProfileActivity
 
 class LoginFragment : Fragment() {
 

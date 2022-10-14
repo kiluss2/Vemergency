@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.shop
+package com.kiluss.vemergency.ui.user.shop
 
 import android.Manifest
 import android.app.Activity
@@ -30,8 +30,8 @@ import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
-import com.kiluss.vemergency.ui.main.MainActivity
-import com.kiluss.vemergency.ui.navigation.PickLocationActivity
+import com.kiluss.vemergency.ui.user.main.MainActivity
+import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import java.io.File

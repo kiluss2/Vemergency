@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.launcher
+package com.kiluss.vemergency.ui.user.launcher
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,7 @@ import com.kiluss.vemergency.constant.ROLE_NAN
 import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.databinding.ActivityPickRoleBinding
-import com.kiluss.vemergency.ui.main.MainActivity
+import com.kiluss.vemergency.ui.user.main.MainActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 
 class PickRoleActivity : AppCompatActivity() {

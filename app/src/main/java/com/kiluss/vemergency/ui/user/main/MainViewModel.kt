@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.main
+package com.kiluss.vemergency.ui.user.main
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -20,7 +20,7 @@ import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
-import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.ui.user.base.BaseViewModel
 import com.kiluss.vemergency.utils.Utils
 import java.io.File
 

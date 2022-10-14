@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.navigation
+package com.kiluss.vemergency.ui.user.navigation
 
 import android.app.Application
 import android.util.Log
@@ -11,7 +11,7 @@ import com.kiluss.vemergency.constant.USER_NODE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
-import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.ui.user.base.BaseViewModel
 
 /**
  * Created by sonlv on 9/19/2022

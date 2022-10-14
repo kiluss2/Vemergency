@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.main
+package com.kiluss.vemergency.ui.user.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
