@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/myShopFragment"
-        android:name="com.kiluss.vemergency.ui.user.main.MyShopFragment"
+        android:name="com.kiluss.vemergency.ui.shop.main.MyShopFragment"
         android:label="MyShopFragment"
         tools:layout="@layout/fragment_my_shop" />
     <fragment

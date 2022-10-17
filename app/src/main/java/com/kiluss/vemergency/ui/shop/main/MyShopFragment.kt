@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.user.main
+package com.kiluss.vemergency.ui.shop.main
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -20,6 +20,7 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
+import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 
 class MyShopFragment : Fragment() {
@@ -28,7 +29,7 @@ class MyShopFragment : Fragment() {
     private val binding get() = _binding!!
 
     // view model ktx
-    private val viewModel: MainViewModel by activityViewModels()
+    private val viewModel: ShopMainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,22 +41,8 @@ class MyShopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (FirebaseManager.getCurrentUser() == null) {
-            binding.clMain.visibility = View.GONE
-            binding.tvCreateToManage.visibility = View.VISIBLE
-        } else {
-            if (viewModel.getUserData().isShopCreated) {
-                binding.clMain.visibility = View.VISIBLE
-                binding.tvCreateToManage.visibility = View.GONE
-                setUpView()
-                observeViewModel()
-                viewModel.getShopData()
-            } else {
-                binding.clMain.visibility = View.GONE
-                binding.tvCreateToManage.visibility = View.VISIBLE
-                binding.tvCreateToManage.text = getString(R.string.create_to_manage_your_shop)
-            }
-        }
+        setUpView()
+        observeViewModel()
     }
 
     private fun setUpView() {
@@ -74,7 +61,6 @@ class MyShopFragment : Fragment() {
                     )
                 } else {
                     val alertDialog = AlertDialog.Builder(context)
-
                     alertDialog.apply {
                         //setIcon(R.drawable.ic_hello)
                         setTitle("Make a phone call?")
@@ -88,6 +74,12 @@ class MyShopFragment : Fragment() {
                         }
                     }.create().show()
                 }
+            }
+            btnCreateShop.setOnClickListener {
+                requireActivity().startActivity(
+                    Intent(requireActivity(), AddNewShopActivity::class.java)
+                )
+                requireActivity().finish()
             }
         }
     }
@@ -107,6 +99,20 @@ class MyShopFragment : Fragment() {
                 }
             }
             shop.observe(viewLifecycleOwner) { shop ->
+                if (FirebaseManager.getCurrentUser() == null) {
+                    binding.clMain.visibility = View.GONE
+                    binding.tvCreateToManage.visibility = View.VISIBLE
+                    binding.tvCreateToManage.text = "Something went wrong"
+                } else {
+                    if (shop != null) {
+                        binding.clMain.visibility = View.VISIBLE
+                        binding.tvCreateToManage.visibility = View.GONE
+                    } else {
+                        binding.clMain.visibility = View.GONE
+                        binding.tvCreateToManage.visibility = View.VISIBLE
+                        binding.tvCreateToManage.text = getString(R.string.create_to_manage_your_shop)
+                    }
+                }
                 shop?.let {
                     it.name?.let {
                         binding.tvShopName.text = it
@@ -152,6 +158,6 @@ class MyShopFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.getShopData()
+        viewModel.getShopInfo()
     }
 }

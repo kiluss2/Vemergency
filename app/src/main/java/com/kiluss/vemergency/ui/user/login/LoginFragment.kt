@@ -124,12 +124,6 @@ class LoginFragment : Fragment() {
                         )
                         requireActivity().finish()
                     }
-                    EXTRA_CREATE_SHOP -> {
-                        requireActivity().startActivity(
-                            Intent(requireActivity(), AddNewShopActivity::class.java)
-                        )
-                        requireActivity().finish()
-                    }
                     EXTRA_EDIT_USER_PROFILE -> {
                         requireActivity().startActivity(
                             Intent(requireActivity(), EditUserProfileActivity::class.java)

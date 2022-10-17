@@ -20,6 +20,7 @@ import com.kiluss.vemergency.databinding.FragmentSettingBinding
 import com.kiluss.vemergency.ui.user.login.LoginActivity
 
 class SettingFragment : Fragment() {
+
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
 
@@ -45,7 +46,9 @@ class SettingFragment : Fragment() {
     private fun setupView() {
         with(binding) {
             tvSignOut.setOnClickListener {
-                createSignOutDialog()
+                FirebaseManager.getAuth()?.currentUser?.let {
+                    createSignOutDialog()
+                }
             }
             rlPersonalDetail.setOnClickListener {
                 startActivity(Intent(activity, LoginActivity::class.java).apply {
@@ -97,6 +100,13 @@ class SettingFragment : Fragment() {
                 with(binding) {
                     FirebaseManager.getAuth()?.currentUser?.email?.let {
                         usernameTextView.text = it
+                    }
+                    if (FirebaseManager.getAuth()?.currentUser != null) {
+                        FirebaseManager.getAuth()?.currentUser?.email?.let {
+                            usernameTextView.text = it
+                        }
+                    } else {
+                        usernameTextView.text = getString(R.string.prompt_username)
                     }
                 }
             }

@@ -6,24 +6,21 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_COVER
+import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
-import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.user.base.BaseViewModel
-import com.kiluss.vemergency.utils.Utils
 import java.io.File
 
 /**
  * Created by sonlv on 10/17/2022
  */
-class ShopMainViewModel (application: Application) : BaseViewModel(application) {
+class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     private var myShop: Shop? = null
     val db = Firebase.firestore
@@ -54,30 +51,22 @@ class ShopMainViewModel (application: Application) : BaseViewModel(application) 
                 .document(it)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
-                    documentSnapshot.toObject<Shop>()?.let { result ->
+                    val result = documentSnapshot.toObject<Shop>()
+                    if (result != null) {
                         _shop.value = result
                         myShop = result
+                    } else {
+                        _shop.value = null
+                        myShop = null
                     }
                 }
                 .addOnFailureListener { exception ->
                     hideProgressbar()
                     Log.e("Main Activity", exception.message.toString())
+                    _shop.value = null
+                    myShop = null
                 }
-        }
-        FirebaseManager.getCurrentUser()?.let {
-            File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
-            val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
-            if (localFile.exists()) {
-                localFile.delete()
-            }
-            localFile.createNewFile()
-            FirebaseManager.getUserAvatarStorageReference()
-                .getFile(localFile)
-                .addOnCompleteListener {
-                    _avatarBitmap.value = BitmapFactory.decodeFile(localFile.absolutePath)
-                }.addOnFailureListener {
-                    it.printStackTrace()
-                }
+            getShopCover()
         }
     }
 

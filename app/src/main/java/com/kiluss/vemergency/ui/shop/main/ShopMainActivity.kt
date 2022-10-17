@@ -69,9 +69,4 @@ class ShopMainActivity : AppCompatActivity() {
             // binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.getShopInfo()
-    }
 }

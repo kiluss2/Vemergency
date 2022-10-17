@@ -11,7 +11,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
-import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -77,7 +76,11 @@ class HomeFragment : Fragment() {
             }
             userInfo.observe(viewLifecycleOwner) {
                 with(binding) {
-                    tvEmail.text = "Welcome ${it.fullName}"
+                    if (it != null) {
+                        tvEmail.text = "Welcome ${it.fullName}"
+                    } else {
+                        tvEmail.text = getString(R.string.app_name)
+                    }
                 }
             }
         }
