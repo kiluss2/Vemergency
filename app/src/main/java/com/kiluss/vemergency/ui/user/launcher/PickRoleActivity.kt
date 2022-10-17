@@ -3,6 +3,7 @@ package com.kiluss.vemergency.ui.user.launcher
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.kiluss.vemergency.constant.ROLE_ADMIN
 import com.kiluss.vemergency.constant.ROLE_NAN
 import com.kiluss.vemergency.constant.ROLE_SHOP
 import com.kiluss.vemergency.constant.ROLE_USER
@@ -35,12 +36,20 @@ class PickRoleActivity : AppCompatActivity() {
                 startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))
                 finish()
             }
+            ROLE_ADMIN -> {
+                startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))
+                finish()
+            }
         }
     }
 
     private fun setupView() {
         with(binding) {
-            btnAdmin.setOnClickListener { }
+            btnAdmin.setOnClickListener {
+                SharedPrefManager.putString(SHARE_PREF_ROLE, ROLE_ADMIN)
+                startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))
+                finish()
+            }
             btnShop.setOnClickListener {
                 SharedPrefManager.putString(SHARE_PREF_ROLE, ROLE_SHOP)
                 startActivity(Intent(this@PickRoleActivity, LoginActivity::class.java))

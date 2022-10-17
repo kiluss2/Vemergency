@@ -17,6 +17,7 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
+import com.kiluss.vemergency.ui.admin.main.AdminMainActivity
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
 import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
@@ -140,6 +141,9 @@ class LoginFragment : Fragment() {
             }
             ROLE_SHOP -> {
                 startActivity(Intent(this@LoginFragment.activity, ShopMainActivity::class.java))
+            }
+            ROLE_ADMIN -> {
+                startActivity(Intent(this@LoginFragment.activity, AdminMainActivity::class.java))
             }
         }
     }

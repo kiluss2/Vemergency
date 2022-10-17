@@ -14,7 +14,7 @@ import com.kiluss.vemergency.constant.SHOP_COVER
 import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
-import com.kiluss.vemergency.ui.user.base.BaseViewModel
+import com.kiluss.vemergency.ui.base.BaseViewModel
 import java.io.File
 
 /**

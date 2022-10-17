@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_shop_main"
+    app:startDestination="@id/manageShopFragment">
+
+    <fragment
+        android:id="@+id/manageShopFragment"
+        android:name="com.kiluss.vemergency.ui.admin.main.ManageShopFragment"
+        android:label="fragment_manage_shop"
+        tools:layout="@layout/fragment_manage_shop" />
+    <fragment
+        android:id="@+id/manageUserFragment"
+        android:name="com.kiluss.vemergency.ui.admin.main.ManageUserFragment"
+        android:label="fragment_manage_user"
+        tools:layout="@layout/fragment_manage_user" />
+    <fragment
+        android:id="@+id/manageTransactionFragment"
+        android:name="com.kiluss.vemergency.ui.admin.main.ManageTransactionFragment"
+        android:label="fragment_manage_transaction"
+        tools:layout="@layout/fragment_manage_transaction" />
+    <fragment
+        android:id="@+id/adminSettingFragment"
+        android:name="com.kiluss.vemergency.ui.admin.main.AdminSettingFragment"
+        android:label="AdminSettingFragment" />
+</navigation>

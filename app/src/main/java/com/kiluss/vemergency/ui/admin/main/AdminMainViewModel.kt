@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.user.main
+package com.kiluss.vemergency.ui.admin.main
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -9,16 +9,16 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.ADMIN_COLLECTION
 import com.kiluss.vemergency.constant.AVATAR
 import com.kiluss.vemergency.constant.TEMP_IMAGE
-import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
 import java.io.File
 
-class MainViewModel(application: Application) : BaseViewModel(application) {
+class AdminMainViewModel(application: Application) : BaseViewModel(application) {
 
     private var user = User()
     val db = Firebase.firestore
@@ -41,7 +41,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     internal fun getUserInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
-            db.collection(USER_COLLECTION)
+            db.collection(ADMIN_COLLECTION)
                 .document(it)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->

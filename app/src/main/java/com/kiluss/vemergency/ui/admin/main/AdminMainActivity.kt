@@ -13,7 +13,6 @@ import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
 import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityAdminMainBinding
-import com.kiluss.vemergency.ui.shop.main.ShopMainViewModel
 
 class AdminMainActivity : AppCompatActivity() {
 
@@ -21,7 +20,7 @@ class AdminMainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdminMainBinding
 
     // view model ktx
-    private val viewModel: ShopMainViewModel by viewModels()
+    private val viewModel: AdminMainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +37,7 @@ class AdminMainActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         with(viewModel) {
-            navigateToHome.observe(this@AdminMainActivity) {
-                binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
-            }
+
         }
     }
 
