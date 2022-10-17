@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
@@ -32,7 +33,7 @@ class MyShopFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentMyShopBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -41,18 +42,18 @@ class MyShopFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (FirebaseManager.getCurrentUser() == null) {
             binding.clMain.visibility = View.GONE
-            binding.tvLoginToManage.visibility = View.VISIBLE
+            binding.tvCreateToManage.visibility = View.VISIBLE
         } else {
             if (viewModel.getUserData().isShopCreated) {
                 binding.clMain.visibility = View.VISIBLE
-                binding.tvLoginToManage.visibility = View.GONE
+                binding.tvCreateToManage.visibility = View.GONE
                 setUpView()
                 observeViewModel()
                 viewModel.getShopData()
             } else {
                 binding.clMain.visibility = View.GONE
-                binding.tvLoginToManage.visibility = View.VISIBLE
-                binding.tvLoginToManage.text = "Let's create to manage a shop"
+                binding.tvCreateToManage.visibility = View.VISIBLE
+                binding.tvCreateToManage.text = getString(R.string.create_to_manage_your_shop)
             }
         }
     }

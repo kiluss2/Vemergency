@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.user.shop
+package com.kiluss.vemergency.ui.shop.addshop
 
 import android.Manifest
 import android.app.Activity

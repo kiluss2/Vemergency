@@ -14,10 +14,8 @@ import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
 import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
-import com.kiluss.vemergency.databinding.ActivityMainBinding
 import com.kiluss.vemergency.databinding.ActivityShopMainBinding
 import com.kiluss.vemergency.ui.user.login.LoginActivity
-import com.kiluss.vemergency.ui.user.main.MainViewModel
 
 class ShopMainActivity : AppCompatActivity() {
 
@@ -25,7 +23,7 @@ class ShopMainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShopMainBinding
 
     // view model ktx
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: ShopMainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,19 +34,21 @@ class ShopMainActivity : AppCompatActivity() {
         //create bottom navigation view object
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
 
+        observeViewModel()
         FirebaseManager.init()
         setUpOnClickView()
     }
 
-    private fun setUpOnClickView() {
-        binding.fabAddPlace.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java).apply {
-                putExtra(
-                    LOGIN_FRAGMENT_EXTRA,
-                    EXTRA_CREATE_SHOP
-                )
-            })
+    private fun observeViewModel() {
+        with(viewModel) {
+            navigateToHome.observe(this@ShopMainActivity) {
+                binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
+            }
         }
+    }
+
+    private fun setUpOnClickView() {
+
     }
 
     override fun onBackPressed() {
@@ -56,7 +56,7 @@ class ShopMainActivity : AppCompatActivity() {
             super.onBackPressed()
         } else {
             backPressPreviousState = true
-            Toast.makeText(this, "Press one more time to exit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.press_one_more_time_to_exit), Toast.LENGTH_SHORT).show()
             Handler().postDelayed({
                 backPressPreviousState = false
             }, DELAY_BACK_TO_EXIT_TIME)
@@ -72,6 +72,6 @@ class ShopMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.getUserInfo()
+        viewModel.getShopInfo()
     }
 }

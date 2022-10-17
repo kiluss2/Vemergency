@@ -11,16 +11,19 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
-import com.kiluss.vemergency.ui.user.shop.AddNewShopActivity
+import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
 import com.kiluss.vemergency.ui.user.userprofile.UserProfileActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
+import com.kiluss.vemergency.utils.Utils
 
 class LoginFragment : Fragment() {
 
@@ -30,13 +33,10 @@ class LoginFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var auth: FirebaseAuth
+    private val db = Firebase.firestore
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val sharedPref = requireActivity().getSharedPreferences(SAVED_LOGIN_ACCOUNT_KEY, Context.MODE_PRIVATE)
-        if (sharedPref.getBoolean(SIGN_IN_KEY, false)) {
-            loginSuccess()
-        }
         // Initialize Firebase Auth
         auth = Firebase.auth
     }
@@ -74,8 +74,29 @@ class LoginFragment : Fragment() {
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseManager.init()
-                            loginSuccess()
-                            binding.pbLoading.visibility = View.GONE
+                            auth.currentUser?.uid?.let {
+                                db.collection(Utils.getCollectionRole()).document(it).get()
+                                    .addOnSuccessListener { documentSnapshot ->
+                                        binding.pbLoading.visibility = View.GONE
+                                        if (documentSnapshot.exists()) {
+                                            loginSuccess()
+                                        } else {
+                                            Utils.showLongToast(
+                                                this@LoginFragment.requireContext(),
+                                                getString(R.string.this_account_is_not_belong_to_this_role)
+                                            )
+                                            auth.signOut()
+                                        }
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        binding.pbLoading.visibility = View.GONE
+                                        Utils.showLongToast(
+                                            this@LoginFragment.requireContext(),
+                                            exception.message.toString()
+                                        )
+                                        auth.signOut()
+                                    }
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "signInWithEmail:failure", task.exception)
@@ -94,7 +115,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginSuccess() {
-        when(SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
+        when (SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
             ROLE_USER -> {
                 when (activity?.intent?.getStringExtra(LOGIN_FRAGMENT_EXTRA)) {
                     EXTRA_USER_PROFILE -> {

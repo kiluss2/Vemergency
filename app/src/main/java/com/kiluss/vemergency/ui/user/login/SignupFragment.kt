@@ -55,13 +55,7 @@ class SignupFragment : Fragment() {
                             if (task.isSuccessful) {
                                 binding.loading.visibility = View.GONE
                                 auth.uid?.let {
-                                    var collection = EMPTY_STRING
-                                    when (SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_NAN)) {
-                                        ROLE_USER -> collection = USER_COLLECTION
-                                        ROLE_SHOP -> collection = SHOP_COLLECTION
-                                        ROLE_ADMIN -> collection = ADMIN_COLLECTION
-                                    }
-                                    db.collection(collection)
+                                    db.collection(Utils.getCollectionRole())
                                         .document(it)
                                         .set(HashMap<String, Any>())
                                         .addOnSuccessListener {

@@ -43,7 +43,7 @@
             android:name=".ui.user.navigation.PickLocationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.user.shop.AddNewShopActivity"
+            android:name=".ui.shop.addshop.AddNewShopActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
