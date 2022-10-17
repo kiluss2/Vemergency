@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.user.login
+package com.kiluss.vemergency.ui.login
 
 import android.content.Intent
 import android.os.Bundle

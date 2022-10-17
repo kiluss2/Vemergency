@@ -8,7 +8,7 @@ import com.kiluss.vemergency.constant.ROLE_SHOP
 import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.databinding.ActivityPickRoleBinding
-import com.kiluss.vemergency.ui.user.login.LoginActivity
+import com.kiluss.vemergency.ui.login.LoginActivity
 import com.kiluss.vemergency.ui.user.main.MainActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 

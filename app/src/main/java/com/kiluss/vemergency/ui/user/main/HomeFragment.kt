@@ -15,7 +15,7 @@ import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentHomeBinding
-import com.kiluss.vemergency.ui.user.login.LoginActivity
+import com.kiluss.vemergency.ui.login.LoginActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 
 class HomeFragment : Fragment() {

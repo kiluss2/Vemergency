@@ -16,7 +16,7 @@ import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentShopSettingBinding
-import com.kiluss.vemergency.ui.user.login.LoginActivity
+import com.kiluss.vemergency.ui.login.LoginActivity
 
 class ShopSettingFragment : Fragment() {
 
