@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.storage.FirebaseStorage
 import com.kiluss.vemergency.constant.SHOP_COVER
+import com.kiluss.vemergency.constant.SHOP_NODE
 import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
@@ -61,7 +63,7 @@ class ShopAdapter(
             localFile.delete()
         }
         localFile.createNewFile()
-        FirebaseManager.getShopImageStorageReference()
+        FirebaseStorage.getInstance().reference.child(uid.toString() + "/" + SHOP_NODE + "/" + SHOP_COVER)
             .getFile(localFile)
             .addOnCompleteListener {
                 val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)

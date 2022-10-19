@@ -50,7 +50,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener {
     }
 
     private fun setUpRecyclerViewListView() {
-        shopPendingAdapter = ShopAdapter(mutableListOf(), requireActivity().applicationContext, this)
+        shopPendingAdapter = ShopAdapter(mutableListOf(), requireActivity(), this)
         with(binding.rvShopList) {
             adapter = shopPendingAdapter
             layoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
