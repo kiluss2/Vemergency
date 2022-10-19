@@ -1,12 +1,13 @@
 package com.kiluss.vemergency.data.model
 
 data class User(
-    var email: String? = null,
-    var fullName: String? = null,
-    var birthday: String? = null,
-    var address: String? = null,
-    var phone: String? = null,
-    var reviews: String? = null,
-    var shop: Shop? = null,
-    var isShopCreated: Boolean = false
+    internal var uid: String? = null,
+    internal var email: String? = null,
+    internal var fullName: String? = null,
+    internal var birthday: String? = null,
+    internal var address: String? = null,
+    internal var phone: String? = null,
+    internal var reviews: String? = null,
+    internal var shop: Shop? = null,
+    internal var isShopCreated: Boolean = false
 )

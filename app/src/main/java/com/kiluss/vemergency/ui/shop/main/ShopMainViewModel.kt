@@ -11,6 +11,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_COVER
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
@@ -53,12 +54,49 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                 .addOnSuccessListener { documentSnapshot ->
                     val result = documentSnapshot.toObject<Shop>()
                     if (result != null) {
+                        if (result.isPendingApprove == true) {
+                            getShopPendingInfo()
+                        } else {
+                            if (result.isCreated == true) {
+                                _shop.value = result
+                                myShop = result
+                                getShopCover()
+                            } else {
+                                _shop.value = null
+                                myShop = null
+                            }
+                            _progressBarStatus.value = false
+                        }
+                    } else {
+                        _shop.value = null
+                        myShop = null
+                        _progressBarStatus.value = false
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    hideProgressbar()
+                    Log.e("Main Activity", exception.message.toString())
+                    _shop.value = null
+                    myShop = null
+                }
+        }
+    }
+
+    private fun getShopPendingInfo() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let {
+            db.collection(SHOP_PENDING_COLLECTION)
+                .document(it)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val result = documentSnapshot.toObject<Shop>()
+                    if (result != null) {
                         _shop.value = result
                         myShop = result
                     } else {
                         _shop.value = null
                         myShop = null
                     }
+                    _progressBarStatus.value = false
                 }
                 .addOnFailureListener { exception ->
                     hideProgressbar()

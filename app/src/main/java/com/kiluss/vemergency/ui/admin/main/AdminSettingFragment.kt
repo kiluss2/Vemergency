@@ -20,6 +20,7 @@ import com.kiluss.vemergency.databinding.FragmentAdminSettingBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
 
 class AdminSettingFragment : Fragment() {
+
     private var _binding: FragmentAdminSettingBinding? = null
     private val binding get() = _binding!!
 
@@ -134,6 +135,8 @@ class AdminSettingFragment : Fragment() {
             Glide.with(this@AdminSettingFragment)
                 .load(R.drawable.ic_account_avatar)
                 .into(binding.profileCircleImageView)
+            startActivity(Intent(this@AdminSettingFragment.requireActivity(), LoginActivity::class.java))
+            requireActivity().finish()
         }
 
         builder.setNegativeButton(android.R.string.cancel) { _, _ ->

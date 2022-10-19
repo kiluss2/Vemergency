@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -105,29 +106,31 @@ class MyShopFragment : Fragment() {
                     binding.tvCreateToManage.text = "Something went wrong"
                 } else {
                     if (shop != null) {
+                        if (shop.isPendingApprove == true) {
+                            binding.tvPendingApprove.visibility = View.VISIBLE
+                            binding.tvPendingApprove.setShadowLayer(2f,2f,2f, Color.WHITE);
+                        }
                         binding.clMain.visibility = View.VISIBLE
                         binding.tvCreateToManage.visibility = View.GONE
+                        shop.name?.let {
+                            binding.tvShopName.text = it
+                        }
+                        shop.phone?.let {
+                            binding.tvPhoneNumber.text = it
+                        }
+                        shop.address?.let {
+                            binding.tvAddress.text = it
+                        }
+                        shop.openTime?.let {
+                            binding.tvOpenTime.text = it
+                        }
+                        shop.website?.let {
+                            binding.tvWebsite.text = it
+                        }
                     } else {
                         binding.clMain.visibility = View.GONE
                         binding.tvCreateToManage.visibility = View.VISIBLE
                         binding.tvCreateToManage.text = getString(R.string.create_to_manage_your_shop)
-                    }
-                }
-                shop?.let {
-                    it.name?.let {
-                        binding.tvShopName.text = it
-                    }
-                    it.phone?.let {
-                        binding.tvPhoneNumber.text = it
-                    }
-                    it.address?.let {
-                        binding.tvAddress.text = it
-                    }
-                    it.openTime?.let {
-                        binding.tvOpenTime.text = it
-                    }
-                    it.website?.let {
-                        binding.tvWebsite.text = it
                     }
                 }
                 binding.btnGetLocation.setOnClickListener {

@@ -2,6 +2,7 @@ package com.kiluss.vemergency.ui.shop.addshop
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -19,18 +20,17 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.firebase.geofire.GeoFireUtils
+import com.firebase.geofire.GeoLocation
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
-import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
-import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
-import com.kiluss.vemergency.ui.user.main.MainActivity
+import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
@@ -41,8 +41,8 @@ class AddNewShopActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddNewShopBinding
     private var imageUri: Uri? = null
     private var shop = Shop()
-    private var user = User()
     private var location: LatLng? = null
+    private val db = Firebase.firestore
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -80,7 +80,6 @@ class AddNewShopActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddNewShopBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupView()
     }
 
@@ -110,39 +109,43 @@ class AddNewShopActivity : AppCompatActivity() {
                     shop.phone = edtPhone.text.toString()
                     shop.openTime = edtOpenTime.text.toString()
                     shop.website = edtWebsite.text.toString()
-                    shop.location = location
-                    FirebaseManager.getAuth()?.uid?.let {
-                        FirebaseManager.getUserInfoDatabaseReference()
-                            .addValueEventListener(object : ValueEventListener {
-                                override fun onDataChange(snapshot: DataSnapshot) {
-                                    snapshot.getValue(User::class.java)?.let { userDb ->
-                                        user = userDb
-                                        user.shop = shop
-                                        user.isShopCreated = true
-                                        FirebaseManager.getAuth()?.uid?.let {
-                                            FirebaseManager.getUserInfoDatabaseReference().setValue(user)
-                                                .addOnCompleteListener {
-                                                    if (it.isSuccessful) {
-                                                        // upload shop image
-                                                        uploadShopImage()
-                                                    } else {
-                                                        hideProgressbar()
-                                                        Utils.showShortToast(
-                                                            this@AddNewShopActivity, "Fail to update profile"
-                                                        )
-                                                        it.exception?.printStackTrace()
-                                                    }
-                                                }
-                                        }
-                                    }
-                                }
-
-                                override fun onCancelled(error: DatabaseError) {
-                                    hideProgressbar()
-                                    Utils.showShortToast(this@AddNewShopActivity, "Fail to get user information")
-                                    Log.e("Main Activity", error.message)
-                                }
-                            })
+                    shop.location = HashMap<String, Any>().apply {
+                        location?.latitude?.let { lat ->
+                            location?.longitude?.let { lng ->
+                                GeoLocation(lat, lng)
+                            }
+                        }?.let { geoLocation ->
+                            GeoFireUtils.getGeoHashForLocation(geoLocation)
+                        }?.let { geoHash ->
+                            put(GEO_HASH, geoHash)
+                        }
+                        location?.latitude?.let { it1 -> put(LATITUDE, it1) }
+                        location?.longitude?.let { it1 -> put(LONGITUDE, it1) }
+                    }
+                    shop.isPendingApprove = true
+                    shop.isCreated = false
+                    FirebaseManager.getAuth()?.uid?.let { uid ->
+                        shop.uid = uid
+                        db.collection(SHOP_PENDING_COLLECTION)
+                            .document(uid)
+                            .set(shop)
+                            .addOnSuccessListener {
+                                // upload shop image
+                                uploadShopImage()
+                                db.collection(SHOP_COLLECTION)
+                                    .document(uid)
+                                    .set(Shop().apply {
+                                        isPendingApprove = true
+                                        isCreated = false
+                                    })
+                            }
+                            .addOnFailureListener { e ->
+                                hideProgressbar()
+                                Utils.showShortToast(
+                                    this@AddNewShopActivity, getString(R.string.fail_to_create_shop)
+                                )
+                                Log.e(ContentValues.TAG, "Error adding document", e)
+                            }
                     }
                 }
             }
@@ -195,7 +198,7 @@ class AddNewShopActivity : AppCompatActivity() {
         if (imageUri != null) {
             FirebaseManager.getShopImageStorageReference().putFile(imageUri!!).addOnCompleteListener {
                 hideProgressbar()
-                startActivity(Intent(this, MainActivity::class.java).apply {
+                startActivity(Intent(this, ShopMainActivity::class.java).apply {
                     putExtra(EXTRA_CREATED_SHOP, "created")
                 })
                 finish()

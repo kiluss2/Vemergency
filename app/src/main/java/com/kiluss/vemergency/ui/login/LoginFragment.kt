@@ -20,7 +20,6 @@ import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.admin.main.AdminMainActivity
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
-import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
 import com.kiluss.vemergency.ui.user.userprofile.UserProfileActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
@@ -123,19 +122,16 @@ class LoginFragment : Fragment() {
                         requireActivity().startActivity(
                             Intent(requireActivity(), UserProfileActivity::class.java)
                         )
-                        requireActivity().finish()
                     }
                     EXTRA_EDIT_USER_PROFILE -> {
                         requireActivity().startActivity(
                             Intent(requireActivity(), EditUserProfileActivity::class.java)
                         )
-                        requireActivity().finish()
                     }
                     EXTRA_CHANGE_PASSWORD -> {
                         requireActivity().startActivity(
                             Intent(requireActivity(), ChangePasswordActivity::class.java)
                         )
-                        requireActivity().finish()
                     }
                 }
             }
@@ -146,6 +142,7 @@ class LoginFragment : Fragment() {
                 startActivity(Intent(this@LoginFragment.activity, AdminMainActivity::class.java))
             }
         }
+        requireActivity().finish()
     }
 
     override fun onDestroyView() {

@@ -11,6 +11,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.ADMIN_COLLECTION
 import com.kiluss.vemergency.constant.AVATAR
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
@@ -38,6 +39,10 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
         MutableLiveData<User>()
     }
     internal val userInfo: LiveData<User> = _userInfo
+    private val _shopPending: MutableLiveData<MutableList<Shop>> by lazy {
+        MutableLiveData<MutableList<Shop>>()
+    }
+    internal val shopPending: LiveData<MutableList<Shop>> = _shopPending
 
     internal fun getUserInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
@@ -59,6 +64,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
             user = User()
             _userInfo.value = null
         }
+        // get avatar
         FirebaseManager.getCurrentUser()?.let {
             File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
             val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$AVATAR.jpg")
@@ -76,12 +82,33 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
         }
     }
 
+    internal fun getShopPendingInfo() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let {
+            db.collection(SHOP_PENDING_COLLECTION)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val list = mutableListOf<Shop>()
+                        for (documentSnapshot in task.result) {
+                            list.add(documentSnapshot.toObject())
+                        }
+                        _shopPending.value = list
+                    } else {
+                        Log.d("Error getting documents: ", task.exception.toString())
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    hideProgressbar()
+                    Log.e("Main Activity", exception.message.toString())
+                }
+        }
+    }
+
     internal fun getUserData() = user
 
     internal fun signOut() {
         FirebaseManager.getAuth()?.signOut() //End user session
         FirebaseManager.logout()
-        getUserInfo()
     }
 
     private fun hideProgressbar() {

@@ -14,4 +14,9 @@
     <string name="this_account_is_not_belong_to_this_role">This account is not belong to this role</string>
     <string name="create_to_manage_your_shop">Create to manage your shop</string>
     <string name="press_one_more_time_to_exit">Press one more time to exit</string>
+    <string name="fail_to_create_shop">Fail to create shop</string>
+    <string name="waiting_for_approve">Waiting for approve</string>
+    <string name="pending_request">Pending request</string>
+    <string name="list_shop_actived">List shop actived</string>
+    <string name="no_item">No item</string>
 </resources>

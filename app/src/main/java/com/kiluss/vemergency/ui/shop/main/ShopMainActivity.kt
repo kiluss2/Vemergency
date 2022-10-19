@@ -1,21 +1,16 @@
 package com.kiluss.vemergency.ui.shop.main
 
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
-import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
-import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
-import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityShopMainBinding
-import com.kiluss.vemergency.ui.login.LoginActivity
 
 class ShopMainActivity : AppCompatActivity() {
 
@@ -29,7 +24,6 @@ class ShopMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityShopMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         //Initialize the bottom navigation view
         //create bottom navigation view object
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
@@ -48,7 +42,6 @@ class ShopMainActivity : AppCompatActivity() {
     }
 
     private fun setUpOnClickView() {
-
     }
 
     override fun onBackPressed() {
@@ -60,13 +53,6 @@ class ShopMainActivity : AppCompatActivity() {
             Handler().postDelayed({
                 backPressPreviousState = false
             }, DELAY_BACK_TO_EXIT_TIME)
-        }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        if (intent?.getStringExtra(EXTRA_CREATED_SHOP) != null) {
-            // binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
         }
     }
 }

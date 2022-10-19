@@ -27,10 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
-import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 
@@ -87,7 +84,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun showAllShopLocation(shops: MutableList<Shop>) {
         shops.forEach { shop ->
             shop.location?.let {
-                val location = LatLng(shop.location?.latitude!!, shop.location?.longitude!!)
+                val location = LatLng(myShop.location?.getValue(LATITUDE)!! as Double, myShop.location?.getValue(LONGITUDE)!! as Double)
                 val markerTitle = shop.name.toString()
 
                 val markerOptions =
@@ -116,7 +113,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             location = LatLng(16.0, 108.2)
         } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
             myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
-            location = LatLng(myShop.location?.latitude!!, myShop.location?.longitude!!)
+            location = LatLng(myShop.location?.getValue(LATITUDE)!! as Double, myShop.location?.getValue(LONGITUDE)!! as Double)
             markerTitle = myShop.name.toString()
             zoom = 15f
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)

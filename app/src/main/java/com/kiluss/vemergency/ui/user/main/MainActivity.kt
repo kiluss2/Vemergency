@@ -61,13 +61,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        if (intent?.getStringExtra(EXTRA_CREATED_SHOP) != null) {
-            // binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         viewModel.getUserInfo()
