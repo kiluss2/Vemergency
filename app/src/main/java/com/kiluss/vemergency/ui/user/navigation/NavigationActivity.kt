@@ -15,11 +15,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -27,7 +24,12 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
+import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 
@@ -36,35 +38,14 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityNavigationBinding
-    private var fusedLocationProvider: FusedLocationProviderClient? = null
     private lateinit var myShop: Shop
     private val viewModel: NavigationViewModel by viewModels()
-    private val locationRequest: LocationRequest = LocationRequest.create().apply {
-        interval = 30
-        fastestInterval = 10
-        priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-        maxWaitTime = 60
-    }
-    private var locationCallback: LocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            val locationList = locationResult.locations
-            if (locationList.isNotEmpty()) {
-                //The last location in the list is the newest
-                val location = locationList.last()
-                Toast.makeText(
-                    this@NavigationActivity, "Got Location: " + location.toString(), Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
     private var currentLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
 
         checkLocationPermission()
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -84,7 +65,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun showAllShopLocation(shops: MutableList<Shop>) {
         shops.forEach { shop ->
             shop.location?.let {
-                val location = LatLng(myShop.location?.getValue(LATITUDE)!! as Double, myShop.location?.getValue(LONGITUDE)!! as Double)
+                val location = LatLng(
+                    myShop.location?.getValue(LATITUDE)!! as Double,
+                    myShop.location?.getValue(LONGITUDE)!! as Double
+                )
                 val markerTitle = shop.name.toString()
 
                 val markerOptions =
@@ -113,7 +97,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             location = LatLng(16.0, 108.2)
         } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
             myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
-            location = LatLng(myShop.location?.getValue(LATITUDE)!! as Double, myShop.location?.getValue(LONGITUDE)!! as Double)
+            location = LatLng(
+                myShop.location?.getValue(LATITUDE)!! as Double,
+                myShop.location?.getValue(LONGITUDE)!! as Double
+            )
             markerTitle = myShop.name.toString()
             zoom = 15f
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
@@ -136,43 +123,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-//            fusedLocationProvider?.requestLocationUpdates(
-//                locationRequest,
-//                locationCallback,
-//                Looper.getMainLooper()
-//            )
-            fusedLocationProvider?.getLastLocation()?.addOnSuccessListener(this) { location ->
-                // Got last known location. In some rare situations this can be null.
-                if (location != null) {
-                    //                        mylatitude = location.latitude
-                    //                        mylongitude = location.longitude
-                    //                        Log.d("chk", "onSuccess: $mylongitude")
-                    // Logic to handle location object
-//                        Toast.makeText(
-//                            this@NavigationActivity,
-//                            "Got Location: $location",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-                }
-            }
-        }
-    }
-
     override fun onPause() {
         super.onPause()
-        if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationProvider?.removeLocationUpdates(locationCallback)
-        }
     }
 
     private fun checkLocationPermission() {
@@ -201,7 +153,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 requestLocationPermission()
             }
         } else {
-            checkBackgroundLocation()
+            //checkBackgroundLocation()
         }
     }
 
@@ -250,11 +202,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                             this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-//                        fusedLocationProvider?.requestLocationUpdates(
-//                            locationRequest,
-//                            locationCallback,
-//                            Looper.getMainLooper()
-//                        )
+                        mMap.isMyLocationEnabled = true
                         // Now check background location
                         checkBackgroundLocation()
                     }
@@ -287,11 +235,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                             this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-//                        fusedLocationProvider?.requestLocationUpdates(
-//                            locationRequest,
-//                            locationCallback,
-//                            Looper.getMainLooper()
-//                        )
                         Toast.makeText(
                             this, "Granted Background Location Permission", Toast.LENGTH_LONG
                         ).show()

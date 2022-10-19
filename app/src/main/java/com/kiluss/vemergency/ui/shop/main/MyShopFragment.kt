@@ -110,6 +110,7 @@ class MyShopFragment : Fragment() {
                             binding.tvPendingApprove.visibility = View.VISIBLE
                             binding.tvPendingApprove.setShadowLayer(2f,2f,2f, Color.WHITE);
                         }
+                        binding.clCreateShop.visibility = View.GONE
                         binding.clMain.visibility = View.VISIBLE
                         binding.tvCreateToManage.visibility = View.GONE
                         shop.name?.let {
@@ -129,6 +130,7 @@ class MyShopFragment : Fragment() {
                         }
                     } else {
                         binding.clMain.visibility = View.GONE
+                        binding.clCreateShop.visibility = View.VISIBLE
                         binding.tvCreateToManage.visibility = View.VISIBLE
                         binding.tvCreateToManage.text = getString(R.string.create_to_manage_your_shop)
                     }

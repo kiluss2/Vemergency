@@ -2,6 +2,7 @@ package com.kiluss.vemergency.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
@@ -23,6 +24,9 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         FirebaseManager.init()
+        if (FirebaseManager.getCurrentUser() == null) {
+            binding.lnSplash.visibility = View.GONE
+        }
         viewPager = binding.vpLogin
         loginPagerAdapter = LoginPagerAdapter(this)
         viewPager.adapter = loginPagerAdapter

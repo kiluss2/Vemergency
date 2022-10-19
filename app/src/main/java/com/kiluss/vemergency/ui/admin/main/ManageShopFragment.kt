@@ -42,6 +42,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener {
             shopPending.observe(viewLifecycleOwner) {
                 if (it.isNotEmpty()) {
                     shopPendingAdapter?.updateData(it)
+                    binding.rvPendingRequest.visibility = View.VISIBLE
                 } else {
                     binding.rvPendingRequest.visibility = View.GONE
                 }
@@ -51,7 +52,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener {
 
     private fun setUpRecyclerViewListView() {
         shopPendingAdapter = ShopAdapter(mutableListOf(), requireActivity(), this)
-        with(binding.rvShopList) {
+        with(binding.rvPendingRequest) {
             adapter = shopPendingAdapter
             layoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
             setHasFixedSize(true)
