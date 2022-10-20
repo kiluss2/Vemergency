@@ -1,8 +1,6 @@
 package com.kiluss.bookrate.network.api
 
 import android.content.Context
-import com.kiluss.bookrate.utils.Constants.Companion.API_URL
-import com.kiluss.bookrate.utils.Constants.Companion.BEARER
 import com.kiluss.vemergency.constant.API_URL
 import com.kiluss.vemergency.utils.SingletonHolder
 import okhttp3.OkHttpClient
