@@ -24,25 +24,33 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
+import com.kiluss.vemergency.network.api.ImageService
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
+import okhttp3.RequestBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.File
 
 class AddNewShopActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddNewShopBinding
-    private var imageUri: Uri? = null
+    private var imageBase64: String? = null
     private var shop = Shop()
     private var location: LatLng? = null
     private val db = Firebase.firestore
+    private lateinit var imageApi: ImageService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -55,7 +63,7 @@ class AddNewShopActivity : AppCompatActivity() {
             val file = File(imagePath)
             val imageBitmap = getFileImageBitmap(file)
             binding.ivCoverPicked.setImageBitmap(imageBitmap)
-            imageUri = intent?.data
+            imageBase64 = Utils.encodeImageToBase64String(imageBitmap)
         }
     }
     private val pickLocationFromGalleryForResult =
@@ -81,6 +89,7 @@ class AddNewShopActivity : AppCompatActivity() {
         binding = ActivityAddNewShopBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
     }
 
     private fun setupView() {
@@ -195,22 +204,78 @@ class AddNewShopActivity : AppCompatActivity() {
     }
 
     private fun uploadShopImage() {
-        if (imageUri != null) {
-            FirebaseManager.getShopImageStorageReference().putFile(imageUri!!).addOnCompleteListener {
-                hideProgressbar()
-                startActivity(Intent(this, ShopMainActivity::class.java).apply {
-                    putExtra(EXTRA_CREATED_SHOP, "created")
+        if (imageBase64 != null) {
+            imageApi.postRequestBook(createRequestBodyForImage())
+                .enqueue(object : Callback<String?> {
+                    override fun onResponse(
+                        call: Call<String?>,
+                        response: Response<String?>
+                    ) {
+                        when {
+                            response.code() == 400 -> {
+                                Toast.makeText(
+                                    this@AddNewShopActivity,
+                                    "Bad request",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            response.code() == 404 -> {
+                                Toast.makeText(
+                                    this@AddNewShopActivity,
+                                    "Url is not exist",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            response.code() == 500 -> {
+                                Toast.makeText(
+                                    this@AddNewShopActivity,
+                                    "Internal error",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            response.isSuccessful -> {
+                                response.body()?.let {
+                                    Log.e("request", response.body().toString())
+                                    hideProgressbar()
+                                    startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
+                                        putExtra(EXTRA_CREATED_SHOP, "created")
+                                    })
+                                    finish()
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<String?>, t: Throwable) {
+                        Toast.makeText(
+                            this@AddNewShopActivity,
+                            t.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        hideProgressbar()
+                        Utils.showShortToast(this@AddNewShopActivity, "Fail to upload avatar")
+                        t.printStackTrace()
+                    }
                 })
-                finish()
-            }.addOnFailureListener {
-                hideProgressbar()
-                Utils.showShortToast(this@AddNewShopActivity, "Fail to upload avatar")
-                it.printStackTrace()
-            }
         } else {
             hideProgressbar()
             Utils.showShortToast(this@AddNewShopActivity, "Edit successful")
             finish()
         }
+    }
+
+    private fun createRequestBodyForImage() = run {
+        val json = JSONObject()
+        json.put("key", API_KEY)
+        if (imageBase64 == null) {
+            json.put("picture", JSONObject.NULL)
+        } else {
+            json.put("picture", imageBase64)
+        }
+        Log.e("object", json.toString())
+        RequestBody.create(
+            okhttp3.MediaType.parse("application/json; charset=utf-8"),
+            json.toString()
+        )
     }
 }

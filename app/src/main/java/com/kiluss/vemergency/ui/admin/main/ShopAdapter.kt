@@ -69,7 +69,7 @@ class ShopAdapter(
                 val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
                 bitmap?.let {
                     ivShopImage.setImageBitmap(it)
-                    notifyItemChanged(adapterPosition)
+                    // notifyItemChanged(adapterPosition)
                 }
             }.addOnFailureListener {
                 it.printStackTrace()
