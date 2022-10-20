@@ -205,7 +205,7 @@ class AddNewShopActivity : AppCompatActivity() {
 
     private fun uploadShopImage() {
         if (imageBase64 != null) {
-            imageApi.postRequestBook(createRequestBodyForImage())
+            imageApi.upload(createRequestBodyForImage())
                 .enqueue(object : Callback<String?> {
                     override fun onResponse(
                         call: Call<String?>,
