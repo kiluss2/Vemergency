@@ -5,8 +5,6 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -24,9 +22,18 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.JsonObject
 import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.API_KEY
+import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
+import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.GEO_HASH
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
@@ -36,7 +43,7 @@ import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
-import okhttp3.RequestBody
+import okhttp3.MultipartBody
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,6 +52,7 @@ import java.io.File
 
 class AddNewShopActivity : AppCompatActivity() {
 
+    private var imageUrl: String? = null
     private lateinit var binding: ActivityAddNewShopBinding
     private var imageBase64: String? = null
     private var shop = Shop()
@@ -61,7 +69,7 @@ class AddNewShopActivity : AppCompatActivity() {
             val imagePath = intent?.data?.let { URIPathHelper().getPath(this, it) } ?: ""
             // handle image from gallery
             val file = File(imagePath)
-            val imageBitmap = getFileImageBitmap(file)
+            val imageBitmap = Utils.getResizedBitmap(file, MAX_WIDTH_IMAGE)
             binding.ivCoverPicked.setImageBitmap(imageBitmap)
             imageBase64 = Utils.encodeImageToBase64String(imageBitmap)
         }
@@ -112,50 +120,7 @@ class AddNewShopActivity : AppCompatActivity() {
                     Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
                 }
                 if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
-                    showProgressbar()
-                    shop.name = edtName.text.toString()
-                    shop.address = edtAddress.text.toString()
-                    shop.phone = edtPhone.text.toString()
-                    shop.openTime = edtOpenTime.text.toString()
-                    shop.website = edtWebsite.text.toString()
-                    shop.location = HashMap<String, Any>().apply {
-                        location?.latitude?.let { lat ->
-                            location?.longitude?.let { lng ->
-                                GeoLocation(lat, lng)
-                            }
-                        }?.let { geoLocation ->
-                            GeoFireUtils.getGeoHashForLocation(geoLocation)
-                        }?.let { geoHash ->
-                            put(GEO_HASH, geoHash)
-                        }
-                        location?.latitude?.let { it1 -> put(LATITUDE, it1) }
-                        location?.longitude?.let { it1 -> put(LONGITUDE, it1) }
-                    }
-                    shop.isPendingApprove = true
-                    shop.isCreated = false
-                    FirebaseManager.getAuth()?.uid?.let { uid ->
-                        shop.uid = uid
-                        db.collection(SHOP_PENDING_COLLECTION)
-                            .document(uid)
-                            .set(shop)
-                            .addOnSuccessListener {
-                                // upload shop image
-                                uploadShopImage()
-                                db.collection(SHOP_COLLECTION)
-                                    .document(uid)
-                                    .set(Shop().apply {
-                                        isPendingApprove = true
-                                        isCreated = false
-                                    })
-                            }
-                            .addOnFailureListener { e ->
-                                hideProgressbar()
-                                Utils.showShortToast(
-                                    this@AddNewShopActivity, getString(R.string.fail_to_create_shop)
-                                )
-                                Log.e(ContentValues.TAG, "Error adding document", e)
-                            }
-                    }
+                    uploadShopImage()
                 }
             }
         }
@@ -191,10 +156,6 @@ class AddNewShopActivity : AppCompatActivity() {
         }
     }
 
-    private fun getFileImageBitmap(imgFile: File): Bitmap {
-        return BitmapFactory.decodeFile(imgFile.absolutePath)
-    }
-
     private fun showProgressbar() {
         binding.pbLoading.visibility = View.VISIBLE
     }
@@ -206,47 +167,27 @@ class AddNewShopActivity : AppCompatActivity() {
     private fun uploadShopImage() {
         if (imageBase64 != null) {
             imageApi.upload(createRequestBodyForImage())
-                .enqueue(object : Callback<String?> {
+                .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
-                        call: Call<String?>,
-                        response: Response<String?>
+                        call: Call<JsonObject?>,
+                        response: Response<JsonObject?>
                     ) {
                         when {
-                            response.code() == 400 -> {
-                                Toast.makeText(
-                                    this@AddNewShopActivity,
-                                    "Bad request",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            response.code() == 404 -> {
-                                Toast.makeText(
-                                    this@AddNewShopActivity,
-                                    "Url is not exist",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            response.code() == 500 -> {
-                                Toast.makeText(
-                                    this@AddNewShopActivity,
-                                    "Internal error",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
                             response.isSuccessful -> {
                                 response.body()?.let {
-                                    Log.e("request", response.body().toString())
-                                    hideProgressbar()
-                                    startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
-                                        putExtra(EXTRA_CREATED_SHOP, "created")
-                                    })
-                                    finish()
+                                    val json = JSONObject(response.body().toString()).getJSONObject("image")
+                                    val file = JSONObject(json.toString()).getJSONObject("file")
+                                    val resource = JSONObject(file.toString()).getJSONObject("resource")
+                                    val chain = JSONObject(resource.toString()).getJSONObject("chain")
+                                    imageUrl = JSONObject(chain.toString()).getString("image")
+                                    Log.e("imageLink", imageUrl.toString())
+                                    upLoadShopInfo()
                                 }
                             }
                         }
                     }
 
-                    override fun onFailure(call: Call<String?>, t: Throwable) {
+                    override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
                         Toast.makeText(
                             this@AddNewShopActivity,
                             t.message,
@@ -258,24 +199,68 @@ class AddNewShopActivity : AppCompatActivity() {
                     }
                 })
         } else {
-            hideProgressbar()
-            Utils.showShortToast(this@AddNewShopActivity, "Edit successful")
-            finish()
+            upLoadShopInfo()
         }
     }
 
     private fun createRequestBodyForImage() = run {
-        val json = JSONObject()
-        json.put("key", API_KEY)
-        if (imageBase64 == null) {
-            json.put("picture", JSONObject.NULL)
-        } else {
-            json.put("picture", imageBase64)
+        MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("key", API_KEY)
+            .addFormDataPart("source", imageBase64)
+            .build();
+    }
+
+    private fun upLoadShopInfo() {
+        showProgressbar()
+        with(binding) {
+            shop.name = edtName.text.toString()
+            shop.address = edtAddress.text.toString()
+            shop.phone = edtPhone.text.toString()
+            shop.openTime = edtOpenTime.text.toString()
+            shop.website = edtWebsite.text.toString()
+            shop.imageUrl = imageUrl
         }
-        Log.e("object", json.toString())
-        RequestBody.create(
-            okhttp3.MediaType.parse("application/json; charset=utf-8"),
-            json.toString()
-        )
+        shop.location = HashMap<String, Any>().apply {
+            location?.latitude?.let { lat ->
+                location?.longitude?.let { lng ->
+                    GeoLocation(lat, lng)
+                }
+            }?.let { geoLocation ->
+                GeoFireUtils.getGeoHashForLocation(geoLocation)
+            }?.let { geoHash ->
+                put(GEO_HASH, geoHash)
+            }
+            location?.latitude?.let { it1 -> put(LATITUDE, it1) }
+            location?.longitude?.let { it1 -> put(LONGITUDE, it1) }
+        }
+        shop.isPendingApprove = true
+        shop.isCreated = false
+        FirebaseManager.getAuth()?.uid?.let { uid ->
+            shop.uid = uid
+            db.collection(SHOP_PENDING_COLLECTION)
+                .document(uid)
+                .set(shop)
+                .addOnSuccessListener {
+                    db.collection(SHOP_COLLECTION)
+                        .document(uid)
+                        .set(Shop().apply {
+                            isPendingApprove = true
+                            isCreated = false
+                        })
+                    hideProgressbar()
+                    startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
+                        putExtra(EXTRA_CREATED_SHOP, "created")
+                    })
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    hideProgressbar()
+                    Utils.showShortToast(
+                        this@AddNewShopActivity, getString(R.string.fail_to_create_shop)
+                    )
+                    Log.e(ContentValues.TAG, "Error adding document", e)
+                }
+        }
     }
 }

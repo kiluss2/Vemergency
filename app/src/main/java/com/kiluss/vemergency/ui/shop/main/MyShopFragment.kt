@@ -108,7 +108,7 @@ class MyShopFragment : Fragment() {
                     if (shop != null) {
                         if (shop.isPendingApprove == true) {
                             binding.tvPendingApprove.visibility = View.VISIBLE
-                            binding.tvPendingApprove.setShadowLayer(2f,2f,2f, Color.WHITE);
+                            binding.tvPendingApprove.setShadowLayer(2f, 2f, 2f, Color.WHITE);
                         }
                         binding.clCreateShop.visibility = View.GONE
                         binding.clMain.visibility = View.VISIBLE
@@ -128,6 +128,11 @@ class MyShopFragment : Fragment() {
                         shop.website?.let {
                             binding.tvWebsite.text = it
                         }
+                        Glide.with(this@MyShopFragment)
+                            .load(shop.imageUrl)
+                            .placeholder(R.drawable.login_background)
+                            .centerCrop()
+                            .into(binding.ivCover)
                     } else {
                         binding.clMain.visibility = View.GONE
                         binding.clCreateShop.visibility = View.VISIBLE
@@ -139,15 +144,6 @@ class MyShopFragment : Fragment() {
                     startActivity(Intent(this@MyShopFragment.requireContext(), NavigationActivity::class.java).apply {
                         putExtra(EXTRA_SHOP_LOCATION, shop)
                     })
-                }
-            }
-            shopImage.observe(viewLifecycleOwner) {
-                activity?.let { it1 ->
-                    Glide.with(it1)
-                        .load(it)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .into(binding.ivCover)
                 }
             }
         }

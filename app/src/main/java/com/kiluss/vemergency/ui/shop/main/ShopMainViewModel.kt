@@ -2,7 +2,6 @@ package com.kiluss.vemergency.ui.shop.main
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,13 +9,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
-import com.kiluss.vemergency.constant.SHOP_COVER
 import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
-import com.kiluss.vemergency.constant.TEMP_IMAGE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.ui.base.BaseViewModel
-import java.io.File
 
 /**
  * Created by sonlv on 10/17/2022
@@ -37,10 +33,6 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<Shop>()
     }
     internal val shop: LiveData<Shop> = _shop
-    private val _shopImage: MutableLiveData<Bitmap> by lazy {
-        MutableLiveData<Bitmap>()
-    }
-    internal val shopImage: LiveData<Bitmap> = _shopImage
     private val _navigateToHome: MutableLiveData<Any> by lazy {
         MutableLiveData<Any>()
     }
@@ -60,7 +52,6 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                             if (result.isCreated == true) {
                                 _shop.value = result
                                 myShop = result
-                                getShopCover()
                             } else {
                                 _shop.value = null
                                 myShop = null
@@ -104,7 +95,6 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                     _shop.value = null
                     myShop = null
                 }
-            getShopCover()
         }
     }
 
@@ -117,25 +107,6 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     private fun hideProgressbar() {
         _progressBarStatus.value = false
-    }
-
-    private fun getShopCover() {
-        File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE").mkdirs()
-        val localFile = File("${getApplication<Application>().cacheDir}/$TEMP_IMAGE/$SHOP_COVER.jpg")
-        if (localFile.exists()) {
-            localFile.delete()
-        }
-        localFile.createNewFile()
-        FirebaseManager.getShopImageStorageReference()
-            .getFile(localFile)
-            .addOnCompleteListener {
-                val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
-                bitmap?.let {
-                    _shopImage.value = it
-                }
-            }.addOnFailureListener {
-                it.printStackTrace()
-            }
     }
 
     internal fun navigateToHome() {

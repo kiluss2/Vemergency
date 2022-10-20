@@ -2,10 +2,19 @@ package com.kiluss.vemergency.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Base64
 import android.widget.Toast
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.ADMIN_COLLECTION
+import com.kiluss.vemergency.constant.ROLE_ADMIN
+import com.kiluss.vemergency.constant.ROLE_NAN
+import com.kiluss.vemergency.constant.ROLE_SHOP
+import com.kiluss.vemergency.constant.ROLE_USER
+import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 object Utils {
 
@@ -40,5 +49,24 @@ object Utils {
         base64Image = base64Image.replace(" ", "")
         base64Image = base64Image.lines().joinToString("")
         return base64Image
+    }
+
+    internal fun getResizedBitmap(imgFile: File, maxWidth: Int): Bitmap {
+        val image = getFileImageBitmap(imgFile)
+        var width = image!!.width
+        var height = image.height
+        val bitmapRatio = width.toFloat() / height.toFloat()
+        if (bitmapRatio > 0) {
+            width = maxWidth
+            height = (width / bitmapRatio).toInt()
+        } else {
+            height = maxWidth
+            width = (height * bitmapRatio).toInt()
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true)
+    }
+
+    internal fun getFileImageBitmap(imgFile: File): Bitmap {
+        return BitmapFactory.decodeFile(imgFile.absolutePath)
     }
 }

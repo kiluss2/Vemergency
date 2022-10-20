@@ -12,6 +12,7 @@ import kotlinx.parcelize.RawValue
     internal var phone: String? = null,
     internal var openTime: String? = null,
     internal var website: String? = null,
+    internal var imageUrl: String? = null,
     internal var pricePerKilometer: Double? = null,
     internal var avgStar: Float? = null,
     internal var location: @RawValue HashMap<String, Any>? = null,
