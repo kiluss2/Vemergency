@@ -19,7 +19,7 @@ class ShopGridAdapter(
 
     interface OnClickListener {
 
-        fun onOpen(shop: Shop)
+        fun onOpenShopDetail(shop: Shop)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,7 +38,7 @@ class ShopGridAdapter(
 
         fun bind(shop: Shop) {
             itemView.setOnClickListener {
-//                listener.onOpen(shops[adapterPosition])
+                listener.onOpenShopDetail(shops[adapterPosition])
             }
             with(shop) {
                 with(binding) {

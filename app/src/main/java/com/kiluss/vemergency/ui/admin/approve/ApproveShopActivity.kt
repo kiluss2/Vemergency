@@ -39,6 +39,10 @@ class ApproveShopActivity : AppCompatActivity() {
         setUpView()
         observeViewModel()
         setShopInfo()
+        intent.getStringExtra(EXTRA_SHOP_DETAIL)?.let {
+            binding.ivApprove.visibility = View.GONE
+            binding.ivDecline.visibility = View.GONE
+        }
     }
 
     private fun setShopInfo() {

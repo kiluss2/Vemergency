@@ -101,6 +101,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
                             list.add(item)
                         }
                     }
+                    currentList.clear()
                     currentList.addAll(list)
                     _allShop.value = currentList
                     // Get the last visible document

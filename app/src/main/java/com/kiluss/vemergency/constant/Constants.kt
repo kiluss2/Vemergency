@@ -58,5 +58,6 @@ const val GEO_HASH = "geohash"
 
 // admin
 const val EXTRA_SHOP_PENDING = "extra_shop_pending"
+const val EXTRA_SHOP_DETAIL = "extra_shop_detail"
 const val ITEM_PER_PAGE = 10L
 

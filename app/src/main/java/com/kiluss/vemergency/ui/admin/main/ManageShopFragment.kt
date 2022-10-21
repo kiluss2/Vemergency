@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.FragmentManageShopBinding
@@ -106,6 +107,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
         _binding = null
     }
 
+    // for approve shop
     override fun onOpen(shop: Shop) {
         startActivity(Intent(requireActivity(), ApproveShopActivity::class.java).apply {
             putExtra(EXTRA_SHOP_PENDING, shop)
@@ -116,5 +118,12 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
         super.onResume()
         viewModel.getShopPendingInfo()
         viewModel.getActiveShop()
+    }
+
+    override fun onOpenShopDetail(shop: Shop) {
+        startActivity(Intent(requireActivity(), ApproveShopActivity::class.java).apply {
+            putExtra(EXTRA_SHOP_PENDING, shop)
+            putExtra(EXTRA_SHOP_DETAIL, "")
+        })
     }
 }

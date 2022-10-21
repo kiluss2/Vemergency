@@ -106,6 +106,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
             mMap.addMarker(markerOptions)
             markerOptions.anchor(0f, 0.5f)
+        } else {
+            location = LatLng(16.0, 108.2)
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 2f))
