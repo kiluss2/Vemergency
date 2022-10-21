@@ -7,6 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.ITEM_PER_PAGE
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.USER_NODE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
@@ -19,6 +25,7 @@ import com.kiluss.vemergency.ui.base.BaseViewModel
 class NavigationViewModel(application: Application) : BaseViewModel(application) {
 
     private var shopLists = mutableListOf<Shop>()
+    private val db = Firebase.firestore
     private val _allShopLocation: MutableLiveData<MutableList<Shop>> by lazy {
         MutableLiveData<MutableList<Shop>>()
     }
@@ -41,5 +48,25 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                 Log.e("Navigation Activity", error.message)
             }
         })
+        db.collection(SHOP_COLLECTION)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val list = mutableListOf<Shop>()
+                    for (documentSnapshot in task.result) {
+                        val item: Shop = documentSnapshot.toObject()
+                        if (item.created == true) {
+                            list.add(item)
+                        }
+                    }
+                    shopLists.addAll(list)
+                    _allShopLocation.value = shopLists
+                } else {
+                    Log.d("Error getting documents: ", task.exception.toString())
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Navigation Activity", exception.message.toString())
+            }
     }
 }
