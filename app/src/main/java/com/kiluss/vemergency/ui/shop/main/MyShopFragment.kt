@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -63,7 +62,7 @@ class MyShopFragment : Fragment() {
                 } else {
                     val alertDialog = AlertDialog.Builder(context)
                     alertDialog.apply {
-                        //setIcon(R.drawable.ic_hello)
+                        setIcon(R.drawable.ic_call)
                         setTitle("Make a phone call?")
                         setMessage("Do you want to make a phone call?")
                         setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
@@ -106,7 +105,7 @@ class MyShopFragment : Fragment() {
                     binding.tvCreateToManage.text = "Something went wrong"
                 } else {
                     if (shop != null) {
-                        if (shop.isPendingApprove == true) {
+                        if (shop.pendingApprove == true) {
                             binding.tvPendingApprove.visibility = View.VISIBLE
                             binding.tvPendingApprove.setShadowLayer(2f, 2f, 2f, Color.WHITE);
                         }

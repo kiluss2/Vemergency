@@ -46,10 +46,10 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                 .addOnSuccessListener { documentSnapshot ->
                     val result = documentSnapshot.toObject<Shop>()
                     if (result != null) {
-                        if (result.isPendingApprove == true) {
+                        if (result.pendingApprove == true) {
                             getShopPendingInfo()
                         } else {
-                            if (result.isCreated == true) {
+                            if (result.created == true) {
                                 _shop.value = result
                                 myShop = result
                             } else {

@@ -104,7 +104,7 @@ class UserProfileActivity : AppCompatActivity() {
                     val alertDialog = AlertDialog.Builder(this@UserProfileActivity)
 
                     alertDialog.apply {
-                        //setIcon(R.drawable.ic_hello)
+                        setIcon(R.drawable.ic_call)
                         setTitle("Make a phone call?")
                         setMessage("Do you want to make a phone call?")
                         setPositiveButton("Yes") { _: DialogInterface?, _: Int ->

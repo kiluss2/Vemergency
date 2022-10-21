@@ -112,7 +112,8 @@ class EditUserProfileActivity : AppCompatActivity() {
             user.fullName = edtFullName.text.toString()
             user.address = edtAddress.text.toString()
             user.phone = edtPhoneNumber.text.toString()
-            user.imageUrl = imageUrl
+            imageUrl?.let { user.imageUrl = it }
+            user.lastModifiedTime = android.icu.util.Calendar.getInstance().timeInMillis.toDouble()
             FirebaseManager.getAuth()?.uid?.let {
                 db.collection(USER_COLLECTION)
                     .document(it)
@@ -125,7 +126,7 @@ class EditUserProfileActivity : AppCompatActivity() {
                     .addOnFailureListener { e ->
                         hideProgressbar()
                         Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
-                        Log.e(ContentValues.TAG, "Error adding document", e)
+                        Log.e(ContentValues.TAG, "Error adding document")
                     }
             }
         }

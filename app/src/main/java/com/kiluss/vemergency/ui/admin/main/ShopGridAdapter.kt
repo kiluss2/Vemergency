@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Shop
-import com.kiluss.vemergency.databinding.ItemListShopViewBinding
+import com.kiluss.vemergency.databinding.ItemListShopGridViewBinding
 import com.kiluss.vemergency.utils.ShopDiff
 
-class ShopAdapter(
+class ShopGridAdapter(
     private var shops: MutableList<Shop>,
     private val context: Context,
     private val listener: OnClickListener
-) : RecyclerView.Adapter<ShopAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ShopGridAdapter.ViewHolder>() {
 
     interface OnClickListener {
 
@@ -24,7 +24,7 @@ class ShopAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemListShopViewBinding.inflate(inflater, parent, false))
+        return ViewHolder(ItemListShopGridViewBinding.inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -33,12 +33,12 @@ class ShopAdapter(
 
     override fun getItemCount() = shops.size
 
-    inner class ViewHolder(private val binding: ItemListShopViewBinding) :
+    inner class ViewHolder(private val binding: ItemListShopGridViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(shop: Shop) {
             itemView.setOnClickListener {
-                listener.onOpen(shops[adapterPosition])
+//                listener.onOpen(shops[adapterPosition])
             }
             with(shop) {
                 with(binding) {

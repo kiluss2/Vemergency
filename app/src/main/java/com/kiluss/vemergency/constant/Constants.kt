@@ -56,3 +56,7 @@ const val LATITUDE = "latitude"
 const val LONGITUDE = "longitude"
 const val GEO_HASH = "geohash"
 
+// admin
+const val EXTRA_SHOP_PENDING = "extra_shop_pending"
+const val ITEM_PER_PAGE = 10L
+

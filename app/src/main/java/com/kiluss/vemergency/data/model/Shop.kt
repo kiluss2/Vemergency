@@ -16,6 +16,7 @@ import kotlinx.parcelize.RawValue
     internal var pricePerKilometer: Double? = null,
     internal var avgStar: Float? = null,
     internal var location: @RawValue HashMap<String, Any>? = null,
-    internal var isPendingApprove: Boolean? = null,
-    internal var isCreated: Boolean? = null
+    internal var pendingApprove: Boolean? = null,
+    internal var created: Boolean? = null,
+    internal var lastModifiedTime: Double? = null
 ) : Parcelable

@@ -26,6 +26,13 @@
         android:theme="@style/Theme.Vemergency"
         tools:targetApi="31">
         <activity
+            android:name=".ui.admin.approve.ApproveShopActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".ui.admin.main.AdminMainActivity"
             android:exported="false">
             <meta-data
@@ -73,7 +80,7 @@
         <activity
             android:name="com.kiluss.vemergency.ui.login.LoginActivity"
             android:exported="false"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTop" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

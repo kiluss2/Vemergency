@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -218,8 +219,9 @@ class AddNewShopActivity : AppCompatActivity() {
             location?.latitude?.let { it1 -> put(LATITUDE, it1) }
             location?.longitude?.let { it1 -> put(LONGITUDE, it1) }
         }
-        shop.isPendingApprove = true
-        shop.isCreated = false
+        shop.pendingApprove = true
+        shop.created = false
+        shop.lastModifiedTime = Calendar.getInstance().timeInMillis.toDouble()
         FirebaseManager.getAuth()?.uid?.let { uid ->
             shop.uid = uid
             db.collection(SHOP_PENDING_COLLECTION)
@@ -229,8 +231,8 @@ class AddNewShopActivity : AppCompatActivity() {
                     db.collection(SHOP_COLLECTION)
                         .document(uid)
                         .set(Shop().apply {
-                            isPendingApprove = true
-                            isCreated = false
+                            pendingApprove = true
+                            created = false
                         })
                     hideProgressbar()
                     startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {

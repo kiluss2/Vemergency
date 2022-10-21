@@ -22,15 +22,16 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/tvPendingRequest"
-        app:layout_constraintTop_toBottomOf="@id/tvPendingRequest"
-        android:orientation="horizontal">
+        app:layout_constraintTop_toBottomOf="@id/tvPendingRequest">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPendingRequest"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
         <TextView
             android:id="@+id/tvNoPending"
             android:layout_width="match_parent"
@@ -56,10 +57,32 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvShopList"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_bias="0"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tvShopList"
+        app:layout_constraintTop_toBottomOf="@id/tvShopList" />
+
+    <ProgressBar
+        android:id="@+id/pbLoadMore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rvShopList"
+        app:layout_constraintEnd_toEndOf="@+id/rvShopList"
+        app:layout_constraintStart_toStartOf="@+id/rvShopList" />
+
+    <TextView
+        android:id="@+id/tvNoShopFound"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        android:text="@string/no_item"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/tvShopList"
         app:layout_constraintTop_toBottomOf="@id/tvShopList" />
