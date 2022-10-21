@@ -25,15 +25,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.API_KEY
-import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
-import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
-import com.kiluss.vemergency.constant.GEO_HASH
-import com.kiluss.vemergency.constant.LATITUDE
-import com.kiluss.vemergency.constant.LONGITUDE
-import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
-import com.kiluss.vemergency.constant.SHOP_COLLECTION
-import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
@@ -43,7 +35,6 @@ import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
-import okhttp3.MultipartBody
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -120,6 +111,7 @@ class AddNewShopActivity : AppCompatActivity() {
                     Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
                 }
                 if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
+                    showProgressbar()
                     uploadShopImage()
                 }
             }
@@ -165,8 +157,9 @@ class AddNewShopActivity : AppCompatActivity() {
     }
 
     private fun uploadShopImage() {
-        if (imageBase64 != null) {
-            imageApi.upload(createRequestBodyForImage())
+        val iBase64 = imageBase64
+        if (iBase64 != null) {
+            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
                 .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
                         call: Call<JsonObject?>,
@@ -203,16 +196,7 @@ class AddNewShopActivity : AppCompatActivity() {
         }
     }
 
-    private fun createRequestBodyForImage() = run {
-        MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("key", API_KEY)
-            .addFormDataPart("source", imageBase64)
-            .build();
-    }
-
     private fun upLoadShopInfo() {
-        showProgressbar()
         with(binding) {
             shop.name = edtName.text.toString()
             shop.address = edtAddress.text.toString()

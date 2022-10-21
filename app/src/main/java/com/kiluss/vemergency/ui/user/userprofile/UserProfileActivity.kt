@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -13,18 +12,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.AVATAR
-import com.kiluss.vemergency.constant.TEMP_IMAGE
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityUserProfileBinding
 import com.kiluss.vemergency.utils.Utils
-import java.io.File
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -62,11 +58,15 @@ class UserProfileActivity : AppCompatActivity() {
                                 user.phone?.let {
                                     binding.tvPhoneNumber.text = it
                                 }
+                                Glide.with(this@UserProfileActivity)
+                                    .load(user.imageUrl)
+                                    .placeholder(R.drawable.ic_account_avatar)
+                                    .centerCrop()
+                                    .into(binding.ivProfile)
                             }
                         }
                     }
                     hideProgressbar()
-                    getAvatar()
                 }
                 .addOnFailureListener { exception ->
                     hideProgressbar()
@@ -78,29 +78,6 @@ class UserProfileActivity : AppCompatActivity() {
             hideProgressbar()
             Utils.showShortToast(this@UserProfileActivity, "Fail to get auth")
         }
-    }
-
-    private fun getAvatar() {
-        File("$cacheDir/$TEMP_IMAGE").mkdirs()
-        val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
-        if (localFile.exists()) {
-            localFile.delete()
-        }
-        localFile.createNewFile()
-        FirebaseManager.getUserAvatarStorageReference()
-            .getFile(localFile)
-            .addOnCompleteListener {
-                val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
-                bitmap?.let {
-                    Glide.with(applicationContext)
-                        .load(bitmap)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .into(binding.ivProfile)
-                }
-            }.addOnFailureListener {
-                it.printStackTrace()
-            }
     }
 
     private fun setupView() {

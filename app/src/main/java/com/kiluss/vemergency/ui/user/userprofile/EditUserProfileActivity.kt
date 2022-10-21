@@ -6,8 +6,6 @@ import android.app.DatePickerDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -22,28 +20,35 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.google.gson.JsonObject
+import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.AVATAR
-import com.kiluss.vemergency.constant.TEMP_IMAGE
+import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
 import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
+import com.kiluss.vemergency.network.api.ImageService
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.File
-import java.util.Calendar
+import java.util.*
 
 class EditUserProfileActivity : AppCompatActivity() {
 
-    private var imageUri: Uri? = null
+    private var imageUrl: String? = null
+    private var imageBase64: String? = null
     private var user = User()
     private val db = Firebase.firestore
     private lateinit var binding: ActivityEditUserProfileBinding
+    private lateinit var imageApi: ImageService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -55,9 +60,9 @@ class EditUserProfileActivity : AppCompatActivity() {
                 intent?.data?.let { URIPathHelper().getPath(this, it) } ?: ""
             // handle image from gallery
             val file = File(imagePath)
-            val imageBitmap = getFileImageBitmap(file)
+            val imageBitmap = Utils.getResizedBitmap(file, MAX_WIDTH_IMAGE)
             binding.ivProfile.setImageBitmap(imageBitmap)
-            imageUri = intent?.data
+            imageBase64 = Utils.encodeImageToBase64String(imageBitmap)
         }
     }
     private val requestReadPermission =
@@ -74,9 +79,9 @@ class EditUserProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEditUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupView()
         getUserData()
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
     }
 
     private fun setupView() {
@@ -94,23 +99,7 @@ class EditUserProfileActivity : AppCompatActivity() {
 
             btnSave.setOnClickListener {
                 showProgressbar()
-                user.fullName = edtFullName.text.toString()
-                user.address = edtAddress.text.toString()
-                user.phone = edtPhoneNumber.text.toString()
-                FirebaseManager.getAuth()?.uid?.let {
-                    db.collection(USER_COLLECTION)
-                        .document(it)
-                        .set(user)
-                        .addOnSuccessListener {
-                            // upload avatar picture
-                            uploadAvatar()
-                        }
-                        .addOnFailureListener { e ->
-                            hideProgressbar()
-                            Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
-                            Log.e(ContentValues.TAG, "Error adding document", e)
-                        }
-                }
+                uploadImage()
             }
             ivProfile.setOnClickListener {
                 pickImage()
@@ -118,21 +107,67 @@ class EditUserProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun uploadAvatar() {
-        if (imageUri != null) {
-            FirebaseManager.getUserAvatarStorageReference().putFile(imageUri!!).addOnCompleteListener {
-                hideProgressbar()
-                Utils.showShortToast(this@EditUserProfileActivity, "Edit successful")
-                finish()
-            }.addOnFailureListener {
-                hideProgressbar()
-                Utils.showShortToast(this@EditUserProfileActivity, "Fail to upload avatar")
-                it.printStackTrace()
+    private fun upLoadUserInfo() {
+        with(binding) {
+            user.fullName = edtFullName.text.toString()
+            user.address = edtAddress.text.toString()
+            user.phone = edtPhoneNumber.text.toString()
+            user.imageUrl = imageUrl
+            FirebaseManager.getAuth()?.uid?.let {
+                db.collection(USER_COLLECTION)
+                    .document(it)
+                    .set(user)
+                    .addOnSuccessListener {
+                        hideProgressbar()
+                        Utils.showShortToast(this@EditUserProfileActivity, "Edit successful")
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        hideProgressbar()
+                        Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
+                        Log.e(ContentValues.TAG, "Error adding document", e)
+                    }
             }
+        }
+    }
+
+    private fun uploadImage() {
+        val iBase64 = imageBase64
+        if (iBase64 != null) {
+            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
+                .enqueue(object : Callback<JsonObject?> {
+                    override fun onResponse(
+                        call: Call<JsonObject?>,
+                        response: Response<JsonObject?>
+                    ) {
+                        when {
+                            response.isSuccessful -> {
+                                response.body()?.let {
+                                    val json = JSONObject(response.body().toString()).getJSONObject("image")
+                                    val file = JSONObject(json.toString()).getJSONObject("file")
+                                    val resource = JSONObject(file.toString()).getJSONObject("resource")
+                                    val chain = JSONObject(resource.toString()).getJSONObject("chain")
+                                    imageUrl = JSONObject(chain.toString()).getString("image")
+                                    Log.e("imageLink", imageUrl.toString())
+                                    upLoadUserInfo()
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
+                        Toast.makeText(
+                            this@EditUserProfileActivity,
+                            t.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        hideProgressbar()
+                        Utils.showShortToast(this@EditUserProfileActivity, "Fail to upload avatar")
+                        t.printStackTrace()
+                    }
+                })
         } else {
-            hideProgressbar()
-            Utils.showShortToast(this@EditUserProfileActivity, "Edit successful")
-            finish()
+            upLoadUserInfo()
         }
     }
 
@@ -180,10 +215,6 @@ class EditUserProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun getFileImageBitmap(imgFile: File): Bitmap {
-        return BitmapFactory.decodeFile(imgFile.absolutePath)
-    }
-
     private fun showProgressbar() {
         binding.pbLoading.visibility = View.VISIBLE
     }
@@ -193,10 +224,10 @@ class EditUserProfileActivity : AppCompatActivity() {
     }
 
     private fun getUserData() {
-        FirebaseManager.getAuth()?.uid?.let {
+        FirebaseManager.getAuth()?.uid?.let { uid ->
             binding.tvEmail.text = FirebaseManager.getAuth()?.currentUser?.email
             db.collection(USER_COLLECTION)
-                .document(it)
+                .document(uid)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
                     if (documentSnapshot.exists()) {
@@ -214,17 +245,10 @@ class EditUserProfileActivity : AppCompatActivity() {
                             user.phone?.let {
                                 binding.edtPhoneNumber.setText(it)
                             }
-                        }
-                    }
-                    hideProgressbar()
-                    val localFile = File("$cacheDir/$TEMP_IMAGE/$AVATAR.jpg")
-                    if (localFile.exists()) {
-                        val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
-                        bitmap?.let {
                             Glide.with(this@EditUserProfileActivity)
-                                .load(bitmap)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                .skipMemoryCache(true)
+                                .load(user.imageUrl)
+                                .placeholder(R.drawable.ic_account_avatar)
+                                .centerCrop()
                                 .into(binding.ivProfile)
                         }
                     }

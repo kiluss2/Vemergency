@@ -31,7 +31,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                 shopLists.clear()
                 for (data in snapshot.children) {
                     data.getValue(User::class.java)?.let {
-                        it.shop?.let { it1 -> shopLists.add(it1) }
+                        //it.shop?.let { it1 -> shopLists.add(it1) }
                     }
                 }
                 _allShopLocation.value = shopLists

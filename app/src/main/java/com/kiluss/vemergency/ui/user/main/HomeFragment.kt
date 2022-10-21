@@ -62,25 +62,18 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         with(viewModel) {
-            avatarBitmap.observe(viewLifecycleOwner) {
-                if (FirebaseManager.getCurrentUser() != null) {
-                    it?.let {
-                        Glide.with(this@HomeFragment)
-                            .load(it)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .dontAnimate()
-                            .into(binding.ivAccount)
-                    }
-                }
-            }
-            userInfo.observe(viewLifecycleOwner) {
+            userInfo.observe(viewLifecycleOwner) { user ->
                 with(binding) {
-                    if (it != null) {
-                        tvEmail.text = "Welcome ${it.fullName}"
+                    if (user.fullName != null) {
+                        tvEmail.text = "Welcome ${user.fullName}"
                     } else {
                         tvEmail.text = getString(R.string.app_name)
                     }
+                    Glide.with(this@HomeFragment)
+                        .load(user.imageUrl)
+                        .placeholder(R.drawable.ic_account_avatar)
+                        .centerCrop()
+                        .into(binding.ivAccount)
                 }
             }
         }

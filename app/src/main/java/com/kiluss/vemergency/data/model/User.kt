@@ -8,6 +8,5 @@ data class User(
     internal var address: String? = null,
     internal var phone: String? = null,
     internal var reviews: String? = null,
-    internal var shop: Shop? = null,
-    internal var isShopCreated: Boolean = false
+    internal var imageUrl: String? = null
 )

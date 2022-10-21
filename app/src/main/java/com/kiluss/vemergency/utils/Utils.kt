@@ -5,14 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.widget.Toast
-import com.kiluss.vemergency.constant.ADMIN_COLLECTION
-import com.kiluss.vemergency.constant.ROLE_ADMIN
-import com.kiluss.vemergency.constant.ROLE_NAN
-import com.kiluss.vemergency.constant.ROLE_SHOP
-import com.kiluss.vemergency.constant.ROLE_USER
-import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
-import com.kiluss.vemergency.constant.SHOP_COLLECTION
-import com.kiluss.vemergency.constant.USER_COLLECTION
+import com.kiluss.vemergency.constant.*
+import okhttp3.MultipartBody
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -68,5 +62,13 @@ object Utils {
 
     internal fun getFileImageBitmap(imgFile: File): Bitmap {
         return BitmapFactory.decodeFile(imgFile.absolutePath)
+    }
+
+    internal fun createRequestBodyForImage(imageBase64: String) = run {
+        MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("key", API_KEY)
+            .addFormDataPart("source", imageBase64)
+            .build();
     }
 }

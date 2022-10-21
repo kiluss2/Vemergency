@@ -84,19 +84,7 @@ class AdminSettingFragment : Fragment() {
 
     private fun observeViewModel() {
         with(viewModel) {
-            avatarBitmap.observe(viewLifecycleOwner) {
-                if (FirebaseManager.getCurrentUser() != null) {
-                    it?.let {
-                        Glide.with(this@AdminSettingFragment)
-                            .load(it)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .dontAnimate()
-                            .into(binding.profileCircleImageView)
-                    }
-                }
-            }
-            userInfo.observe(viewLifecycleOwner) {
+            userInfo.observe(viewLifecycleOwner) { user ->
                 with(binding) {
                     FirebaseManager.getAuth()?.currentUser?.email?.let {
                         usernameTextView.text = it
@@ -108,6 +96,11 @@ class AdminSettingFragment : Fragment() {
                     } else {
                         usernameTextView.text = getString(R.string.prompt_username)
                     }
+                    Glide.with(this@AdminSettingFragment)
+                        .load(user.imageUrl)
+                        .placeholder(R.drawable.ic_account_avatar)
+                        .centerCrop()
+                        .into(binding.profileCircleImageView)
                 }
             }
         }
