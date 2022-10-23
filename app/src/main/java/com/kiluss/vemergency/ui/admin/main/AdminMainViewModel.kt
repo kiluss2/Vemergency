@@ -1,25 +1,38 @@
 package com.kiluss.vemergency.ui.admin.main
 
 import android.app.Application
+import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.firebase.geofire.GeoFireUtils
+import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.ADMIN_COLLECTION
+import com.kiluss.vemergency.constant.GEO_HASH
 import com.kiluss.vemergency.constant.ITEM_PER_PAGE
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.SHOP_CLONE_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
+import com.kiluss.vemergency.extension.loadJSONFromAssets
 import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.utils.Utils
+import org.json.JSONArray
+import java.time.Instant
 
 class AdminMainViewModel(application: Application) : BaseViewModel(application) {
 
+    private lateinit var shopGoogleMaps: ArrayList<Shop>
     private var lastDocument: DocumentSnapshot? = null
     private var user = User()
     private val db = Firebase.firestore
@@ -163,4 +176,90 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
     private fun hideProgressbar() {
         _progressBarStatus.value = false
     }
+
+    internal fun bindJSONDataInFacilityList(context: Context) {
+        shopGoogleMaps = ArrayList()
+        val shopJsonArray = JSONArray(context.loadJSONFromAssets("result.json")) // Extension Function call here
+        for (i in 0 until shopJsonArray.length()) {
+            val shop = Shop()
+            val shopJSONObject = shopJsonArray.getJSONObject(i)
+            if (shopJSONObject.has("latitude") && shopJSONObject.has("longitude")) {
+                shop.location = HashMap<String, Any>().apply {
+                    put(
+                        GEO_HASH,
+                        GeoFireUtils.getGeoHashForLocation(
+                            GeoLocation(
+                                shopJSONObject.getDouble("latitude"),
+                                shopJSONObject.getDouble("longitude")
+                            )
+                        )
+                    )
+                    put(LATITUDE, shopJSONObject.getDouble("latitude"))
+                    put(LONGITUDE, shopJSONObject.getDouble("longitude"))
+                }
+                shop.name = shopJSONObject.getString("title")
+                shop.rating = if (shopJSONObject.getString("rating").isNotEmpty()) {
+                    shopJSONObject.getString("rating").toDouble()
+                } else {
+                    null
+                }
+                shop.reviewCount = if (shopJSONObject.getString("reviewCount").isNotEmpty()) {
+                    shopJSONObject.getLong("reviewCount")
+                } else {
+                    null
+                }
+                shop.address = shopJSONObject.getString("address")
+                shop.website = shopJSONObject.getString("website")
+                shop.phone = shopJSONObject.getString("phoneNumber")
+                if (shopJSONObject.has("monday")) {
+                    shop.openTime = shopJSONObject.getString("monday")
+                }
+                shop.imageUrl = shopJSONObject.getString("imgUrl")
+                shop.created = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    shop.lastModifiedTime = Instant.parse(shopJSONObject.getString("timestamp"))
+                        .toEpochMilli().toDouble()
+                }
+                println(shop)
+                shopGoogleMaps.add(shop)
+            }
+        }
+        println(shopGoogleMaps.size)
+        pushGoogleMapData(shopGoogleMaps)
+    }
+
+    private fun pushGoogleMapData(shops: ArrayList<Shop>) {
+        db.runBatch { batch ->
+            for (shop in shops) {
+                batch.set(db.collection(SHOP_CLONE_COLLECTION).document(), shop)
+            }
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Utils.showShortToast(getApplication(), "upload success")
+            } else {
+                Utils.showShortToast(getApplication(), "upload error")
+                Log.d("Error getting documents: ", task.exception.toString())
+            }
+        }.addOnFailureListener { exception ->
+            hideProgressbar()
+            Log.e("Main Activity", exception.message.toString())
+        }
+    }
+
+    internal fun getShopCloneSize() {
+        db.collection(SHOP_CLONE_COLLECTION)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    println("clone "+task.result.size())
+                } else {
+                    Log.d("Error getting documents: ", task.exception.toString())
+                }
+            }
+            .addOnFailureListener { exception ->
+                hideProgressbar()
+                Log.e("Main Activity", exception.message.toString())
+            }
+    }
 }
+

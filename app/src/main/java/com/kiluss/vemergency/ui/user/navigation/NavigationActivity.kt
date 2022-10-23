@@ -66,8 +66,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         shops.forEach { shop ->
             shop.location?.let {
                 val location = LatLng(
-                    myShop.location?.getValue(LATITUDE)!! as Double,
-                    myShop.location?.getValue(LONGITUDE)!! as Double
+                    it.getValue(LATITUDE) as Double,
+                    it.getValue(LONGITUDE) as Double
                 )
                 val markerTitle = shop.name.toString()
 

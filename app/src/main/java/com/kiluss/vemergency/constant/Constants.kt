@@ -44,6 +44,7 @@ const val USER_COLLECTION = "users"
 const val SHOP_COLLECTION = "shops"
 const val ADMIN_COLLECTION = "admins"
 const val SHOP_PENDING_COLLECTION = "shop_pendings"
+const val SHOP_CLONE_COLLECTION = "shop_clones"
 
 const val SHARE_PREF_ROLE = "share_pref_role"
 const val ROLE_ADMIN = "role_admin"
