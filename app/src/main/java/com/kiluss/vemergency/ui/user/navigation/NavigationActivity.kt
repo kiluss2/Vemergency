@@ -59,10 +59,29 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             allShopLocation.observe(this@NavigationActivity) {
                 showAllShopLocation(it)
             }
+            allCloneShopLocation.observe(this@NavigationActivity) {
+                showAllCloneShopLocation(it)
+            }
         }
     }
 
     private fun showAllShopLocation(shops: MutableList<Shop>) {
+        shops.forEach { shop ->
+            shop.location?.let {
+                val location = LatLng(
+                    myShop.location?.getValue(LATITUDE)!! as Double,
+                    myShop.location?.getValue(LONGITUDE)!! as Double
+                )
+                val markerTitle = shop.name.toString()
+
+                val markerOptions =
+                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
+                mMap.addMarker(markerOptions)
+            }
+        }
+    }
+
+    private fun showAllCloneShopLocation(shops: MutableList<Shop>) {
         shops.forEach { shop ->
             shop.location?.let {
                 val location = LatLng(

@@ -30,25 +30,35 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
         MutableLiveData<MutableList<Shop>>()
     }
     internal val allShopLocation: LiveData<MutableList<Shop>> = _allShopLocation
+    private val _allCloneShopLocation: MutableLiveData<MutableList<Shop>> by lazy {
+        MutableLiveData<MutableList<Shop>>()
+    }
+    internal val allCloneShopLocation: LiveData<MutableList<Shop>> = _allCloneShopLocation
 
     internal fun getAllShopLocation() {
-        // Most viewed posts
-        FirebaseManager.getDatabaseReference()?.child(USER_NODE)?.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                shopLists.clear()
-                for (data in snapshot.children) {
-                    data.getValue(User::class.java)?.let {
-                        //it.shop?.let { it1 -> shopLists.add(it1) }
-                    }
-                }
-                _allShopLocation.value = shopLists
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Navigation Activity", error.message)
-            }
-        })
         db.collection(SHOP_COLLECTION)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val list = mutableListOf<Shop>()
+                    for (documentSnapshot in task.result) {
+                        val item: Shop = documentSnapshot.toObject()
+                        if (item.created == true) {
+                            list.add(item)
+                        }
+                    }
+                    shopLists.addAll(list)
+                    _allShopLocation.value = shopLists
+                } else {
+                    Log.d("Error getting documents: ", task.exception.toString())
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Navigation Activity", exception.message.toString())
+            }
+    }
+    internal fun getAllCloneShopLocation() {
+        db.collection(CLON)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
