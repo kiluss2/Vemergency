@@ -124,19 +124,18 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
 //            }
         db.collection(SHOP_CLONE_COLLECTION)
             .orderBy(GEO_HASH)
-
+//            .startAt("w6ugma")
+//            .endAt("w6ugmz")
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val list = mutableListOf<Shop>()
                     for (documentSnapshot in task.result) {
                         val item: Shop = documentSnapshot.toObject()
-                        if (item.created == true) {
-                            list.add(item)
-                        }
+                        list.add(item)
                     }
-                    shopLists.addAll(list)
-                    _allShopLocation.value = shopLists
+                    shopCloneLists.addAll(list)
+                    _allCloneShopLocation.value = shopCloneLists
                 } else {
                     Log.d("Error getting documents: ", task.exception.toString())
                 }
