@@ -3,36 +3,34 @@ package com.kiluss.vemergency.ui.user.navigation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
-import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
-import com.kiluss.vemergency.constant.LATITUDE
-import com.kiluss.vemergency.constant.LONGITUDE
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
-
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -41,6 +39,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var myShop: Shop
     private val viewModel: NavigationViewModel by viewModels()
     private var currentLocation: Location? = null
+    private var fusedLocationClient: FusedLocationProviderClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,61 +51,42 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
         observeViewModel()
-    }
-
-    private fun observeViewModel() {
-        with(viewModel) {
-            allShopLocation.observe(this@NavigationActivity) {
-                showAllShopLocation(it)
-            }
-            allCloneShopLocation.observe(this@NavigationActivity) {
-                showAllCloneShopLocation(it)
-            }
-        }
-    }
-
-    private fun showAllShopLocation(shops: MutableList<Shop>) {
-        shops.forEach { shop ->
-            shop.location?.let {
-                val location = LatLng(
-                    it.getValue(LATITUDE) as Double,
-                    it.getValue(LONGITUDE) as Double
-                )
-                val markerTitle = shop.name.toString()
-
-                val markerOptions =
-                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
-                mMap.addMarker(markerOptions)
-            }
-        }
-    }
-
-    private fun showAllCloneShopLocation(shops: MutableList<Shop>) {
-        shops.forEach { shop ->
-            shop.location?.let {
-                val location = LatLng(
-                    myShop.location?.getValue(LATITUDE)!! as Double,
-                    myShop.location?.getValue(LONGITUDE)!! as Double
-                )
-                val markerTitle = shop.name.toString()
-
-                val markerOptions =
-                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
-                mMap.addMarker(markerOptions)
-            }
-        }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        viewModel.getAllShopLocation()
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this, com.kiluss.vemergency.R.raw.map_style_json
+                )
+            )
+            if (!success) {
+                Log.e("TAG", "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("TAG", "Can't find style. Error: ", e)
+        }
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             mMap.isMyLocationEnabled = true
+            fusedLocationClient!!.lastLocation
+                .addOnSuccessListener(this) { location ->
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        // Logic to handle location object
+                        viewModel.getNearByShop(location)
+                    }
+                }
         }
+        viewModel.getAllShopLocation()
+        //viewModel.getAllCloneShopLocation()
         // Add a marker and move the camera
         var location = LatLng(0.0, 0.0)
         var markerTitle = "Marker in Da Nang"
@@ -142,6 +122,50 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                Toast.LENGTH_SHORT
 //            ).show()
 //        }
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            allShopLocation.observe(this@NavigationActivity) {
+                showAllShopLocation(it)
+            }
+            allCloneShopLocation.observe(this@NavigationActivity) {
+                showAllCloneShopLocation(it)
+            }
+        }
+    }
+
+    private fun showAllShopLocation(shops: MutableList<Shop>) {
+        shops.forEach { shop ->
+            shop.location?.let {
+                val location = LatLng(
+                    it.getValue(LATITUDE) as Double,
+                    it.getValue(LONGITUDE) as Double
+                )
+                val markerTitle = shop.name.toString()
+                val markerOptions =
+                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
+                mMap.addMarker(markerOptions)
+            }
+        }
+    }
+
+    private fun showAllCloneShopLocation(shops: MutableList<Shop>) {
+        shops.forEach { shop ->
+            shop.location?.let {
+                val location = LatLng(
+                    it.getValue(LATITUDE) as Double,
+                    it.getValue(LONGITUDE) as Double
+                )
+                val markerTitle = shop.name.toString()
+                val markerOptions =
+                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true).icon(
+                        BitmapDescriptorFactory
+                            .defaultMarker(25F)
+                    )
+                mMap.addMarker(markerOptions)
+            }
+        }
     }
 
     override fun onPause() {

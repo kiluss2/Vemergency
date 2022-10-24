@@ -183,19 +183,19 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
         for (i in 0 until shopJsonArray.length()) {
             val shop = Shop()
             val shopJSONObject = shopJsonArray.getJSONObject(i)
-            if (shopJSONObject.has("latitude") && shopJSONObject.has("longitude")) {
+            if (shopJSONObject.has(LATITUDE) && shopJSONObject.has(LATITUDE)) {
                 shop.location = HashMap<String, Any>().apply {
                     put(
                         GEO_HASH,
                         GeoFireUtils.getGeoHashForLocation(
                             GeoLocation(
-                                shopJSONObject.getDouble("latitude"),
-                                shopJSONObject.getDouble("longitude")
+                                shopJSONObject.getDouble(LATITUDE),
+                                shopJSONObject.getDouble(LATITUDE)
                             )
                         )
                     )
-                    put(LATITUDE, shopJSONObject.getDouble("latitude"))
-                    put(LONGITUDE, shopJSONObject.getDouble("longitude"))
+                    put(LATITUDE, shopJSONObject.getDouble(LATITUDE))
+                    put(LONGITUDE, shopJSONObject.getDouble(LATITUDE))
                 }
                 shop.name = shopJSONObject.getString("title")
                 shop.rating = if (shopJSONObject.getString("rating").isNotEmpty()) {
