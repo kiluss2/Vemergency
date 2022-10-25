@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
@@ -34,7 +36,8 @@ import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var mMap: GoogleMap
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private var map: GoogleMap? = null
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var myShop: Shop
     private val viewModel: NavigationViewModel by viewModels()
@@ -48,20 +51,22 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         checkLocationPermission()
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
         observeViewModel()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
+        map = googleMap
+        initBottomSheet()
+        adjustMapPaddingToBottomSheet()
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
             val success = googleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                    this, com.kiluss.vemergency.R.raw.map_style_json
+                    this, R.raw.map_style_json
                 )
             )
             if (!success) {
@@ -75,17 +80,18 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            mMap.isMyLocationEnabled = true
-            fusedLocationClient!!.lastLocation
-                .addOnSuccessListener(this) { location ->
+            val mMap = map
+            mMap?.isMyLocationEnabled = true
+            fusedLocationClient?.lastLocation
+                ?.addOnSuccessListener(this) { location ->
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         // Logic to handle location object
-                        viewModel.getNearByShop(location)
+                        viewModel.getNearByShop(location, 1)
                     }
                 }
         }
-        viewModel.getAllShopLocation()
+        //viewModel.getAllShopLocation()
         //viewModel.getAllCloneShopLocation()
         // Add a marker and move the camera
         var location = LatLng(0.0, 0.0)
@@ -103,17 +109,19 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             markerTitle = myShop.name.toString()
             zoom = 15f
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
-            mMap.addMarker(markerOptions)
+            map?.addMarker(markerOptions)
             markerOptions.anchor(0f, 0.5f)
         } else {
             location = LatLng(16.0, 108.2)
         }
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 2f))
         val handler = Handler()
-        handler.postDelayed({
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
-        }, 500)
+        map?.moveCamera(CameraUpdateFactory.newLatLng(location))
+//        handler.postDelayed({
+//            map?.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
+//        }, 500)
+        binding.btnTest.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
 //        mMap.setOnMapClickListener { position ->
 //            Toast.makeText(
 //                this,
@@ -122,6 +130,47 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //                Toast.LENGTH_SHORT
 //            ).show()
 //        }
+    }
+
+    private fun initBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet))
+        bottomSheetBehavior.isFitToContents = false
+        bottomSheetBehavior.halfExpandedRatio = 0.6f
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                when (bottomSheetBehavior.state) {
+                    BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
+                        adjustMapPaddingToBottomSheet()
+                    }
+                    else -> {
+                        // No adjustment needed on other slide states.
+                    }
+                }
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                // Needed only in case you manually change the bottomsheet's state in code somewhere.
+                when (newState) {
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        // Nothing to do here
+                    }
+                    else -> {
+                        adjustMapPaddingToBottomSheet()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun adjustMapPaddingToBottomSheet() {
+        Log.e("TAG", (binding.rootLayout.height - binding.bottomSheet.top).toString())
+        map?.setPadding(
+            0,
+            0,
+            0,
+            binding.rootLayout.height - binding.bottomSheet.top
+        )
     }
 
     private fun observeViewModel() {
@@ -145,7 +194,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 val markerTitle = shop.name.toString()
                 val markerOptions =
                     MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
-                mMap.addMarker(markerOptions)
+                map?.addMarker(markerOptions)
             }
         }
     }
@@ -163,7 +212,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         BitmapDescriptorFactory
                             .defaultMarker(25F)
                     )
-                mMap.addMarker(markerOptions)
+                map?.addMarker(markerOptions)
             }
         }
     }
@@ -247,7 +296,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                             this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-                        mMap.isMyLocationEnabled = true
+                        map?.isMyLocationEnabled = true
                         // Now check background location
                         checkBackgroundLocation()
                     }
