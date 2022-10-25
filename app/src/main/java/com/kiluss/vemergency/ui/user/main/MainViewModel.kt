@@ -1,14 +1,19 @@
 package com.kiluss.vemergency.ui.user.main
 
 import android.app.Application
-import android.graphics.Bitmap
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.firebase.geofire.GeoFireUtils
+import com.firebase.geofire.GeoLocation
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.USER_COLLECTION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
@@ -30,6 +35,10 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<User>()
     }
     internal val userInfo: LiveData<User> = _userInfo
+    private val _nearByShopCount: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
+    internal val nearByShopCount: LiveData<Int> = _nearByShopCount
 
     internal fun getUserInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
@@ -63,5 +72,43 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     private fun hideProgressbar() {
         _progressBarStatus.value = false
+    }
+
+    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+        val center = GeoLocation(location.latitude, location.longitude)
+        // query 5km around the location
+        val radiusInM = (radiusKmRange * 1000).toDouble()
+        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
+        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+        for (b in bounds) {
+            val q = db.collection(SHOP_CLONE_COLLECTION)
+                .orderBy("location\$app_debug.$GEO_HASH")
+                .startAt(b.startHash)
+                .endAt(b.endHash)
+            tasks.add(q.get())
+        }
+        // Collect all the query results together into a single list
+        Tasks.whenAllComplete(tasks)
+            .addOnCompleteListener {
+                var matchingDocs = 0
+                for (task in tasks) {
+                    val snap: QuerySnapshot = task.result
+                    for (doc in snap.documents) {
+                        val shop = doc.toObject<Shop>()
+                        val lat = shop?.location?.getValue(LATITUDE)
+                        val lng = shop?.location?.getValue(LONGITUDE)
+                        // We have to filter out a few false positives due to GeoHash
+                        // accuracy, but most will match
+                        if (lat != null && lng != null) {
+                            val docLocation = GeoLocation(lat as Double, lng as Double)
+                            val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
+                            if (distanceInM <= radiusInM) {
+                                matchingDocs++
+                            }
+                        }
+                    }
+                }
+                _nearByShopCount.value = matchingDocs
+            }
     }
 }

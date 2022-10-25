@@ -19,4 +19,5 @@
     <string name="pending_request">Pending request</string>
     <string name="list_shop_actived">List shop actived</string>
     <string name="no_item">No item</string>
+    <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} place near by}</string>
 </resources>
