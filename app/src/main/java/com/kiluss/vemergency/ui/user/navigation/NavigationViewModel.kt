@@ -123,7 +123,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
 //                _allCloneShopLocation.value = shopCloneLists
 //            }
         db.collection(SHOP_CLONE_COLLECTION)
-            .orderBy(GEO_HASH)
+            //.orderBy("lastModifiedTime")
 //            .startAt("w6ugma")
 //            .endAt("w6ugmz")
             .get()
