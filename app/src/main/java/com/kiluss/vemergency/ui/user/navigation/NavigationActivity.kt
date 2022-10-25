@@ -60,7 +60,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         initBottomSheet()
-        adjustMapPaddingToBottomSheet()
+        //adjustMapPaddingToBottomSheet()
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
@@ -116,9 +116,9 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         val handler = Handler()
         map?.moveCamera(CameraUpdateFactory.newLatLng(location))
-//        handler.postDelayed({
-//            map?.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
-//        }, 500)
+        handler.postDelayed({
+            map?.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
+        }, 500)
         binding.btnTest.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
