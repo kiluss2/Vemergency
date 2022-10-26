@@ -33,8 +33,8 @@ class AdminMainActivity : AppCompatActivity() {
         observeViewModel()
         FirebaseManager.init()
         setUpOnClickView()
-        viewModel.getShopCloneSize()
-        viewModel.bindJSONDataInFacilityList(this)
+        // viewModel.getShopCloneSize()
+        // viewModel.bindJSONDataInShopList(this)
     }
 
     private fun observeViewModel() {

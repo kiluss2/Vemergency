@@ -14,6 +14,8 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -116,6 +118,30 @@ class AddNewShopActivity : AppCompatActivity() {
                     uploadShopImage()
                 }
             }
+            setupSpinnerCategory()
+        }
+    }
+
+    private fun setupSpinnerCategory() {
+        val items = arrayOf(MOTORCYCLE_REPAIR_SERVICE, CAR_REPAIR_SERVICE, CAR_MOTORCYCLE_REPAIR_SERVICE)
+        val adapter = ArrayAdapter(
+            this@AddNewShopActivity,
+            android.R.layout.simple_spinner_dropdown_item,
+            items
+        )
+        binding.spinnerCategory.adapter = adapter
+        shop.service = MOTORCYCLE_REPAIR_SERVICE
+        binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                arg0: AdapterView<*>?,
+                arg1: View?,
+                arg2: Int,
+                arg3: Long
+            ) {
+                shop.service = binding.spinnerCategory.selectedItem.toString()
+            }
+
+            override fun onNothingSelected(arg0: AdapterView<*>?) {}
         }
     }
 

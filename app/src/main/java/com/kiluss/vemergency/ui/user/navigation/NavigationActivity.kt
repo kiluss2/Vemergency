@@ -8,7 +8,6 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -18,6 +17,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,8 +36,13 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
+import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.text.MessageFormat
 
-class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
+class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private var map: GoogleMap? = null
@@ -43,6 +51,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private val viewModel: NavigationViewModel by viewModels()
     private var currentLocation: Location? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var shopCloneAdapter: ShopPreviewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +62,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
+        setUpRecyclerViewListView()
         observeViewModel()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -82,14 +92,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         ) {
             val mMap = map
             mMap?.isMyLocationEnabled = true
-            fusedLocationClient?.lastLocation
-                ?.addOnSuccessListener(this) { location ->
-                    // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
-                        // Logic to handle location object
-                        viewModel.getNearByShop(location, 1)
-                    }
-                }
         }
         //viewModel.getAllShopLocation()
         //viewModel.getAllCloneShopLocation()
@@ -100,6 +102,20 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (intent.getStringExtra(EXTRA_LAUNCH_MAP) != null) {
             location = LatLng(16.0, 108.2)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedLocationClient?.lastLocation
+                    ?.addOnSuccessListener(this) { location ->
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            viewModel.getNearByShop(location, 1)
+                        }
+                    }
+            }
         } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
             myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
             location = LatLng(
@@ -111,16 +127,32 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
             map?.addMarker(markerOptions)
             markerOptions.anchor(0f, 0.5f)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         } else {
             location = LatLng(16.0, 108.2)
         }
-        val handler = Handler()
-        map?.moveCamera(CameraUpdateFactory.newLatLng(location))
-        handler.postDelayed({
-            map?.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1000, null)
-        }, 500)
-        binding.btnTest.setOnClickListener {
+        map?.animateCamera(CameraUpdateFactory.newLatLng(location))
+        map?.setOnMapClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+        }
+        map?.setOnMarkerClickListener { marker ->
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+            lifecycleScope.launch(Dispatchers.IO) {
+                delay(50)
+                launch(Dispatchers.Main) {
+                    //Your task...
+                    if (marker.isInfoWindowShown) {
+                        marker.hideInfoWindow()
+                    } else {
+                        marker.showInfoWindow()
+                    }
+                    map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
+                    setBottomSheetShowingState(BOTTOM_SHEET_SHOP_PREVIEW_STATE)
+                    setShopPreviewInfo(viewModel.getShopCloneInfo(marker.tag.toString().toInt()))
+                }
+            }
+            true
         }
 //        mMap.setOnMapClickListener { position ->
 //            Toast.makeText(
@@ -132,8 +164,73 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 //        }
     }
 
+    private fun setShopPreviewInfo(shop: Shop) {
+        val service = shop.service
+        if (service != null && service.isNotEmpty()) {
+            binding.tvBottomSheetTitle.text = service
+        }
+        binding.tvBottomSheetTitle.text = "service"
+        with(binding.shopPreview) {
+            tvShopTitle.text = shop.name
+            tvShopAddress.text = shop.address
+            val shopRating = shop.rating
+            if (shopRating != null) {
+                rbRating.visibility = View.VISIBLE
+                tvNoRating.visibility = View.GONE
+                rbRating.rating = shopRating.toFloat()
+            } else {
+                rbRating.visibility = View.GONE
+                tvNoRating.visibility = View.VISIBLE
+            }
+            shop.imageUrl?.let {
+                Glide.with(this@NavigationActivity)
+                    .load(shop.imageUrl)
+                    .into(ivShopImage)
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            allShop.observe(this@NavigationActivity) {
+                showAllShopLocation(it)
+                setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+            }
+            cloneShop.observe(this@NavigationActivity) {
+                showAllCloneShopLocation(it)
+                shopCloneAdapter?.updateData(it)
+                binding.tvBottomSheetTitle.text = MessageFormat.format(
+                    resources.getText(R.string.text_found_near_by).toString(),
+                    it.size
+                )
+                setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+            }
+        }
+    }
+
+    private fun setBottomSheetShowingState(state: String) {
+        with(binding) {
+            when (state) {
+                BOTTOM_SHEET_LIST_SHOP_STATE -> {
+                    shopPreview.clMain.visibility = View.GONE
+                    rvShopList.visibility = View.VISIBLE
+                }
+                BOTTOM_SHEET_SHOP_PREVIEW_STATE -> {
+                    shopPreview.clMain.visibility = View.VISIBLE
+                    rvShopList.visibility = View.GONE
+                }
+                else -> {
+                    tvBottomSheetTitle.text = resources.getText(R.string.app_name)
+                    shopPreview.clMain.visibility = View.GONE
+                    rvShopList.visibility = View.GONE
+                }
+            }
+        }
+    }
+
     private fun initBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet))
+        setBottomSheetShowingState("")
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.clBottomSheet))
         bottomSheetBehavior.isFitToContents = false
         bottomSheetBehavior.halfExpandedRatio = 0.6f
         bottomSheetBehavior.addBottomSheetCallback(object :
@@ -161,26 +258,37 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         })
+        binding.tvBottomSheetTitle.setOnClickListener {
+            when (bottomSheetBehavior.state) {
+                BottomSheetBehavior.STATE_COLLAPSED -> {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                }
+                BottomSheetBehavior.STATE_EXPANDED -> {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                }
+                else -> {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                }
+            }
+        }
     }
 
     private fun adjustMapPaddingToBottomSheet() {
-        Log.e("TAG", (binding.rootLayout.height - binding.bottomSheet.top).toString())
         map?.setPadding(
             0,
             0,
             0,
-            binding.rootLayout.height - binding.bottomSheet.top
+            binding.rootLayout.height - binding.clBottomSheet.top
         )
     }
 
-    private fun observeViewModel() {
-        with(viewModel) {
-            allShopLocation.observe(this@NavigationActivity) {
-                showAllShopLocation(it)
-            }
-            allCloneShopLocation.observe(this@NavigationActivity) {
-                showAllCloneShopLocation(it)
-            }
+    private fun setUpRecyclerViewListView() {
+        shopCloneAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
+        with(binding.rvShopList) {
+            adapter = shopCloneAdapter
+            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.VERTICAL, false)
+            setHasFixedSize(true)
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
@@ -200,7 +308,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun showAllCloneShopLocation(shops: MutableList<Shop>) {
-        shops.forEach { shop ->
+        for (index in shops.indices) {
+            val shop = shops[index]
             shop.location?.let {
                 val location = LatLng(
                     it.getValue(LATITUDE) as Double,
@@ -212,7 +321,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         BitmapDescriptorFactory
                             .defaultMarker(25F)
                     )
-                map?.addMarker(markerOptions)
+                val marker = map?.addMarker(markerOptions)
+                marker?.tag = index
             }
         }
     }
@@ -296,13 +406,13 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                             this, Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-                        map?.isMyLocationEnabled = true
+                        val mMap = map
+                        mMap?.isMyLocationEnabled = true
                         // Now check background location
                         checkBackgroundLocation()
                     }
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
                     // Check if we are in a state where the user has denied the permission and
                     // selected Don't ask again
@@ -334,12 +444,18 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         ).show()
                     }
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
                 }
                 return
             }
         }
+    }
+
+    override fun onOpen(shop: Shop) {
+        startActivity(Intent(this, ApproveShopActivity::class.java).apply {
+            putExtra(EXTRA_SHOP_DETAIL, "")
+            putExtra(EXTRA_SHOP_PENDING, shop)
+        })
     }
 }

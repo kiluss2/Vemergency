@@ -1,21 +1,21 @@
-package com.kiluss.vemergency.ui.admin.main
+package com.kiluss.vemergency.ui.user.navigation
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Shop
-import com.kiluss.vemergency.databinding.ItemListShopViewBinding
+import com.kiluss.vemergency.databinding.ItemListShopMapPreviewBinding
 import com.kiluss.vemergency.utils.ShopDiff
 
-class ShopAdapter(
+class ShopPreviewAdapter(
     private var shops: MutableList<Shop>,
     private val context: Context,
     private val listener: OnClickListener
-) : RecyclerView.Adapter<ShopAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ShopPreviewAdapter.ViewHolder>() {
 
     interface OnClickListener {
 
@@ -24,7 +24,7 @@ class ShopAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemListShopViewBinding.inflate(inflater, parent, false))
+        return ViewHolder(ItemListShopMapPreviewBinding.inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -33,7 +33,7 @@ class ShopAdapter(
 
     override fun getItemCount() = shops.size
 
-    inner class ViewHolder(private val binding: ItemListShopViewBinding) :
+    inner class ViewHolder(private val binding: ItemListShopMapPreviewBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(shop: Shop) {
@@ -44,6 +44,15 @@ class ShopAdapter(
                 with(binding) {
                     tvShopTitle.text = name
                     tvShopAddress.text = address
+                    val shopRating = rating
+                    if (shopRating!= null) {
+                        rbRating.visibility = View.VISIBLE
+                        tvNoRating.visibility = View.GONE
+                        rbRating.rating = shopRating.toFloat()
+                    } else {
+                        rbRating.visibility = View.GONE
+                        tvNoRating.visibility = View.VISIBLE
+                    }
                     shop.imageUrl?.let {
                         Glide.with(context)
                             .load(shop.imageUrl)

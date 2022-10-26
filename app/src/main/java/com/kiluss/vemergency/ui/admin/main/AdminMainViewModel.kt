@@ -13,14 +13,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.ADMIN_COLLECTION
-import com.kiluss.vemergency.constant.GEO_HASH
-import com.kiluss.vemergency.constant.ITEM_PER_PAGE
-import com.kiluss.vemergency.constant.LATITUDE
-import com.kiluss.vemergency.constant.LONGITUDE
-import com.kiluss.vemergency.constant.SHOP_CLONE_COLLECTION
-import com.kiluss.vemergency.constant.SHOP_COLLECTION
-import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
@@ -177,7 +170,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
         _progressBarStatus.value = false
     }
 
-    internal fun bindJSONDataInFacilityList(context: Context) {
+    internal fun bindJSONDataInShopList(context: Context) {
         shopGoogleMaps = ArrayList()
         val shopJsonArray = JSONArray(context.loadJSONFromAssets("result.json")) // Extension Function call here
         for (i in 0 until shopJsonArray.length()) {
@@ -197,6 +190,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
                     put(LATITUDE, shopJSONObject.getDouble(LATITUDE))
                     put(LONGITUDE, shopJSONObject.getDouble(LONGITUDE))
                 }
+                shop.service = shopJSONObject.getString("category")
                 shop.name = shopJSONObject.getString("title")
                 shop.rating = if (shopJSONObject.getString("rating").isNotEmpty()) {
                     shopJSONObject.getString("rating").toDouble()
@@ -251,7 +245,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    println("clone "+task.result.size())
+                    println("clone " + task.result.size())
                 } else {
                     Log.d("Error getting documents: ", task.exception.toString())
                 }

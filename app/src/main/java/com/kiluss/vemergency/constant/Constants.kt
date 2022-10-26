@@ -9,7 +9,7 @@ const val API_URL = "https://freeimage.host/api/"
 const val API_KEY = "6d207e02198a847aa98d0a2a901485a5"
 const val SAVED_LOGIN_ACCOUNT_KEY = "saved_login_account_key"
 const val SIGN_IN_KEY = "sign_in_key"
-
+const val SHARED_PREFERENCE_KEY = "shared_prefs_key"
 const val USER_NODE = "users"
 const val TEMP_IMAGE = "tempImage"
 const val EXTRA_USER_PROFILE = "extra_user_profile"
@@ -30,14 +30,15 @@ const val MY_PERMISSIONS_REQUEST_LOCATION = 99
 const val MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION = 66
 const val EXTRA_LAUNCH_MAP = "extra_launch_map"
 const val EXTRA_SHOP_LOCATION = "extra_shop_location"
+const val BOTTOM_SHEET_LIST_SHOP_STATE = "bottom_sheet_list_shop_state"
+const val BOTTOM_SHEET_SHOP_PREVIEW_STATE = "bottom_sheet_shop_preview_state"
 
 // add new shop
 const val EXTRA_CREATED_SHOP = "extra_created_shop"
-
 const val EXTRA_PICK_LOCATION = "extra_pick_location"
-
-const val SHARED_PREFERENCE_KEY = "shared_prefs_key"
-const val SHARED_PREFERENCE_KEY_CHANGE_USER = "shared_prefs_key"
+const val CAR_REPAIR_SERVICE = "Car repair service"
+const val MOTORCYCLE_REPAIR_SERVICE = "Motorcycle repair service"
+const val CAR_MOTORCYCLE_REPAIR_SERVICE = "Car & motorcycle repair service"
 
 // firestore
 const val USER_COLLECTION = "users"

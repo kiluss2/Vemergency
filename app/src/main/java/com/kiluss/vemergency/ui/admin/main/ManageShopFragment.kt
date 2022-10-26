@@ -24,7 +24,6 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
 
     private var _binding: FragmentManageShopBinding? = null
     private val binding get() = _binding!!
-    private val db = Firebase.firestore
     private val viewModel: AdminMainViewModel by activityViewModels()
     private var shopPendingAdapter: ShopAdapter? = null
     private var allShopAdapter: ShopGridAdapter? = null

@@ -26,14 +26,14 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
     private var shopLists = mutableListOf<Shop>()
     private var shopCloneLists = mutableListOf<Shop>()
     private val db = Firebase.firestore
-    private val _allShopLocation: MutableLiveData<MutableList<Shop>> by lazy {
+    private val _allShop: MutableLiveData<MutableList<Shop>> by lazy {
         MutableLiveData<MutableList<Shop>>()
     }
-    internal val allShopLocation: LiveData<MutableList<Shop>> = _allShopLocation
-    private val _allCloneShopLocation: MutableLiveData<MutableList<Shop>> by lazy {
+    internal val allShop: LiveData<MutableList<Shop>> = _allShop
+    private val _cloneShop: MutableLiveData<MutableList<Shop>> by lazy {
         MutableLiveData<MutableList<Shop>>()
     }
-    internal val allCloneShopLocation: LiveData<MutableList<Shop>> = _allCloneShopLocation
+    internal val cloneShop: LiveData<MutableList<Shop>> = _cloneShop
 
     internal fun getAllShopLocation() {
         db.collection(SHOP_COLLECTION)
@@ -48,7 +48,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                         }
                     }
                     shopLists.addAll(list)
-                    _allShopLocation.value = shopLists
+                    _allShop.value = shopLists
                 } else {
                     Log.d("Error getting documents: ", task.exception.toString())
                 }
@@ -69,7 +69,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                         list.add(item)
                     }
                     shopCloneLists.addAll(list)
-                    _allCloneShopLocation.value = shopCloneLists
+                    _cloneShop.value = shopCloneLists
                 } else {
                     Log.d("Error getting documents: ", task.exception.toString())
                 }
@@ -120,7 +120,9 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                     item?.let { it1 -> list.add(it1) }
                 }
                 shopCloneLists.addAll(list)
-                _allCloneShopLocation.value = shopCloneLists
+                _cloneShop.value = shopCloneLists
             }
     }
+
+    internal fun getShopCloneInfo(position: Int) = shopCloneLists[position]
 }
