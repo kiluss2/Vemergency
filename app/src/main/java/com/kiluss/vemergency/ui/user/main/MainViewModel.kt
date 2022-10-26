@@ -79,7 +79,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         // query 5km around the location
         val radiusInM = (radiusKmRange * 1000).toDouble()
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
-        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+        val tasks = mutableListOf<Task<QuerySnapshot>>()
         for (b in bounds) {
             val q = db.collection(SHOP_CLONE_COLLECTION)
                 .orderBy("location\$app_debug.$GEO_HASH")
