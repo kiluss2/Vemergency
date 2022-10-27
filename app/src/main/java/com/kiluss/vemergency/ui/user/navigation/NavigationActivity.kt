@@ -32,12 +32,25 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
 import com.kiluss.vemergency.BuildConfig.MAPS_API_KEY
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
+import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
@@ -96,8 +109,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             Log.e("TAG", "Can't find style. Error: ", e)
         }
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val mMap = map
@@ -113,24 +125,21 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         if (intent.getStringExtra(EXTRA_LAUNCH_MAP) != null) {
             location = LatLng(16.0, 108.2)
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    this, Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                fusedLocationClient?.lastLocation
-                    ?.addOnSuccessListener(this) { location ->
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // Logic to handle location object
-                            viewModel.getNearByShop(location, 1)
-                        }
+                fusedLocationClient?.lastLocation?.addOnSuccessListener(this) { location ->
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        // Logic to handle location object
+                        viewModel.getNearByShop(location, 1)
                     }
+                }
             }
         } else if (intent.getParcelableExtra<LatLng>(EXTRA_SHOP_LOCATION) != null) {
             myShop = intent.getParcelableExtra(EXTRA_SHOP_LOCATION)!!
             location = LatLng(
-                myShop.location?.getValue(LATITUDE)!! as Double,
-                myShop.location?.getValue(LONGITUDE)!! as Double
+                myShop.location?.getValue(LATITUDE)!! as Double, myShop.location?.getValue(LONGITUDE)!! as Double
             )
             markerTitle = myShop.name.toString()
             zoom = 16f
@@ -145,8 +154,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         map?.setOnMapClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             binding.tvBottomSheetTitle.text = MessageFormat.format(
-                resources.getText(R.string.text_found_near_by).toString(),
-                viewModel.getShopClone().size
+                resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
             )
             setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
         }
@@ -165,19 +173,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     marker.tag?.let { tag ->
                         val shop = viewModel.getShopCloneInfo(tag as Int)
                         setShopPreviewInfo(shop)
-                        fusedLocationClient?.lastLocation?.addOnSuccessListener(this@NavigationActivity) { location ->
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                // Logic to handle location object
-                                direction(
-                                    location,
-                                    LatLng(
-                                        shop.location?.get(LATITUDE) as Double,
-                                        shop.location?.get(LONGITUDE) as Double
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -209,11 +204,26 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 tvNoRating.visibility = View.VISIBLE
             }
             shop.imageUrl?.let {
-                Glide.with(this@NavigationActivity)
-                    .load(shop.imageUrl)
-                    .placeholder(R.drawable.default_pic)
-                    .centerCrop()
+                Glide.with(this@NavigationActivity).load(shop.imageUrl).placeholder(R.drawable.default_pic).centerCrop()
                     .into(ivShopImage)
+            }
+        }
+        binding.ivDirection.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedLocationClient?.lastLocation?.addOnSuccessListener(this@NavigationActivity) { location ->
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        // Logic to handle location object
+                        direction(
+                            LatLng(location.latitude, location.longitude), LatLng(
+                                shop.location?.get(LATITUDE) as Double, shop.location?.get(LONGITUDE) as Double
+                            )
+                        )
+                    }
+                }
             }
         }
     }
@@ -228,8 +238,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 showAllCloneShopLocation(it)
                 shopCloneAdapter?.updateData(it)
                 binding.tvBottomSheetTitle.text = MessageFormat.format(
-                    resources.getText(R.string.text_found_near_by).toString(),
-                    it.size
+                    resources.getText(R.string.text_found_near_by).toString(), it.size
                 )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
@@ -265,8 +274,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.clBottomSheet))
         bottomSheetBehavior.isFitToContents = false
         bottomSheetBehavior.halfExpandedRatio = 0.6f
-        bottomSheetBehavior.addBottomSheetCallback(object :
-            BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 when (bottomSheetBehavior.state) {
                     BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
@@ -310,10 +318,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
 
     private fun adjustMapPaddingToBottomSheet() {
         map?.setPadding(
-            0,
-            0,
-            0,
-            binding.rootLayout.height - binding.clBottomSheet.top
+            0, 0, 0, binding.rootLayout.height - binding.clBottomSheet.top
         )
     }
 
@@ -331,8 +336,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         shops.forEach { shop ->
             shop.location?.let {
                 val location = LatLng(
-                    it.getValue(LATITUDE) as Double,
-                    it.getValue(LONGITUDE) as Double
+                    it.getValue(LATITUDE) as Double, it.getValue(LONGITUDE) as Double
                 )
                 val markerTitle = shop.name.toString()
                 val markerOptions =
@@ -347,23 +351,17 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             val shop = shops[index]
             shop.location?.let {
                 val location = LatLng(
-                    it.getValue(LATITUDE) as Double,
-                    it.getValue(LONGITUDE) as Double
+                    it.getValue(LATITUDE) as Double, it.getValue(LONGITUDE) as Double
                 )
                 val markerTitle = shop.name.toString()
                 val markerOptions =
                     MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true).icon(
-                        BitmapDescriptorFactory
-                            .defaultMarker(25F)
+                        BitmapDescriptorFactory.defaultMarker(25F)
                     )
                 val marker = map?.addMarker(markerOptions)
                 marker?.tag = index
             }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
     }
 
     private fun checkLocationPermission() {
@@ -450,8 +448,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             } catch (exception: JSONException) {
                 exception.printStackTrace()
             }
-        }, Response.ErrorListener {
-        }) {}
+        }, Response.ErrorListener {}) {}
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(directionsRequest)
     }
