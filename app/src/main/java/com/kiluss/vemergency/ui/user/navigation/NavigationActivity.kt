@@ -22,7 +22,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -45,7 +44,11 @@ import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONException
 import org.json.JSONObject
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.util.GeoPoint
 import java.text.MessageFormat
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
@@ -153,14 +156,29 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             lifecycleScope.launch(Dispatchers.IO) {
                 delay(50)
                 launch(Dispatchers.Main) {
-                    //Your task...
                     if (marker.isInfoWindowShown) {
                         marker.hideInfoWindow()
                     } else {
                         marker.showInfoWindow()
                     }
                     map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
-                    setShopPreviewInfo(viewModel.getShopCloneInfo(marker.tag.toString().toInt()))
+                    marker.tag?.let { tag ->
+                        val shop = viewModel.getShopCloneInfo(tag as Int)
+                        setShopPreviewInfo(shop)
+                        fusedLocationClient?.lastLocation?.addOnSuccessListener(this@NavigationActivity) { location ->
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                // Logic to handle location object
+                                direction(
+                                    location,
+                                    LatLng(
+                                        shop.location?.get(LATITUDE) as Double,
+                                        shop.location?.get(LONGITUDE) as Double
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
             true
@@ -225,11 +243,13 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     bottomSheetBehavior.halfExpandedRatio = 0.5f
                     layoutShopPreview.cvMain.visibility = View.GONE
                     rvShopList.visibility = View.VISIBLE
+                    ivDirection.visibility = View.GONE
                 }
                 BOTTOM_SHEET_SHOP_PREVIEW_STATE -> {
                     bottomSheetBehavior.halfExpandedRatio = 0.42f
                     layoutShopPreview.cvMain.visibility = View.VISIBLE
                     rvShopList.visibility = View.GONE
+                    ivDirection.visibility = View.VISIBLE
                 }
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
@@ -407,27 +427,57 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         }
     }
 
-    private fun direction() {
+    private fun directionApi() {
         val path: MutableList<List<LatLng>> = ArrayList()
-        val urlDirections = "https://maps.googleapis.com/maps/api/directions/json?origin=16.073503,108.161034&destination=16.072937,108.213773&key=<$$MAPS_API_KEY>"
-        val directionsRequest = object : StringRequest(Request.Method.GET, urlDirections, Response.Listener<String> {
-                response ->
-            val jsonResponse = JSONObject(response)
-            // Get routes
-            val routes = jsonResponse.getJSONArray("routes")
-            val legs = routes.getJSONObject(0).getJSONArray("legs")
-            val steps = legs.getJSONObject(0).getJSONArray("steps")
-            for (i in 0 until steps.length()) {
-                val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
-                path.add(PolyUtil.decode(points))
-            }
-            for (i in 0 until path.size) {
-                map?.addPolyline(PolylineOptions().addAll(path[i]).color(Color.RED))
+        val urlDirections =
+            "http://router.project-osrm.org/route/v1/driving/16.057258%2C108.215804&loc=16.033316%2C108.224602&loc=16.081816%2C108.146324?overview=false"
+        "https://maps.googleapis.com/maps/api/directions/json?origin=16.073503,108.161034&destination=16.072937,108.213773&key=$MAPS_API_KEY"
+        val directionsRequest = object : StringRequest(Method.GET, urlDirections, Response.Listener { response ->
+            try {
+                val jsonResponse = JSONObject(response)
+                println(response.toString())
+                // Get routes
+                val routes = jsonResponse.getJSONArray("routes")
+                val legs = routes.getJSONObject(0).getJSONArray("legs")
+                val steps = legs.getJSONObject(0).getJSONArray("steps")
+                for (i in 0 until steps.length()) {
+                    val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
+                    path.add(PolyUtil.decode(points))
+                }
+                for (i in 0 until path.size) {
+                    map?.addPolyline(PolylineOptions().addAll(path[i]).color(Color.RED))
+                }
+            } catch (exception: JSONException) {
+                exception.printStackTrace()
             }
         }, Response.ErrorListener {
-        }){}
+        }) {}
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(directionsRequest)
+    }
+
+    private fun direction(departure: LatLng, destination: LatLng) {
+        val paths = mutableListOf<List<LatLng>>()
+        val roadManager: RoadManager = OSRMRoadManager(this, "MY_USER_AGENT")
+        val waypoints = arrayListOf<GeoPoint>()
+        waypoints.add(GeoPoint(departure.latitude, departure.longitude))
+        waypoints.add(GeoPoint(destination.latitude, destination.longitude))
+        lifecycleScope.launch(Dispatchers.IO) {
+            val road = roadManager.getRoad(waypoints)
+            launch(Dispatchers.Main) {
+                val steps = RoadManager.buildRoadOverlay(road).actualPoints
+                for (i in 0 until steps.size - 1) {
+                    val path = listOf(
+                        LatLng(steps[i].latitude, steps[i].longitude),
+                        LatLng(steps[i + 1].latitude, steps[i + 1].longitude)
+                    )
+                    paths.add(path)
+                }
+                for (i in 0 until paths.size) {
+                    map?.addPolyline(PolylineOptions().addAll(paths[i]).color(Color.RED).width(10f))
+                }
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
