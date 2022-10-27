@@ -20,6 +20,6 @@
     <string name="list_shop_actived">List shop actived</string>
     <string name="no_item">No item</string>
     <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} place near by}</string>
-    <string name="founding_near_by_place">founding near by place..</string>
+    <string name="finding_near_by_place">finding near by place..</string>
     <string name="no_review">No review</string>
 </resources>

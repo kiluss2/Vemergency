@@ -125,4 +125,6 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
     }
 
     internal fun getShopCloneInfo(position: Int) = shopCloneLists[position]
+
+    internal fun getShopClone() = shopCloneLists
 }

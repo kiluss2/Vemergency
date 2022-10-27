@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cvMain"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="2.9dp"
@@ -17,12 +18,13 @@
             android:layout_width="match_parent"
             android:layout_height="85dp"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_nav_store"
-            app:layout_constraintVertical_bias="0"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_pic"
             app:layout_constraintBottom_toTopOf="@id/tvShopTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0" />
 
         <TextView
             android:id="@+id/tvShopTitle"
@@ -45,7 +47,6 @@
             android:id="@+id/tvShopAddress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8.5dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:textAlignment="viewStart"
@@ -54,6 +55,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tvShopTitle"
             app:layout_constraintTop_toBottomOf="@id/tvShopTitle" />
+
+        <TextView
+            android:id="@+id/tvService"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textAlignment="viewStart"
+            android:textColor="@color/blue_crayola"
+            android:textSize="10.3dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvShopTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvShopAddress" />
 
         <RatingBar
             android:id="@+id/rbRating"
@@ -67,7 +81,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="@id/tvShopTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvShopAddress" />
+            app:layout_constraintTop_toBottomOf="@id/tvService" />
 
         <TextView
             android:id="@+id/tvNoRating"

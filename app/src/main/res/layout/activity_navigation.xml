@@ -47,8 +47,11 @@
             app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle" />
 
         <include
-            android:id="@+id/shopPreview"
+            android:id="@+id/layoutShopPreview"
             layout="@layout/item_list_shop_map_preview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle" />
 

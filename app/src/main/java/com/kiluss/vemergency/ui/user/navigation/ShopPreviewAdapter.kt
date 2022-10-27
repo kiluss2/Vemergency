@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ItemListShopMapPreviewBinding
 import com.kiluss.vemergency.utils.ShopDiff
@@ -44,8 +45,9 @@ class ShopPreviewAdapter(
                 with(binding) {
                     tvShopTitle.text = name
                     tvShopAddress.text = address
+                    tvService.text = shop.service
                     val shopRating = rating
-                    if (shopRating!= null) {
+                    if (shopRating != null) {
                         rbRating.visibility = View.VISIBLE
                         tvNoRating.visibility = View.GONE
                         rbRating.rating = shopRating.toFloat()
@@ -56,6 +58,9 @@ class ShopPreviewAdapter(
                     shop.imageUrl?.let {
                         Glide.with(context)
                             .load(shop.imageUrl)
+                            .centerCrop()
+                            .placeholder(R.drawable.default_pic)
+                            .centerCrop()
                             .into(ivShopImage)
                     }
                 }

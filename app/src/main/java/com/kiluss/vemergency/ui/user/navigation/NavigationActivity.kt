@@ -1,9 +1,11 @@
 package com.kiluss.vemergency.ui.user.navigation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.Color
 import android.location.Location
 import android.net.Uri
 import android.os.Build
@@ -20,6 +22,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -27,11 +33,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.PolyUtil
+import com.kiluss.vemergency.BuildConfig.MAPS_API_KEY
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
@@ -40,6 +45,7 @@ import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.text.MessageFormat
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
@@ -67,6 +73,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         initBottomSheet()
@@ -98,7 +105,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         // Add a marker and move the camera
         var location = LatLng(0.0, 0.0)
         var markerTitle = "Marker in Da Nang"
-        var zoom = 10f
+        var zoom = 6f
 
         if (intent.getStringExtra(EXTRA_LAUNCH_MAP) != null) {
             location = LatLng(16.0, 108.2)
@@ -123,7 +130,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 myShop.location?.getValue(LONGITUDE)!! as Double
             )
             markerTitle = myShop.name.toString()
-            zoom = 15f
+            zoom = 16f
             val markerOptions = MarkerOptions().position(location).title(markerTitle).snippet(markerTitle).visible(true)
             map?.addMarker(markerOptions)
             markerOptions.anchor(0f, 0.5f)
@@ -131,12 +138,17 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         } else {
             location = LatLng(16.0, 108.2)
         }
-        map?.animateCamera(CameraUpdateFactory.newLatLng(location))
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
         map?.setOnMapClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            binding.tvBottomSheetTitle.text = MessageFormat.format(
+                resources.getText(R.string.text_found_near_by).toString(),
+                viewModel.getShopClone().size
+            )
             setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
         }
         map?.setOnMarkerClickListener { marker ->
+            setBottomSheetShowingState(BOTTOM_SHEET_SHOP_PREVIEW_STATE)
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             lifecycleScope.launch(Dispatchers.IO) {
                 delay(50)
@@ -148,7 +160,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                         marker.showInfoWindow()
                     }
                     map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
-                    setBottomSheetShowingState(BOTTOM_SHEET_SHOP_PREVIEW_STATE)
                     setShopPreviewInfo(viewModel.getShopCloneInfo(marker.tag.toString().toInt()))
                 }
             }
@@ -165,14 +176,11 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     }
 
     private fun setShopPreviewInfo(shop: Shop) {
-        val service = shop.service
-        if (service != null && service.isNotEmpty()) {
-            binding.tvBottomSheetTitle.text = service
-        }
-        binding.tvBottomSheetTitle.text = "service"
-        with(binding.shopPreview) {
+        binding.tvBottomSheetTitle.text = shop.name
+        with(binding.layoutShopPreview) {
             tvShopTitle.text = shop.name
             tvShopAddress.text = shop.address
+            tvService.text = shop.service
             val shopRating = shop.rating
             if (shopRating != null) {
                 rbRating.visibility = View.VISIBLE
@@ -185,6 +193,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             shop.imageUrl?.let {
                 Glide.with(this@NavigationActivity)
                     .load(shop.imageUrl)
+                    .placeholder(R.drawable.default_pic)
+                    .centerCrop()
                     .into(ivShopImage)
             }
         }
@@ -212,16 +222,18 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         with(binding) {
             when (state) {
                 BOTTOM_SHEET_LIST_SHOP_STATE -> {
-                    shopPreview.clMain.visibility = View.GONE
+                    bottomSheetBehavior.halfExpandedRatio = 0.5f
+                    layoutShopPreview.cvMain.visibility = View.GONE
                     rvShopList.visibility = View.VISIBLE
                 }
                 BOTTOM_SHEET_SHOP_PREVIEW_STATE -> {
-                    shopPreview.clMain.visibility = View.VISIBLE
+                    bottomSheetBehavior.halfExpandedRatio = 0.42f
+                    layoutShopPreview.cvMain.visibility = View.VISIBLE
                     rvShopList.visibility = View.GONE
                 }
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
-                    shopPreview.clMain.visibility = View.GONE
+                    layoutShopPreview.cvMain.visibility = View.GONE
                     rvShopList.visibility = View.GONE
                 }
             }
@@ -250,6 +262,9 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 // Needed only in case you manually change the bottomsheet's state in code somewhere.
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
+                        // Nothing to do here
+                    }
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
                         // Nothing to do here
                     }
                     else -> {
@@ -390,6 +405,29 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSIONS_REQUEST_LOCATION
             )
         }
+    }
+
+    private fun direction() {
+        val path: MutableList<List<LatLng>> = ArrayList()
+        val urlDirections = "https://maps.googleapis.com/maps/api/directions/json?origin=16.073503,108.161034&destination=16.072937,108.213773&key=<$$MAPS_API_KEY>"
+        val directionsRequest = object : StringRequest(Request.Method.GET, urlDirections, Response.Listener<String> {
+                response ->
+            val jsonResponse = JSONObject(response)
+            // Get routes
+            val routes = jsonResponse.getJSONArray("routes")
+            val legs = routes.getJSONObject(0).getJSONArray("legs")
+            val steps = legs.getJSONObject(0).getJSONArray("steps")
+            for (i in 0 until steps.length()) {
+                val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
+                path.add(PolyUtil.decode(points))
+            }
+            for (i in 0 until path.size) {
+                map?.addPolyline(PolylineOptions().addAll(path[i]).color(Color.RED))
+            }
+        }, Response.ErrorListener {
+        }){}
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(directionsRequest)
     }
 
     override fun onRequestPermissionsResult(
