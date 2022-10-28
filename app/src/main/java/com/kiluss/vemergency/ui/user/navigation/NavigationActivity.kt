@@ -176,6 +176,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         }
         binding.ivBack.setOnClickListener {
             directing = false
+            currentPolylines?.remove()
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             binding.tvBottomSheetTitle.text = MessageFormat.format(
                 resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
@@ -505,7 +506,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 map?.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().apply {
                     include(departure)
                     include(destination)
-                }.build(), 100))
+                }.build(), 300))
                 with(binding) {
                     val df = DecimalFormat("#.#")
                     df.roundingMode = RoundingMode.CEILING
