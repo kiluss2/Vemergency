@@ -30,8 +30,11 @@ const val MY_PERMISSIONS_REQUEST_LOCATION = 99
 const val MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION = 66
 const val EXTRA_LAUNCH_MAP = "extra_launch_map"
 const val EXTRA_SHOP_LOCATION = "extra_shop_location"
+const val BOTTOM_SHEET_DEFAULT_STATE = "bottom_sheet_default_state"
 const val BOTTOM_SHEET_LIST_SHOP_STATE = "bottom_sheet_list_shop_state"
 const val BOTTOM_SHEET_SHOP_PREVIEW_STATE = "bottom_sheet_shop_preview_state"
+const val BOTTOM_SHEET_DIRECTION_STATE = "bottom_sheet_direction_state"
+const val POLYLINE_STROKE_WIDTH_PX = 25f
 
 // add new shop
 const val EXTRA_CREATED_SHOP = "extra_created_shop"

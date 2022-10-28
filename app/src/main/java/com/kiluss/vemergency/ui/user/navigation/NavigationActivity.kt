@@ -32,28 +32,16 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
 import com.kiluss.vemergency.BuildConfig.MAPS_API_KEY
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
-import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
-import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
-import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
-import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
-import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
-import com.kiluss.vemergency.constant.LATITUDE
-import com.kiluss.vemergency.constant.LONGITUDE
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
-import com.kiluss.vemergency.constant.MY_PERMISSIONS_REQUEST_LOCATION
+import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
+import com.kiluss.vemergency.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,6 +50,8 @@ import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.util.GeoPoint
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.text.MessageFormat
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
@@ -74,6 +64,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     private var currentLocation: Location? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var shopCloneAdapter: ShopPreviewAdapter? = null
+    private var currentPolylines: Polyline? = null
+    private var directing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,11 +144,13 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         }
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
         map?.setOnMapClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            binding.tvBottomSheetTitle.text = MessageFormat.format(
-                resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
-            )
-            setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+            if (!directing) {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                binding.tvBottomSheetTitle.text = MessageFormat.format(
+                    resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
+                )
+                setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+            }
         }
         map?.setOnMarkerClickListener { marker ->
             setBottomSheetShowingState(BOTTOM_SHEET_SHOP_PREVIEW_STATE)
@@ -170,13 +164,23 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                         marker.showInfoWindow()
                     }
                     map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
-                    marker.tag?.let { tag ->
-                        val shop = viewModel.getShopCloneInfo(tag as Int)
-                        setShopPreviewInfo(shop)
-                    }
+                }
+            }
+            if (!directing) {
+                marker.tag?.let { tag ->
+                    val shop = viewModel.getShopCloneInfo(tag as Int)
+                    setShopPreviewInfo(shop)
                 }
             }
             true
+        }
+        binding.ivBack.setOnClickListener {
+            directing = false
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            binding.tvBottomSheetTitle.text = MessageFormat.format(
+                resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
+            )
+            setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
         }
 //        mMap.setOnMapClickListener { position ->
 //            Toast.makeText(
@@ -216,7 +220,11 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 fusedLocationClient?.lastLocation?.addOnSuccessListener(this@NavigationActivity) { location ->
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
-                        // Logic to handle location object
+                        directing = true
+                        setBottomSheetShowingState(BOTTOM_SHEET_DIRECTION_STATE)
+                        currentPolylines?.remove()
+                        binding.tvBottomSheetTitle.text = getString(R.string.direction_from_your_location)
+                        binding.tvDirectionTo.text = shop.name
                         direction(
                             LatLng(location.latitude, location.longitude), LatLng(
                                 shop.location?.get(LATITUDE) as Double, shop.location?.get(LONGITUDE) as Double
@@ -249,16 +257,32 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         with(binding) {
             when (state) {
                 BOTTOM_SHEET_LIST_SHOP_STATE -> {
-                    bottomSheetBehavior.halfExpandedRatio = 0.5f
-                    layoutShopPreview.cvMain.visibility = View.GONE
-                    rvShopList.visibility = View.VISIBLE
-                    ivDirection.visibility = View.GONE
+                    if (!directing) {
+                        bottomSheetBehavior.halfExpandedRatio = 0.5f
+                        layoutShopPreview.cvMain.visibility = View.GONE
+                        rvShopList.visibility = View.VISIBLE
+                        ivDirection.visibility = View.GONE
+                        lnDirection.visibility = View.GONE
+                        ivBack.visibility = View.GONE
+                    }
                 }
                 BOTTOM_SHEET_SHOP_PREVIEW_STATE -> {
-                    bottomSheetBehavior.halfExpandedRatio = 0.42f
-                    layoutShopPreview.cvMain.visibility = View.VISIBLE
+                    if (!directing) {
+                        bottomSheetBehavior.halfExpandedRatio = 0.42f
+                        layoutShopPreview.cvMain.visibility = View.VISIBLE
+                        rvShopList.visibility = View.GONE
+                        ivDirection.visibility = View.VISIBLE
+                        lnDirection.visibility = View.GONE
+                        ivBack.visibility = View.GONE
+                    }
+                }
+                BOTTOM_SHEET_DIRECTION_STATE -> {
+                    bottomSheetBehavior.halfExpandedRatio = 0.4f
+                    layoutShopPreview.cvMain.visibility = View.GONE
                     rvShopList.visibility = View.GONE
-                    ivDirection.visibility = View.VISIBLE
+                    ivDirection.visibility = View.GONE
+                    lnDirection.visibility = View.VISIBLE
+                    ivBack.visibility = View.VISIBLE
                 }
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
@@ -443,7 +467,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     path.add(PolyUtil.decode(points))
                 }
                 for (i in 0 until path.size) {
-                    map?.addPolyline(PolylineOptions().addAll(path[i]).color(Color.RED))
+                    map?.addPolyline(
+                        PolylineOptions().addAll(path[i]).color(Color.BLUE).jointType(JointType.ROUND)
+                            .width(POLYLINE_STROKE_WIDTH_PX)
+                    )
                 }
             } catch (exception: JSONException) {
                 exception.printStackTrace()
@@ -455,7 +482,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
 
     private fun direction(departure: LatLng, destination: LatLng) {
         val paths = mutableListOf<List<LatLng>>()
-        val roadManager: RoadManager = OSRMRoadManager(this, "MY_USER_AGENT")
+        val roadManager = OSRMRoadManager(this, "MY_USER_AGENT")
         val waypoints = arrayListOf<GeoPoint>()
         waypoints.add(GeoPoint(departure.latitude, departure.longitude))
         waypoints.add(GeoPoint(destination.latitude, destination.longitude))
@@ -470,8 +497,20 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     )
                     paths.add(path)
                 }
+                val option = PolylineOptions().color(getColor(R.color.blue_shazam)).width(POLYLINE_STROKE_WIDTH_PX)
                 for (i in 0 until paths.size) {
-                    map?.addPolyline(PolylineOptions().addAll(paths[i]).color(Color.RED).width(10f))
+                    option.addAll(paths[i])
+                }
+                currentPolylines = map?.addPolyline(option)
+                map?.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().apply {
+                    include(departure)
+                    include(destination)
+                }.build(), 100))
+                with(binding) {
+                    val df = DecimalFormat("#.#")
+                    df.roundingMode = RoundingMode.CEILING
+                    tvDistance.text = "${getString(R.string.distance)} ${df.format(road.mLength)} km"
+                    tvEstimateTime.text = "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
                 }
             }
         }
@@ -542,5 +581,13 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             putExtra(EXTRA_SHOP_DETAIL, "")
             putExtra(EXTRA_SHOP_PENDING, shop)
         })
+    }
+
+    override fun onBackPressed() {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        } else {
+            super.onBackPressed()
+        }
     }
 }

@@ -47,7 +47,7 @@ object Utils {
 
     internal fun getResizedBitmap(imgFile: File, maxWidth: Int): Bitmap {
         val image = getFileImageBitmap(imgFile)
-        var width = image!!.width
+        var width = image.width
         var height = image.height
         val bitmapRatio = width.toFloat() / height.toFloat()
         if (bitmapRatio > 0) {
@@ -69,6 +69,26 @@ object Utils {
             .setType(MultipartBody.FORM)
             .addFormDataPart("key", API_KEY)
             .addFormDataPart("source", imageBase64)
-            .build();
+            .build()
+    }
+
+    internal fun distanceFormat(distance: Double): Int {
+        return if (distance >= 1000.0) {
+            (distance / 1000).toInt()
+        } else {
+            distance.toInt()
+        }
+    }
+
+    internal fun convertSeconds(seconds: Int): String {
+        val h = seconds / 3600
+        val m = seconds % 3600 / 60
+        val s = seconds % 60
+        val sh = if (h > 0) "$h h" else ""
+        val sm =
+            (if (m in 1..9 && h > 0) "0" else "") + if (m > 0) if (h > 0 && s == 0) m.toString() else "$m min" else ""
+        val ss =
+            if (s == 0 && (h > 0 || m > 0)) "" else (if (s < 10 && (h > 0 || m > 0)) "0" else "") + s.toString() + " " + "sec"
+        return sh + (if (h > 0) " " else "") + sm + (if (m > 0) " " else "") + ss
     }
 }

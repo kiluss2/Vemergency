@@ -22,4 +22,8 @@
     <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} place near by}</string>
     <string name="finding_near_by_place">finding near by place..</string>
     <string name="no_review">No review</string>
+    <string name="distance">Distance: </string>
+    <string name="estimate_time">Estimate time: </string>
+    <string name="direction_to">Direction to </string>
+    <string name="direction_from_your_location">Direction from your location</string>
 </resources>

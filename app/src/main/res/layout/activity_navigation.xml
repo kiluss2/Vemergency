@@ -29,10 +29,22 @@
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <!-- Your bottom sheet's content-->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:src="@drawable/ic_left_arrow_back"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tvBottomSheetTitle"
             android:layout_width="0dp"
             android:layout_height="50dp"
+            android:layout_marginHorizontal="5dp"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
@@ -40,10 +52,9 @@
             android:textColor="@color/blue_crayola"
             android:textSize="18dp"
             app:layout_constraintEnd_toStartOf="@id/ivDirection"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivBack"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Your bottom sheet's content-->
         <ImageView
             android:id="@+id/ivDirection"
             android:layout_width="wrap_content"
@@ -70,6 +81,41 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle" />
+
+        <LinearLayout
+            android:id="@+id/lnDirection"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle">
+
+            <TextView
+                android:id="@+id/tvDirectionTo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:text="@string/direction_from_your_location"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDistance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/distance" />
+
+            <TextView
+                android:id="@+id/tvEstimateTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/estimate_time" />
+
+        </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
