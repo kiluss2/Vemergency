@@ -14,7 +14,6 @@ import kotlinx.parcelize.RawValue
     internal var website: String? = null,
     internal var imageUrl: String? = null,
     internal var service: String? = null,
-    internal var pricePerKilometer: Double? = null,
     internal var rating: Double? = null,
     internal var reviewCount: Long? = null,
     internal var location: @RawValue HashMap<String, Any>? = null,
