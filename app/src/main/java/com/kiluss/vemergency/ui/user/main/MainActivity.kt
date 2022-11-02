@@ -10,8 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
-import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
-import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
+import com.kiluss.vemergency.constant.EXTRA_EMERGENCY
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityMainBinding
@@ -29,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         //Initialize the bottom navigation view
         //create bottom navigation view object
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
@@ -43,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java).apply {
                 putExtra(
                     LOGIN_FRAGMENT_EXTRA,
-                    EXTRA_CREATE_SHOP
+                    EXTRA_EMERGENCY
                 )
             })
         }

@@ -133,6 +133,11 @@ class LoginFragment : Fragment() {
                             Intent(requireActivity(), ChangePasswordActivity::class.java)
                         )
                     }
+                    EXTRA_EMERGENCY -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), ChangePasswordActivity::class.java)
+                        )
+                    }
                 }
             }
             ROLE_SHOP -> {
