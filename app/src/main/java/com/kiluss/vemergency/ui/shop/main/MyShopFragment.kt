@@ -134,6 +134,9 @@ class MyShopFragment : Fragment() {
                         shop.owner?.let {
                             binding.tvOwner.text = it
                         }
+                        shop.service?.let {
+                            binding.tvService.text = it
+                        }
                         Glide.with(this@MyShopFragment)
                             .load(shop.imageUrl)
                             .placeholder(R.drawable.login_background)

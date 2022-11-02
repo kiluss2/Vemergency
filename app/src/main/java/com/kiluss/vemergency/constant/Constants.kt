@@ -36,6 +36,8 @@ const val BOTTOM_SHEET_LIST_SHOP_STATE = "bottom_sheet_list_shop_state"
 const val BOTTOM_SHEET_SHOP_PREVIEW_STATE = "bottom_sheet_shop_preview_state"
 const val BOTTOM_SHEET_DIRECTION_STATE = "bottom_sheet_direction_state"
 const val POLYLINE_STROKE_WIDTH_PX = 25f
+const val ACTIVE_SHOP_MARKER = "active_shop_marker"
+const val CLONE_SHOP_MARKER = "clone_shop_marker"
 
 // add new shop
 const val EXTRA_CREATED_SHOP = "extra_created_shop"

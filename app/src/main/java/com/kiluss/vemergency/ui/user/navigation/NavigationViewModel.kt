@@ -23,7 +23,7 @@ import com.kiluss.vemergency.ui.base.BaseViewModel
  */
 class NavigationViewModel(application: Application) : BaseViewModel(application) {
 
-    private var shopLists = mutableListOf<Shop>()
+    private var activeShopLists = mutableListOf<Shop>()
     private var shopCloneLists = mutableListOf<Shop>()
     private val db = Firebase.firestore
     private var nearByShopNumber = 0
@@ -48,8 +48,8 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                             list.add(item)
                         }
                     }
-                    shopLists.addAll(list)
-                    _allShop.value = shopLists
+                    activeShopLists.addAll(list)
+                    _allShop.value = activeShopLists
                 } else {
                     Log.d("Error getting documents: ", task.exception.toString())
                 }
@@ -115,14 +115,19 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                         }
                     }
                 }
-                // matchingDocs contains the results
-                val list = mutableListOf<Shop>()
-                for (documentSnapshot in matchingDocs) {
-                    val item = documentSnapshot.toObject<Shop>()
-                    item?.let { it1 -> list.add(it1) }
+                if (matchingDocs.isEmpty()) {
+                    getNearByCloneShop(location, radiusKmRange + radiusKmRange%10 + 1)
+                    println(radiusKmRange)
+                } else {
+                    // matchingDocs contains the results
+                    val list = mutableListOf<Shop>()
+                    for (documentSnapshot in matchingDocs) {
+                        val item = documentSnapshot.toObject<Shop>()
+                        item?.let { it1 -> list.add(it1) }
+                    }
+                    shopCloneLists.addAll(list)
+                    _cloneShop.value = shopCloneLists
                 }
-                shopCloneLists.addAll(list)
-                _cloneShop.value = shopCloneLists
             }
     }
 
@@ -167,14 +172,16 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
                     val item = documentSnapshot.toObject<Shop>()
                     item?.let { it1 -> list.add(it1) }
                 }
-                shopLists.addAll(list)
-                _allShop.value = shopLists
+                activeShopLists.addAll(list)
+                _allShop.value = activeShopLists
             }
     }
 
     internal fun getShopCloneInfo(position: Int) = shopCloneLists[position]
 
+    internal fun getActiveShopInfo(position: Int) = activeShopLists[position]
+
     internal fun getShopClone() = shopCloneLists
 
-    internal fun getNearByShopNumber() = shopCloneLists.size + shopLists.size
+    internal fun getNearByShopNumber() = shopCloneLists.size + activeShopLists.size
 }

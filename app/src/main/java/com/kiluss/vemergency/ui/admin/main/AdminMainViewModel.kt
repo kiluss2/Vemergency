@@ -130,7 +130,6 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
     }
 
     internal fun getMoreActiveShop() {
-        println(lastDocument)
         questionCollectionQuery?.let {
             it.startAfter(lastDocument)
                 .limit(ITEM_PER_PAGE)
@@ -219,11 +218,9 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
                     shop.lastModifiedTime = Instant.parse(shopJSONObject.getString("timestamp"))
                         .toEpochMilli().toDouble()
                 }
-                println(shop)
                 shopGoogleMaps.add(shop)
             }
         }
-        println(shopGoogleMaps.size)
         pushGoogleMapData(shopGoogleMaps)
     }
 

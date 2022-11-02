@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ItemListShopGridViewBinding
@@ -48,7 +49,7 @@ class ShopGridAdapter(
                         Glide.with(context)
                             .load(shop.imageUrl)
                             .centerCrop()
-                            .placeholder(R.drawable.default_pic)
+                            .placeholder(R.drawable.default_pic_small)
                             .into(ivShopImage)
                     }
                 }

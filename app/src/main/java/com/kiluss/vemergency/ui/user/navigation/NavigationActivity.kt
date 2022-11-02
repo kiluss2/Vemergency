@@ -168,9 +168,15 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 }
             }
             if (!directing) {
-                marker.tag?.let { tag ->
-                    val shop = viewModel.getShopCloneInfo(tag as Int)
-                    setShopPreviewInfo(shop)
+                marker.tag?.let {
+                    val tag = it as Pair<*, *>
+                    if (tag.first == CLONE_SHOP_MARKER) {
+                        val shop = viewModel.getShopCloneInfo(tag.second as Int)
+                        setShopPreviewInfo(shop)
+                    } else {
+                        val shop = viewModel.getActiveShopInfo(tag.second as Int)
+                        setShopPreviewInfo(shop)
+                    }
                 }
             }
             true
@@ -359,7 +365,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     }
 
     private fun showAllShopLocation(shops: MutableList<Shop>) {
-        shops.forEach { shop ->
+        for (index in shops.indices) {
+            val shop = shops[index]
             shop.location?.let {
                 val location = LatLng(
                     it.getValue(LATITUDE) as Double, it.getValue(LONGITUDE) as Double
@@ -367,7 +374,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 val markerTitle = shop.name.toString()
                 val markerOptions =
                     MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
-                map?.addMarker(markerOptions)
+                val marker = map?.addMarker(markerOptions)
+                marker?.tag = Pair(ACTIVE_SHOP_MARKER, index)
             }
         }
     }
@@ -385,7 +393,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                         BitmapDescriptorFactory.defaultMarker(25F)
                     )
                 val marker = map?.addMarker(markerOptions)
-                marker?.tag = index
+                marker?.tag = Pair(CLONE_SHOP_MARKER, index)
             }
         }
     }
@@ -512,7 +520,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     val df = DecimalFormat("#.#")
                     df.roundingMode = RoundingMode.CEILING
                     tvDistance.text = "${getString(R.string.distance)} ${df.format(road.mLength)} km"
-                    tvEstimateTime.text = "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
+                    tvEstimateTime.text =
+                        "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
                 }
             }
         }
