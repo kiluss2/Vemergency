@@ -64,7 +64,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     private var currentLocation: Location? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var shopCloneAdapter: ShopPreviewAdapter? = null
-    private var currentPolylines: Polyline? = null
+    private var currentPolyLines: Polyline? = null
     private var directing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,7 +124,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         // Logic to handle location object
-                        viewModel.getNearByShop(location, 1)
+                        viewModel.getNearByShop(location, 5)
+                        viewModel.getNearByCloneShop(location, 1)
                     }
                 }
             }
@@ -176,7 +177,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         }
         binding.ivBack.setOnClickListener {
             directing = false
-            currentPolylines?.remove()
+            currentPolyLines?.remove()
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             binding.tvBottomSheetTitle.text = MessageFormat.format(
                 resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
@@ -223,7 +224,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     if (location != null) {
                         directing = true
                         setBottomSheetShowingState(BOTTOM_SHEET_DIRECTION_STATE)
-                        currentPolylines?.remove()
+                        currentPolyLines?.remove()
                         binding.tvBottomSheetTitle.text = getString(R.string.direction_from_your_location)
                         binding.tvDirectionTo.text = shop.name
                         direction(
@@ -247,7 +248,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 showAllCloneShopLocation(it)
                 shopCloneAdapter?.updateData(it)
                 binding.tvBottomSheetTitle.text = MessageFormat.format(
-                    resources.getText(R.string.text_found_near_by).toString(), it.size
+                    resources.getText(R.string.text_found_near_by).toString(), getNearByShopNumber()
                 )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
@@ -502,7 +503,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 for (i in 0 until paths.size) {
                     option.addAll(paths[i])
                 }
-                currentPolylines = map?.addPolyline(option)
+                currentPolyLines = map?.addPolyline(option)
                 map?.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().apply {
                     include(departure)
                     include(destination)

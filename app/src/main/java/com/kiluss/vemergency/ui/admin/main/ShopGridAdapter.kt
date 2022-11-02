@@ -47,7 +47,8 @@ class ShopGridAdapter(
                     shop.imageUrl?.let {
                         Glide.with(context)
                             .load(shop.imageUrl)
-                            .placeholder(R.drawable.ic_nav_store)
+                            .centerCrop()
+                            .placeholder(R.drawable.default_pic)
                             .into(ivShopImage)
                     }
                 }

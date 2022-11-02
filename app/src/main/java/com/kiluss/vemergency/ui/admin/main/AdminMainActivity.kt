@@ -46,6 +46,12 @@ class AdminMainActivity : AppCompatActivity() {
     private fun setUpOnClickView() {
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.getShopPendingInfo()
+        viewModel.getActiveShop()
+    }
+
     override fun onBackPressed() {
         if (backPressPreviousState) {
             super.onBackPressed()

@@ -10,8 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
 import com.kiluss.vemergency.data.model.Shop
@@ -64,6 +62,8 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
                 } else {
                     binding.tvNoShopFound.visibility = View.VISIBLE
                 }
+                scrollListener.setLoaded()
+                setProgressBarStatus(false)
             }
         }
     }
@@ -94,11 +94,20 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
         scrollListener.setOnLoadMoreListener(object :
             OnLoadMoreListener {
             override fun onLoadMore() {
+                setProgressBarStatus(true)
                 viewModel.getMoreActiveShop()
             }
         })
 
         binding.rvShopList.addOnScrollListener(scrollListener)
+    }
+
+    private fun setProgressBarStatus(status: Boolean) {
+        binding.pbLoading.visibility = if (status) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 
     override fun onDestroyView() {
@@ -115,8 +124,6 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
 
     override fun onResume() {
         super.onResume()
-        viewModel.getShopPendingInfo()
-        viewModel.getActiveShop()
     }
 
     override fun onOpenShopDetail(shop: Shop) {

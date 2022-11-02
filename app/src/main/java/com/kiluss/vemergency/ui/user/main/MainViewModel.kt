@@ -9,6 +9,7 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -22,7 +23,8 @@ import com.kiluss.vemergency.ui.base.BaseViewModel
 class MainViewModel(application: Application) : BaseViewModel(application) {
 
     private var user = User()
-    val db = Firebase.firestore
+    private val db = Firebase.firestore
+    private var nearByShopNumber = 0
     private val _progressBarStatus: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
@@ -74,9 +76,9 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         _progressBarStatus.value = false
     }
 
-    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+    internal fun getNearByCloneShop(location: Location, radiusKmRange: Int) {
         val center = GeoLocation(location.latitude, location.longitude)
-        // query 5km around the location
+        // query $radiusKmRange km around the location
         val radiusInM = (radiusKmRange * 1000).toDouble()
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
         val tasks = mutableListOf<Task<QuerySnapshot>>()
@@ -90,7 +92,6 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         // Collect all the query results together into a single list
         Tasks.whenAllComplete(tasks)
             .addOnCompleteListener {
-                var matchingDocs = 0
                 for (task in tasks) {
                     val snap: QuerySnapshot = task.result
                     for (doc in snap.documents) {
@@ -103,12 +104,51 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                             val docLocation = GeoLocation(lat as Double, lng as Double)
                             val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
                             if (distanceInM <= radiusInM) {
-                                matchingDocs++
+                                nearByShopNumber++
                             }
                         }
                     }
                 }
-                _nearByShopCount.value = matchingDocs
+                _nearByShopCount.value = nearByShopNumber
+            }
+    }
+
+    // get active shop near by
+    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+        val center = GeoLocation(location.latitude, location.longitude)
+        // query $radiusKmRange km around the location
+        val radiusInM = (radiusKmRange * 1000).toDouble()
+        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
+        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+        for (b in bounds) {
+            val q = db.collection(SHOP_COLLECTION)
+                .orderBy("location\$app_debug.$GEO_HASH")
+                .startAt(b.startHash)
+                .endAt(b.endHash)
+            tasks.add(q.get())
+        }
+        // Collect all the query results together into a single list
+        Tasks.whenAllComplete(tasks)
+            .addOnCompleteListener {
+                nearByShopNumber = 0
+                for (task in tasks) {
+                    val snap: QuerySnapshot = task.result
+                    for (doc in snap.documents) {
+                        val shop = doc.toObject<Shop>()
+                        val lat = shop?.location?.getValue(LATITUDE)
+                        val lng = shop?.location?.getValue(LONGITUDE)
+                        // We have to filter out a few false positives due to GeoHash
+                        // accuracy, but most will match
+                        if (lat != null && lng != null) {
+                            val docLocation = GeoLocation(lat as Double, lng as Double)
+                            val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
+                            if (distanceInM <= radiusInM) {
+                                nearByShopNumber++
+                            }
+                        }
+                    }
+                }
+                getNearByCloneShop(location, radiusKmRange)
             }
     }
 }

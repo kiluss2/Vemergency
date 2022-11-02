@@ -171,6 +171,31 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvOwnerLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Owner: "
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvOwner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:linksClickable="true"
+                            android:text="Not set"
+                            android:textColor="@color/blue_crayola" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
                             android:id="@+id/tvOpenTimeLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

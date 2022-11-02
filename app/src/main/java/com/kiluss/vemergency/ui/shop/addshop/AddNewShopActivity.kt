@@ -110,10 +110,13 @@ class AddNewShopActivity : AppCompatActivity() {
                 if (edtAddress.text.isEmpty()) {
                     edtAddress.error = "Address can not empty"
                 }
+                if (edtPhone.text.isEmpty()) {
+                    edtPhone.error = "Phone can not empty"
+                }
                 if (tvLocationPicked.text.isEmpty()) {
                     Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
                 }
-                if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
+                if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && edtPhone.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
                     showProgressbar()
                     uploadShopImage()
                 }
@@ -230,6 +233,7 @@ class AddNewShopActivity : AppCompatActivity() {
             shop.phone = edtPhone.text.toString()
             shop.openTime = edtOpenTime.text.toString()
             shop.website = edtWebsite.text.toString()
+            shop.owner = edtOwner.text.toString()
             shop.imageUrl = imageUrl
         }
         shop.location = HashMap<String, Any>().apply {

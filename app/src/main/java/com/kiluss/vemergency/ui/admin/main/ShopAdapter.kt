@@ -47,6 +47,8 @@ class ShopAdapter(
                     shop.imageUrl?.let {
                         Glide.with(context)
                             .load(shop.imageUrl)
+                            .centerCrop()
+                            .placeholder(R.drawable.default_pic)
                             .into(ivShopImage)
                     }
                 }

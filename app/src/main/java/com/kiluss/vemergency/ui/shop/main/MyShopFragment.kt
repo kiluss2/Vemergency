@@ -18,6 +18,7 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.HTTP_PREFIX
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
 import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
@@ -79,7 +80,10 @@ class MyShopFragment : Fragment() {
                 requireActivity().startActivity(
                     Intent(requireActivity(), AddNewShopActivity::class.java)
                 )
-                requireActivity().finish()
+            }
+            tvWebsite.setOnClickListener {
+                val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse(HTTP_PREFIX + tvWebsite.text.toString()))
+                startActivity(urlIntent)
             }
         }
     }
@@ -126,6 +130,9 @@ class MyShopFragment : Fragment() {
                         }
                         shop.website?.let {
                             binding.tvWebsite.text = it
+                        }
+                        shop.owner?.let {
+                            binding.tvOwner.text = it
                         }
                         Glide.with(this@MyShopFragment)
                             .load(shop.imageUrl)

@@ -24,6 +24,7 @@ const val AVATAR = "avatar"
 const val DEFAULT_ZOOM = 10F
 const val EMPTY_STRING = ""
 const val MAX_WIDTH_IMAGE = 600
+const val HTTP_PREFIX = "https://"
 
 // navigation activity
 const val MY_PERMISSIONS_REQUEST_LOCATION = 99

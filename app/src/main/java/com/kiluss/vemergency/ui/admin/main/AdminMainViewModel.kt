@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -26,9 +25,10 @@ import java.time.Instant
 class AdminMainViewModel(application: Application) : BaseViewModel(application) {
 
     private lateinit var shopGoogleMaps: ArrayList<Shop>
-    private var lastDocument: DocumentSnapshot? = null
+    private var lastDocument: Double? = null
     private var user = User()
     private val db = Firebase.firestore
+    private var questionCollectionQuery: Query? = null
     private val currentList = mutableListOf<Shop>()
     private val _progressBarStatus: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
@@ -94,69 +94,74 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
     }
 
     internal fun getActiveShop() {
-        db.collection(SHOP_COLLECTION)
+        questionCollectionQuery = db.collection(SHOP_CLONE_COLLECTION)
             .orderBy("lastModifiedTime\$app_debug", Query.Direction.DESCENDING)
-            .limit(ITEM_PER_PAGE)
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val list = mutableListOf<Shop>()
-                    for (documentSnapshot in task.result) {
-                        val item: Shop = documentSnapshot.toObject()
-                        if (item.created == true) {
+        questionCollectionQuery?.let {
+            it.limit(ITEM_PER_PAGE)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val list = mutableListOf<Shop>()
+                        for (documentSnapshot in task.result) {
+                            val item: Shop = documentSnapshot.toObject()
+//                        if (item.created == true) {
+//                            list.add(item)
+//                        }
                             list.add(item)
                         }
-                    }
-                    currentList.clear()
-                    currentList.addAll(list)
-                    _allShop.value = currentList
-                    // Get the last visible document
-                    lastDocument = if (task.result.size() > 0) {
-                        task.result.documents[task.result.size() - 1]
+                        currentList.clear()
+                        currentList.addAll(list)
+                        _allShop.value = currentList
+                        // Get the last visible document
+                        lastDocument = if (task.result.size() > 0) {
+                            currentList[currentList.size - 1].lastModifiedTime
+                        } else {
+                            null
+                        }
                     } else {
-                        null
+                        Log.d("Error getting documents: ", task.exception.toString())
                     }
-                } else {
-                    Log.d("Error getting documents: ", task.exception.toString())
                 }
-            }
-            .addOnFailureListener { exception ->
-                hideProgressbar()
-                Log.e("Main Activity", exception.message.toString())
-            }
+                .addOnFailureListener { exception ->
+                    hideProgressbar()
+                    Log.e("Main Activity", exception.message.toString())
+                }
+        }
     }
 
     internal fun getMoreActiveShop() {
-        db.collection(SHOP_COLLECTION)
-            .orderBy("lastModifiedTime\$app_debug", Query.Direction.DESCENDING)
-            .startAfter(lastDocument)
-            .limit(ITEM_PER_PAGE)
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val list = mutableListOf<Shop>()
-                    for (documentSnapshot in task.result) {
-                        val item: Shop = documentSnapshot.toObject()
-                        if (item.created == true) {
+        println(lastDocument)
+        questionCollectionQuery?.let {
+            it.startAfter(lastDocument)
+                .limit(ITEM_PER_PAGE)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val list = mutableListOf<Shop>()
+                        for (documentSnapshot in task.result) {
+                            val item: Shop = documentSnapshot.toObject()
+//                        if (item.created == true) {
+//                            list.add(item)
+//                        }
                             list.add(item)
                         }
-                    }
-                    currentList.addAll(list)
-                    _allShop.value = currentList
-                    // Get the last visible document
-                    lastDocument = if (task.result.size() > 0) {
-                        task.result.documents[task.result.size() - 1]
+                        currentList.addAll(list)
+                        _allShop.value = currentList
+                        // Get the last visible document
+                        lastDocument = if (task.result.size() > 0) {
+                            currentList[currentList.size - 1].lastModifiedTime
+                        } else {
+                            null
+                        }
                     } else {
-                        null
+                        Log.d("Error getting documents: ", task.exception.toString())
                     }
-                } else {
-                    Log.d("Error getting documents: ", task.exception.toString())
                 }
-            }
-            .addOnFailureListener { exception ->
-                hideProgressbar()
-                Log.e("Main Activity", exception.message.toString())
-            }
+                .addOnFailureListener { exception ->
+                    hideProgressbar()
+                    Log.e("Main Activity", exception.message.toString())
+                }
+        }
     }
 
     internal fun getUserData() = user
@@ -223,9 +228,12 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
     }
 
     private fun pushGoogleMapData(shops: ArrayList<Shop>) {
+        val collectionRef = db.collection(SHOP_CLONE_COLLECTION)
         db.runBatch { batch ->
             for (shop in shops) {
-                batch.set(db.collection(SHOP_CLONE_COLLECTION).document(), shop)
+                val docRef = collectionRef.document()
+                shop.uid = docRef.id
+                batch.set(docRef, shop)
             }
         }.addOnCompleteListener { task ->
             if (task.isSuccessful) {

@@ -62,6 +62,9 @@ class ApproveShopActivity : AppCompatActivity() {
             shop.website?.let {
                 binding.tvWebsite.text = it
             }
+            shop.owner?.let {
+                binding.tvOwner.text = it
+            }
             Glide.with(this@ApproveShopActivity)
                 .load(shop.imageUrl)
                 .placeholder(R.drawable.login_background)
@@ -164,6 +167,10 @@ class ApproveShopActivity : AppCompatActivity() {
                         }
                     }.create().show()
                 }
+            }
+            tvWebsite.setOnClickListener {
+                val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse(HTTP_PREFIX + tvWebsite.text.toString()))
+                startActivity(urlIntent)
             }
         }
     }

@@ -26,6 +26,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
     private var shopLists = mutableListOf<Shop>()
     private var shopCloneLists = mutableListOf<Shop>()
     private val db = Firebase.firestore
+    private var nearByShopNumber = 0
     private val _allShop: MutableLiveData<MutableList<Shop>> by lazy {
         MutableLiveData<MutableList<Shop>>()
     }
@@ -79,9 +80,10 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
             }
     }
 
-    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+    // get clone shop near by
+    internal fun getNearByCloneShop(location: Location, radiusKmRange: Int) {
         val center = GeoLocation(location.latitude, location.longitude)
-        // query 5km around the location
+        // query $radiusKmRange km around the location
         val radiusInM = (radiusKmRange * 1000).toDouble()
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
@@ -124,7 +126,55 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
             }
     }
 
+    // get active shop near by
+    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+        val center = GeoLocation(location.latitude, location.longitude)
+        // query $radiusKmRange km around the location
+        val radiusInM = (radiusKmRange * 1000).toDouble()
+        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
+        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+        for (b in bounds) {
+            val q = db.collection(SHOP_COLLECTION)
+                .orderBy("location\$app_debug.$GEO_HASH")
+                .startAt(b.startHash)
+                .endAt(b.endHash)
+            tasks.add(q.get())
+        }
+        // Collect all the query results together into a single list
+        Tasks.whenAllComplete(tasks)
+            .addOnCompleteListener {
+                val matchingDocs: MutableList<DocumentSnapshot> = ArrayList()
+                for (task in tasks) {
+                    val snap: QuerySnapshot = task.result
+                    for (doc in snap.documents) {
+                        val shop = doc.toObject<Shop>()
+                        val lat = shop?.location?.getValue(LATITUDE)
+                        val lng = shop?.location?.getValue(LONGITUDE)
+                        // We have to filter out a few false positives due to GeoHash
+                        // accuracy, but most will match
+                        if (lat != null && lng != null) {
+                            val docLocation = GeoLocation(lat as Double, lng as Double)
+                            val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
+                            if (distanceInM <= radiusInM) {
+                                matchingDocs.add(doc)
+                            }
+                        }
+                    }
+                }
+                // matchingDocs contains the results
+                val list = mutableListOf<Shop>()
+                for (documentSnapshot in matchingDocs) {
+                    val item = documentSnapshot.toObject<Shop>()
+                    item?.let { it1 -> list.add(it1) }
+                }
+                shopLists.addAll(list)
+                _allShop.value = shopLists
+            }
+    }
+
     internal fun getShopCloneInfo(position: Int) = shopCloneLists[position]
 
     internal fun getShopClone() = shopCloneLists
+
+    internal fun getNearByShopNumber() = shopCloneLists.size + shopLists.size
 }
