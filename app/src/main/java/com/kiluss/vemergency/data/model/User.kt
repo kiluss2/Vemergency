@@ -9,5 +9,6 @@ data class User(
     internal var phone: String? = null,
     internal var reviews: String? = null,
     internal var imageUrl: String? = null,
-    internal var lastModifiedTime: Double? = null
+    internal var lastModifiedTime: Double? = null,
+    internal var inEmergency: Boolean? = null,
 )
