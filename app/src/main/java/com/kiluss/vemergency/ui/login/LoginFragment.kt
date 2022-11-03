@@ -19,6 +19,7 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.admin.main.AdminMainActivity
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
+import com.kiluss.vemergency.ui.user.emergency.CreateEmergencyActivity
 import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
 import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
 import com.kiluss.vemergency.ui.user.userprofile.UserProfileActivity
@@ -131,6 +132,11 @@ class LoginFragment : Fragment() {
                     EXTRA_CHANGE_PASSWORD -> {
                         requireActivity().startActivity(
                             Intent(requireActivity(), ChangePasswordActivity::class.java)
+                        )
+                    }
+                    EXTRA_EMERGENCY -> {
+                        requireActivity().startActivity(
+                            Intent(requireActivity(), CreateEmergencyActivity::class.java)
                         )
                     }
                 }

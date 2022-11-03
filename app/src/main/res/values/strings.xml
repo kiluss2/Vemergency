@@ -26,4 +26,5 @@
     <string name="estimate_time">Estimate time: </string>
     <string name="direction_to">Direction to </string>
     <string name="direction_from_your_location">Direction from your location</string>
+    <string name="or_use_your_location_by_default">or just leave it to use your current location by default</string>
 </resources>

@@ -4,11 +4,12 @@ package com.kiluss.vemergency.data.model
  * Created by sonlv on 11/1/2022
  */
 data class Transaction(
-    internal val userUid: String? = null,
-    internal val shopUid: String? = null,
-    internal val service: String? = null,
-    internal val time: Double? = null,
-    internal val waiting: Boolean = true,
-    internal val content: String? = null,
-    internal val review: Review? = null
+    internal var userUid: String? = null,
+    internal var shopUid: String? = null,
+    internal var service: String? = null,
+    internal var time: Double? = null,
+    internal var content: String? = null,
+    internal var userLocation: LatLng? = null,
+    internal var shopLocation: LatLng? = null,
+    internal var review: Review? = null
 )
