@@ -42,7 +42,9 @@
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
                             android:text="Choose emergency service: "
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:textSize="17dp"
+                            android:textColor="@color/blue"/>
 
                         <Spinner
                             android:id="@+id/spinnerCategory"
@@ -61,16 +63,16 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Note: "
+                            android:text="Note:"
                             android:textStyle="bold" />
 
                         <EditText
-                            android:id="@+id/edtWebsite"
+                            android:id="@+id/edtContent"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="10dp"
                             android:hint="Note"
-                            android:inputType="textUri" />
+                            android:inputType="textMultiLine" />
 
                     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -124,6 +126,12 @@
                                 app:layout_constraintTop_toTopOf="parent" />
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/or_use_your_location_by_default"
+                        android:layout_margin="10dp"/>
 
                     <Button
                         android:id="@+id/btnSubmit"

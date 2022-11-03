@@ -117,7 +117,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal fun getNearByShop(location: Location, radiusKmRange: Int) {
         val center = GeoLocation(location.latitude, location.longitude)
         // query $radiusKmRange km around the location
-        val radiusInM = (radiusKmRange * 1000).toDouble()
+        val radiusInM = (radiusKmRange * 5000).toDouble()
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
         for (b in bounds) {

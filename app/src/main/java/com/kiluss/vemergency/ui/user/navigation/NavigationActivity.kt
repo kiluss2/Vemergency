@@ -186,7 +186,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             currentPolyLines?.remove()
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             binding.tvBottomSheetTitle.text = MessageFormat.format(
-                resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
+                resources.getText(R.string.text_found_near_by).toString(), viewModel.getNearByShopNumber()
             )
             setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
         }
