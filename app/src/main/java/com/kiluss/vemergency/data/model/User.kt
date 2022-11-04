@@ -11,4 +11,5 @@ data class User(
     internal var imageUrl: String? = null,
     internal var lastModifiedTime: Double? = null,
     internal var inEmergency: Boolean? = null,
+    internal var fcmToken: String? = null
 )

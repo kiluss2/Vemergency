@@ -19,5 +19,6 @@ import kotlinx.parcelize.RawValue
     internal var location: @RawValue HashMap<String, Any>? = null,
     internal var pendingApprove: Boolean? = null,
     internal var created: Boolean? = null,
-    internal var lastModifiedTime: Double? = null
+    internal var lastModifiedTime: Double? = null,
+    internal var fcmToken: String? = null
 ) : Parcelable
