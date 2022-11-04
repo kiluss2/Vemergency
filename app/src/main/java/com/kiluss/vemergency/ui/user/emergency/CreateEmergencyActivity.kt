@@ -99,7 +99,7 @@ class CreateEmergencyActivity : AppCompatActivity() {
             btnSubmit.setOnClickListener {
                 if (binding.spinnerCategory.selectedItem.toString().isNotEmpty()) {
                     transaction.content = edtContent.text.toString()
-                    transaction.time = Calendar.getInstance().timeInMillis.toDouble()
+                    transaction.startTime = Calendar.getInstance().timeInMillis.toDouble()
                     transaction.userUid = FirebaseManager.getAuth()?.uid
                     if (tvLocationPicked.text.isEmpty()) {
                         if (location != null) {

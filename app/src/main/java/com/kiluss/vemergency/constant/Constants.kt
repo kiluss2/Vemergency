@@ -26,6 +26,7 @@ const val DEFAULT_ZOOM = 10F
 const val EMPTY_STRING = ""
 const val MAX_WIDTH_IMAGE = 600
 const val HTTP_PREFIX = "https://"
+const val CHANEL_ID = "push_notification_id"
 
 // navigation activity
 const val MY_PERMISSIONS_REQUEST_LOCATION = 99
