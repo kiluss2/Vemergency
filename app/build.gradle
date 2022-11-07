@@ -95,4 +95,6 @@ dependencies {
 
     // work manager
     implementation "androidx.work:work-runtime-ktx:$work_version"
+    // FirePush
+    implementation 'com.github.karanatwal:FirePush:1.0.0'
 }

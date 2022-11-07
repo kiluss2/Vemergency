@@ -148,7 +148,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             if (!directing) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.tvBottomSheetTitle.text = MessageFormat.format(
-                    resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
+                    resources .getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
                 )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
