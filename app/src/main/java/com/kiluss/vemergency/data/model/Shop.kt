@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
-@Keep
 @Parcelize data class Shop(
     internal var uid: String? = null,
     internal var name: String? = null,
