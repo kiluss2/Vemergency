@@ -1,9 +1,10 @@
 package com.kiluss.vemergency.data.model
 
 import android.os.Parcelable
+import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
-
+@Keep
 @Parcelize data class Shop(
     internal var uid: String? = null,
     internal var name: String? = null,
@@ -20,5 +21,6 @@ import kotlinx.parcelize.RawValue
     internal var pendingApprove: Boolean? = null,
     internal var created: Boolean? = null,
     internal var lastModifiedTime: Double? = null,
-    internal var fcmToken: String? = null
+    internal var fcmToken: String? = null,
+    internal var isReady: Boolean = false,
 ) : Parcelable

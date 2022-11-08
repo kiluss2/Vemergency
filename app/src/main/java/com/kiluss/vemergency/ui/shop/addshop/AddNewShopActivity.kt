@@ -26,7 +26,7 @@ import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.kiluss.bookrate.network.api.RetrofitClient
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -91,7 +91,7 @@ class AddNewShopActivity : AppCompatActivity() {
         binding = ActivityAddNewShopBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ImageService::class.java)
     }
 
     private fun setupView() {

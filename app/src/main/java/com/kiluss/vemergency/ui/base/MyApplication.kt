@@ -14,7 +14,6 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         makeNotificationChannel(CHANEL_ID, "Notification", NotificationManager.IMPORTANCE_DEFAULT)
-        Fire.init("YOUR_SERVER_KEY_HERE")
     }
 
     fun makeNotificationChannel(id: String?, name: String?, importance: Int) {

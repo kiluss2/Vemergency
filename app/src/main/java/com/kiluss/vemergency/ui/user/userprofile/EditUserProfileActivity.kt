@@ -24,8 +24,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.kiluss.bookrate.network.api.RetrofitClient
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.IMAGE_API_URL
 import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
 import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -81,7 +82,7 @@ class EditUserProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupView()
         getUserData()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ImageService::class.java)
     }
 
     private fun setupView() {
@@ -123,7 +124,7 @@ class EditUserProfileActivity : AppCompatActivity() {
                         Utils.showShortToast(this@EditUserProfileActivity, "Edit successful")
                         finish()
                     }
-                    .addOnFailureListener { e ->
+                    .addOnFailureListener {
                         hideProgressbar()
                         Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
                         Log.e(ContentValues.TAG, "Error adding document")

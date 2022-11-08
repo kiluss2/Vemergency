@@ -42,7 +42,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="16dp"
-                            android:text="Shop name: "
+                            android:text="@string/shop_name"
                             android:textStyle="bold" />
 
                         <EditText
@@ -50,7 +50,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="10dp"
-                            android:hint="Input title"
+                            android:hint="@string/input_title"
                             android:inputType="text" />
                     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -65,7 +65,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Address: "
+                            android:text="@string/address"
                             android:textStyle="bold" />
 
                         <androidx.appcompat.widget.LinearLayoutCompat
@@ -77,7 +77,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginHorizontal="10dp"
-                                android:hint="Address"
+                                android:hint="@string/address"
                                 android:inputType="text" />
                         </androidx.appcompat.widget.LinearLayoutCompat>
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -93,7 +93,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Owner name: "
+                            android:text="@string/owner_name"
                             android:textStyle="bold" />
 
                         <androidx.appcompat.widget.LinearLayoutCompat
@@ -105,7 +105,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginHorizontal="10dp"
-                                android:hint="Owner"
+                                android:hint="@string/owner"
                                 android:inputType="text" />
                         </androidx.appcompat.widget.LinearLayoutCompat>
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -121,7 +121,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Phone number: "
+                            android:text="@string/phone_number"
                             android:textStyle="bold" />
 
                         <EditText
@@ -129,7 +129,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="10dp"
-                            android:hint="Phone"
+                            android:hint="@string/phone"
                             android:inputType="phone" />
 
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -145,7 +145,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Open time: "
+                            android:text="@string/open_time"
                             android:textStyle="bold" />
 
                         <androidx.appcompat.widget.LinearLayoutCompat
@@ -157,7 +157,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginHorizontal="10dp"
-                                android:hint="Open time"
+                                android:hint="@string/open_time"
                                 android:inputType="text" />
                         </androidx.appcompat.widget.LinearLayoutCompat>
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -172,7 +172,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Category: "
+                            android:text="@string/category"
                             android:textStyle="bold" />
 
                         <Spinner
@@ -192,7 +192,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Website: "
+                            android:text="@string/website"
                             android:textStyle="bold" />
 
                         <EditText
@@ -200,7 +200,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="10dp"
-                            android:hint="Website"
+                            android:hint="@string/website"
                             android:inputType="textUri" />
 
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -215,7 +215,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="Shop cover: "
+                            android:text="@string/upload_shop_proof_photo"
                             android:textStyle="bold" />
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -240,7 +240,7 @@
                                     android:layout_marginStart="8dp"
                                     android:layout_marginEnd="4dp"
                                     android:gravity="center_horizontal"
-                                    android:text="Pick cover"
+                                    android:text="@string/pick_image"
                                     android:textSize="16dp"
                                     android:textStyle="bold" />
 
@@ -294,7 +294,7 @@
                                     android:layout_marginStart="8dp"
                                     android:layout_marginEnd="4dp"
                                     android:gravity="center_horizontal"
-                                    android:text="Pick location"
+                                    android:text="@string/pick_location"
                                     android:textSize="16dp"
                                     android:textStyle="bold" />
 
@@ -325,7 +325,7 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="8dp"
-                        android:text="Submit" />
+                        android:text="@string/submit" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
 
