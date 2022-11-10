@@ -16,7 +16,9 @@ import androidx.work.WorkerParameters
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
 import com.kiluss.vemergency.ui.user.main.MainActivity
+import com.kiluss.vemergency.utils.SharedPrefManager
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -76,9 +78,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun sendRegistrationToServer(token: String?) {
-        // TODO: Implement this method to send token to your app server.
-        Log.d(TAG, "sendRegistrationTokenToServer($token)")
+    private fun sendRegistrationToServer(token: String) {
+        SharedPrefManager.putString(FCM_DEVICE_TOKEN, token)
     }
 
     private fun sendNotification(messageBody: String) {

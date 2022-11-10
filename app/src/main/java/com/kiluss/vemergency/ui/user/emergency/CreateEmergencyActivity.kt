@@ -9,9 +9,11 @@ import android.icu.util.Calendar
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,8 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -33,8 +37,15 @@ import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.ActivityCreateEmergencyBinding
+import com.kiluss.vemergency.network.api.ApiService
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.Utils
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class CreateEmergencyActivity : AppCompatActivity() {
 
@@ -133,6 +144,29 @@ class CreateEmergencyActivity : AppCompatActivity() {
 
     private fun sendEmergency() {
         println(shopLists)
+        val tokens = JsonArray()
+        tokens.add("ftZKtB2wRAuLTDaS7tg4ov:APA91bHbDmyyoV8Rd8rVexKBdSC2EbrzNkVxQVyx1efXfQFsP-7xAlHfx6Nfk9_IwnxRIM1Vteu60PfTdjkvISyTzzgze6KjjeWvE4VQmEuUaJNn-ONhkU-oboeoLhD68amyJwxbmDHx")
+        tokens.add("fEOFrZcPRLuiVDjbhsVHdg:APA91bFD9hXYgJqawGXEFbM8Cds75wFaY17hODj5lkhOiTfnoelJlwj4OoKX3k5_5Zlkos3EKXs1aLNG0RZYWnTi4jhLZKEw0bA3DrJELyZFs6AH0fb83uTnvMfloRGAiTNXH_ItqEbO")
+        RetrofitClient.getInstance(this).getClientUnAuthorize(SEND_NOTI_API_URL).create(ApiService::class.java)
+            .sendNoti(tokens.toString().toRequestBody())
+            .enqueue(object : Callback<JsonObject?> {
+                override fun onResponse(
+                    call: Call<JsonObject?>,
+                    response: Response<JsonObject?>
+                ) {
+                    Log.e("emergency", response.body().toString())
+                    when {
+                        response.isSuccessful -> {
+                            Log.e("emergency", response.body().toString())
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
+                    Log.e("emergency", t.toString())
+                    t.printStackTrace()
+                }
+            })
     }
 
     private fun setProgressDialog(show: Boolean) {

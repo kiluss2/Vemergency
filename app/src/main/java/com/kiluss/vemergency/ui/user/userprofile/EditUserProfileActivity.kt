@@ -32,7 +32,7 @@ import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
-import com.kiluss.vemergency.network.api.ImageService
+import com.kiluss.vemergency.network.api.ApiService
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import org.json.JSONObject
@@ -49,7 +49,7 @@ class EditUserProfileActivity : AppCompatActivity() {
     private var user = User()
     private val db = Firebase.firestore
     private lateinit var binding: ActivityEditUserProfileBinding
-    private lateinit var imageApi: ImageService
+    private lateinit var imageApi: ApiService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -82,7 +82,7 @@ class EditUserProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupView()
         getUserData()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ApiService::class.java)
     }
 
     private fun setupView() {
@@ -136,7 +136,7 @@ class EditUserProfileActivity : AppCompatActivity() {
     private fun uploadImage() {
         val iBase64 = imageBase64
         if (iBase64 != null) {
-            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
+            imageApi.uploadPhoto(Utils.createRequestBodyForImage(iBase64))
                 .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
                         call: Call<JsonObject?>,

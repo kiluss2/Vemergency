@@ -13,6 +13,7 @@ import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.utils.Utils
 
 /**
  * Created by sonlv on 10/17/2022
@@ -101,8 +102,15 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
     internal fun getShopData() = myShop
 
     internal fun signOut() {
+        removeFcmToken()
         FirebaseManager.getAuth()?.signOut() //End user session
         FirebaseManager.logout()
+    }
+
+    private fun removeFcmToken() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+        }
     }
 
     private fun hideProgressbar() {

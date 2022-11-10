@@ -33,7 +33,7 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
-import com.kiluss.vemergency.network.api.ImageService
+import com.kiluss.vemergency.network.api.ApiService
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
@@ -52,7 +52,7 @@ class AddNewShopActivity : AppCompatActivity() {
     private var shop = Shop()
     private var location: LatLng? = null
     private val db = Firebase.firestore
-    private lateinit var imageApi: ImageService
+    private lateinit var imageApi: ApiService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -91,7 +91,7 @@ class AddNewShopActivity : AppCompatActivity() {
         binding = ActivityAddNewShopBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ApiService::class.java)
     }
 
     private fun setupView() {
@@ -189,7 +189,7 @@ class AddNewShopActivity : AppCompatActivity() {
     private fun uploadShopImage() {
         val iBase64 = imageBase64
         if (iBase64 != null) {
-            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
+            imageApi.uploadPhoto(Utils.createRequestBodyForImage(iBase64))
                 .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
                         call: Call<JsonObject?>,

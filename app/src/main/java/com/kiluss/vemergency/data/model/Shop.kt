@@ -5,8 +5,8 @@ import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 @Parcelize data class Shop(
-    internal var uid: String? = null,
-    internal var name: String? = null,
+    var uid: String? = null,
+    var name: String? = null,
     internal var owner: String? = null,
     internal var address: String? = null,
     internal var phone: String? = null,

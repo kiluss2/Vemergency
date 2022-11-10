@@ -86,6 +86,7 @@ class UserProfileActivity : AppCompatActivity() {
                 startActivity(Intent(this@UserProfileActivity, EditUserProfileActivity::class.java))
             }
             btnLogout.setOnClickListener {
+                removeFcmToken()
                 FirebaseManager.getAuth()?.signOut() //End user session
                 FirebaseManager.logout()
                 finish()
@@ -117,6 +118,12 @@ class UserProfileActivity : AppCompatActivity() {
                     }.create().show()
                 }
             }
+        }
+    }
+
+    private fun removeFcmToken() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
         }
     }
 

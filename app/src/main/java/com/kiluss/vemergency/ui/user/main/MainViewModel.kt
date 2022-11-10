@@ -9,7 +9,6 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -19,6 +18,7 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.utils.Utils
 
 class MainViewModel(application: Application) : BaseViewModel(application) {
 
@@ -67,9 +67,16 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal fun getUserData() = user
 
     internal fun signOut() {
+        removeFcmToken()
         FirebaseManager.getAuth()?.signOut() //End user session
         FirebaseManager.logout()
         getUserInfo()
+    }
+
+    private fun removeFcmToken() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+        }
     }
 
     private fun hideProgressbar() {

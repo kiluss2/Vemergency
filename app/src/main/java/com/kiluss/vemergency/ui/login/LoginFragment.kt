@@ -75,11 +75,17 @@ class LoginFragment : Fragment() {
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseManager.init()
-                            auth.currentUser?.uid?.let {
-                                db.collection(Utils.getCollectionRole()).document(it).get()
+                            auth.currentUser?.uid?.let { uid ->
+                                val collectionRole = Utils.getCollectionRole()
+                                db.collection(collectionRole).document(uid).get()
                                     .addOnSuccessListener { documentSnapshot ->
                                         binding.pbLoading.visibility = View.GONE
                                         if (documentSnapshot.exists()) {
+                                            db.collection(collectionRole).document(uid).update(
+                                                "fcmToken", SharedPrefManager.getString(
+                                                    FCM_DEVICE_TOKEN, ""
+                                                )
+                                            )
                                             loginSuccess()
                                         } else {
                                             Utils.showLongToast(
