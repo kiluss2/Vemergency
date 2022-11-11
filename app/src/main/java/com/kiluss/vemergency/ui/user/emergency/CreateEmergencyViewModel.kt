@@ -39,7 +39,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
     internal fun getNearByShop(location: Location, radiusKmRange: Int) {
         if (radiusKmRange >= 200) {
             Utils.showLongToast(getApplication(), "Can't find any service near by you")
-        } else if (isStarting) {
+        } else if (queryNearShop) {
             val center = GeoLocation(location.latitude, location.longitude)
             // query $radiusKmRange km around the location
             val radiusInM = (radiusKmRange * 1000).toDouble()
