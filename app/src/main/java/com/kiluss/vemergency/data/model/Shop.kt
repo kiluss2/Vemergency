@@ -1,25 +1,26 @@
 package com.kiluss.vemergency.data.model
 
 import android.os.Parcelable
-import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
-@Parcelize data class Shop(
+
+@Parcelize
+data class Shop(
     var uid: String? = null,
     var name: String? = null,
-    internal var owner: String? = null,
-    internal var address: String? = null,
-    internal var phone: String? = null,
-    internal var openTime: String? = null,
-    internal var website: String? = null,
-    internal var imageUrl: String? = null,
-    internal var service: String? = null,
-    internal var rating: Double? = null,
-    internal var reviewCount: Long? = null,
-    internal var location: @RawValue HashMap<String, Any>? = null,
-    internal var pendingApprove: Boolean? = null,
-    internal var created: Boolean? = null,
-    internal var lastModifiedTime: Double? = null,
-    internal var fcmToken: String? = null,
-    internal var isReady: Boolean = false,
+    var owner: String? = null,
+    var address: String? = null,
+    var phone: String? = null,
+    var openTime: String? = null,
+    var website: String? = null,
+    var imageUrl: String? = null,
+    var service: String? = null,
+    var rating: Double? = null,
+    var reviewCount: Long? = null,
+    var location: @RawValue HashMap<String, Any>? = null,
+    var pendingApprove: Boolean? = null,
+    var created: Boolean? = null,
+    var lastModifiedTime: Double? = null,
+    var fcmToken: String? = null,
+    var isReady: Boolean = false,
 ) : Parcelable

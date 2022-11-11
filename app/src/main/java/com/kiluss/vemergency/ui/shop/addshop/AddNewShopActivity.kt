@@ -260,10 +260,10 @@ class AddNewShopActivity : AppCompatActivity() {
                 .addOnSuccessListener {
                     db.collection(SHOP_COLLECTION)
                         .document(uid)
-                        .set(Shop().apply {
-                            pendingApprove = true
-                            created = false
-                        })
+                        .update(
+                            "pendingApprove", true,
+                            "created", false
+                        )
                     hideProgressbar()
                     startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
                         putExtra(EXTRA_CREATED_SHOP, "created")

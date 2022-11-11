@@ -8,13 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityShopMainBinding
 
 class ShopMainActivity : AppCompatActivity() {
 
-    private var backPressPreviousState: Boolean = false
+    private var backPressPreviousState = false
     private lateinit var binding: ActivityShopMainBinding
 
     // view model ktx
@@ -45,14 +44,18 @@ class ShopMainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (backPressPreviousState) {
-            super.onBackPressed()
-        } else {
+        val id = findNavController(R.id.navFragment).currentDestination?.id
+        if (id == R.id.myShopFragment && !backPressPreviousState) {
             backPressPreviousState = true
-            Toast.makeText(this, getString(R.string.press_one_more_time_to_exit), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Press one more time to exit", Toast.LENGTH_SHORT).show()
             Handler().postDelayed({
                 backPressPreviousState = false
-            }, DELAY_BACK_TO_EXIT_TIME)
+            }, 3000)
+        } else if (id != R.id.myShopFragment) {
+            super.onBackPressed()
+            backPressPreviousState = false
+        } else if (backPressPreviousState) {
+            super.onBackPressed()
         }
     }
 }

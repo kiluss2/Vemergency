@@ -8,7 +8,7 @@ package com.kiluss.vemergency.constant
 const val IMAGE_API_URL = "https://freeimage.host/api/"
 const val IMAGE_API_KEY = "6d207e02198a847aa98d0a2a901485a5"
 const val PROVINCE_API_URL = "https://provinces.open-api.vn/api/"
-const val SEND_NOTI_API_URL = "https://02b0-117-2-120-195.ap.ngrok.io/core/"
+const val SEND_NOTI_API_URL = "https://886b-113-176-107-71.ap.ngrok.io/core/"
 
 const val SAVED_LOGIN_ACCOUNT_KEY = "saved_login_account_key"
 const val SIGN_IN_KEY = "sign_in_key"

@@ -9,53 +9,31 @@ import android.icu.util.Calendar
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.firebase.geofire.GeoFireUtils
-import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.*
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
-import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.ActivityCreateEmergencyBinding
-import com.kiluss.vemergency.network.api.ApiService
-import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.Utils
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class CreateEmergencyActivity : AppCompatActivity() {
 
-    private var isStarting = false
     private lateinit var binding: ActivityCreateEmergencyBinding
     private var transaction = Transaction()
     private var location: Location? = null
-    private val db = Firebase.firestore
     private var dialog: AlertDialog? = null
-    private val shopLists = mutableListOf<Shop>()
+    private val viewModel: CreateEmergencyViewModel by viewModels()
     private val pickLocationFromGalleryForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -70,6 +48,16 @@ class CreateEmergencyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateEmergencyBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        observeViewModel()
+        getCurrentLocation()
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+        }
+    }
+
+    private fun getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(
                 this@CreateEmergencyActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -84,7 +72,8 @@ class CreateEmergencyActivity : AppCompatActivity() {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         this.location = location
-                        getNearByShop(location, 1)
+                        viewModel.getNearByShop(location, 1)
+                        viewModel.queryNearShop = true
                     }
                     setupView()
                 }
@@ -102,6 +91,10 @@ class CreateEmergencyActivity : AppCompatActivity() {
         builder.setView(R.layout.progress_dialog)
         dialog = builder.create()
         dialog?.setCanceledOnTouchOutside(false)
+        dialog?.setOnDismissListener {
+            viewModel.isStarting = false
+            viewModel.queryNearShop = false
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -112,13 +105,14 @@ class CreateEmergencyActivity : AppCompatActivity() {
                     transaction.content = edtContent.text.toString()
                     transaction.startTime = Calendar.getInstance().timeInMillis.toDouble()
                     transaction.userUid = FirebaseManager.getAuth()?.uid
+                    // when user let to use current location
                     if (tvLocationPicked.text.isEmpty()) {
                         if (location != null) {
                             transaction.userLocation = LatLng(location?.latitude, location?.longitude)
-                            if (shopLists.isEmpty()) {
-                                isStarting = true
+                            if (viewModel.shopLists.isEmpty()) {
+                                viewModel.isStarting = true
                             } else {
-                                sendEmergency()
+                                viewModel.sendEmergency(viewModel.shopLists)
                             }
                             setProgressDialog(true)
                         } else {
@@ -131,8 +125,8 @@ class CreateEmergencyActivity : AppCompatActivity() {
                         val location = Location(LocationManager.GPS_PROVIDER)
                         location.latitude = transaction.userLocation?.latitude!!
                         location.longitude = transaction.userLocation?.longitude!!
-                        isStarting = true
-                        getNearByShop(location, 1)
+                        viewModel.isStarting = true
+                        viewModel.getNearByShop(location, 1)
                         setProgressDialog(true)
                     }
                 } else {
@@ -140,33 +134,6 @@ class CreateEmergencyActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun sendEmergency() {
-        println(shopLists)
-        val tokens = JsonArray()
-        tokens.add("ftZKtB2wRAuLTDaS7tg4ov:APA91bHbDmyyoV8Rd8rVexKBdSC2EbrzNkVxQVyx1efXfQFsP-7xAlHfx6Nfk9_IwnxRIM1Vteu60PfTdjkvISyTzzgze6KjjeWvE4VQmEuUaJNn-ONhkU-oboeoLhD68amyJwxbmDHx")
-        tokens.add("fEOFrZcPRLuiVDjbhsVHdg:APA91bFD9hXYgJqawGXEFbM8Cds75wFaY17hODj5lkhOiTfnoelJlwj4OoKX3k5_5Zlkos3EKXs1aLNG0RZYWnTi4jhLZKEw0bA3DrJELyZFs6AH0fb83uTnvMfloRGAiTNXH_ItqEbO")
-        RetrofitClient.getInstance(this).getClientUnAuthorize(SEND_NOTI_API_URL).create(ApiService::class.java)
-            .sendNoti(tokens.toString().toRequestBody())
-            .enqueue(object : Callback<JsonObject?> {
-                override fun onResponse(
-                    call: Call<JsonObject?>,
-                    response: Response<JsonObject?>
-                ) {
-                    Log.e("emergency", response.body().toString())
-                    when {
-                        response.isSuccessful -> {
-                            Log.e("emergency", response.body().toString())
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
-                    Log.e("emergency", t.toString())
-                    t.printStackTrace()
-                }
-            })
     }
 
     private fun setProgressDialog(show: Boolean) {
@@ -196,61 +163,8 @@ class CreateEmergencyActivity : AppCompatActivity() {
         }
     }
 
-    // get active shop near by
-    private fun getNearByShop(location: Location, radiusKmRange: Int) {
-        val center = GeoLocation(location.latitude, location.longitude)
-        // query $radiusKmRange km around the location
-        val radiusInM = (radiusKmRange * 1000).toDouble()
-        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
-        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
-        for (b in bounds) {
-            val q = db.collection(SHOP_COLLECTION)
-                .orderBy("location\$app_debug.$GEO_HASH")
-                .startAt(b.startHash)
-                .endAt(b.endHash)
-            tasks.add(q.get())
-        }
-        // Collect all the query results together into a single list
-        Tasks.whenAllComplete(tasks)
-            .addOnCompleteListener {
-                val matchingDocs: MutableList<DocumentSnapshot> = ArrayList()
-                for (task in tasks) {
-                    val snap: QuerySnapshot = task.result
-                    for (doc in snap.documents) {
-                        val shop = doc.toObject<Shop>()
-                        val lat = shop?.location?.getValue(LATITUDE)
-                        val lng = shop?.location?.getValue(LONGITUDE)
-                        // We have to filter out a few false positives due to GeoHash
-                        // accuracy, but most will match
-                        if (lat != null && lng != null) {
-                            val docLocation = GeoLocation(lat as Double, lng as Double)
-                            val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
-                            if (distanceInM <= radiusInM) {
-                                matchingDocs.add(doc)
-                            }
-                        }
-                    }
-                }
-                if (matchingDocs.isEmpty()) {
-                    getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1)
-                    println(radiusKmRange + radiusKmRange % 10 + 1)
-                } else {
-                    // matchingDocs contains the results
-                    val list = mutableListOf<Shop>()
-                    for (documentSnapshot in matchingDocs) {
-                        val item = documentSnapshot.toObject<Shop>()
-                        item?.let { it1 -> list.add(it1) }
-                    }
-                    shopLists.addAll(list)
-                    if (isStarting) {
-                        sendEmergency()
-                    }
-                }
-            }
-    }
-
     override fun onBackPressed() {
-        if (isStarting) {
+        if (viewModel.isStarting) {
             finish()
         } else {
             super.onBackPressed()
