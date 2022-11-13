@@ -91,7 +91,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         val tasks = mutableListOf<Task<QuerySnapshot>>()
         for (b in bounds) {
             val q = db.collection(SHOP_CLONE_COLLECTION)
-                .orderBy("location\$app_debug.$GEO_HASH")
+                .orderBy("location.$GEO_HASH")
                 .startAt(b.startHash)
                 .endAt(b.endHash)
             tasks.add(q.get())
@@ -129,7 +129,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
         for (b in bounds) {
             val q = db.collection(SHOP_COLLECTION)
-                .orderBy("location\$app_debug.$GEO_HASH")
+                .orderBy("location.$GEO_HASH")
                 .startAt(b.startHash)
                 .endAt(b.endHash)
             tasks.add(q.get())

@@ -191,10 +191,6 @@ class PickRoleActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
                 ), MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
             )
-        } else {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSIONS_REQUEST_LOCATION
-            )
         }
     }
 }

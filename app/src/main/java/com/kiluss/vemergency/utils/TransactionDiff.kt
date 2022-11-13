@@ -1,13 +1,12 @@
 package com.kiluss.vemergency.utils
 
 import androidx.recyclerview.widget.DiffUtil
-import com.kiluss.vemergency.data.model.Shop
+import com.kiluss.vemergency.data.model.Transaction
 
-class ShopDiff(
-    private var newList: MutableList<Shop>,
-    private var oldList: MutableList<Shop>
+class TransactionDiff(
+    private var newList: MutableList<Transaction>,
+    private var oldList: MutableList<Transaction>
 ) : DiffUtil.Callback() {
-
     override fun getOldListSize(): Int {
         return oldList.size
     }

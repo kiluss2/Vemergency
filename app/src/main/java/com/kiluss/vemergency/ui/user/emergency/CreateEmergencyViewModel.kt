@@ -14,13 +14,26 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
+import com.kiluss.vemergency.constant.GEO_HASH
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.SEND_NOTI_API_URL
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.USER_COLLECTION
+import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
+import com.kiluss.vemergency.data.model.Transaction
+import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.network.api.ApiService
 import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.utils.SharedPrefManager
 import com.kiluss.vemergency.utils.Utils
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,14 +42,12 @@ import retrofit2.Response
  * Created by sonlv on 11/11/2022
  */
 class CreateEmergencyViewModel(application: Application) : BaseViewModel(application) {
-
-    internal var isStarting = false
     internal var queryNearShop = true
     private val db = Firebase.firestore
     internal val shopLists = mutableListOf<Shop>()
 
     // get active shop near by
-    internal fun getNearByShop(location: Location, radiusKmRange: Int) {
+    internal fun getNearByShop(location: Location, radiusKmRange: Int, transaction: Transaction) {
         if (radiusKmRange >= 200) {
             Utils.showLongToast(getApplication(), "Can't find any service near by you")
         } else if (queryNearShop) {
@@ -47,7 +58,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
             val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
             for (b in bounds) {
                 val q = db.collection(SHOP_COLLECTION)
-                    .orderBy("location\$app_debug.$GEO_HASH")
+                    .orderBy("location.$GEO_HASH")
                     .startAt(b.startHash)
                     .endAt(b.endHash)
                 tasks.add(q.get())
@@ -74,7 +85,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                         }
                     }
                     if (matchingDocs.isEmpty()) {
-                        getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1)
+                        getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1, transaction)
                         println(radiusKmRange + radiusKmRange % 10 + 1)
                     } else {
                         // matchingDocs contains the results
@@ -90,11 +101,8 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                         }
                         if (list.isNotEmpty()) {
                             shopLists.addAll(list)
-                            if (isStarting) {
-                                sendEmergency(shopLists)
-                            }
                         } else {
-                            getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1)
+                            getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1, transaction)
                             println(radiusKmRange + radiusKmRange % 10 + 1)
                         }
                     }
@@ -102,38 +110,63 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
         }
     }
 
-    internal fun sendEmergency(shopLists: MutableList<Shop>) {
+    internal fun sendEmergency(shopLists: MutableList<Shop>, transaction: Transaction) {
         val tokens = JsonArray()
+        val shopIds = JsonArray()
         shopLists.forEach {
-            val token = it.fcmToken
-            if (token != null && token.isNotEmpty()) {
-                tokens.add(token)
-                println(it)
+            val shopToken = it.fcmToken
+            if (shopToken != null && shopToken.isNotEmpty() && it.created == true) {
+                tokens.add(shopToken)
+                shopIds.add(it.id)
             }
         }
-        RetrofitClient.getInstance(getApplication()).getClientUnAuthorize(SEND_NOTI_API_URL)
-            .create(ApiService::class.java)
-            .sendNoti(tokens.toString().toRequestBody())
-            .enqueue(object : Callback<JsonObject?> {
-                override fun onResponse(
-                    call: Call<JsonObject?>,
-                    response: Response<JsonObject?>
-                ) {
-                    when {
-                        response.isSuccessful -> {
-                            Log.e("createEmergency", response.body().toString())
+        FirebaseManager.getAuth()?.uid?.let {
+            db.collection(USER_COLLECTION)
+                .document(it)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    documentSnapshot.toObject<User>()?.let { userInfo ->
+                        with(transaction) {
+                            userFcmToken = SharedPrefManager.getString(FCM_DEVICE_TOKEN, "")
+                            userFullName = userInfo.fullName
+                            userPhone = userInfo.phone
+                            address = userInfo.address
                         }
-                        else -> {
-                            Utils.showShortToast(getApplication(), "failCreateEmergency")
-                        }
+                        val request = JSONObject()
+                        request.put("transaction", Json.encodeToString(transaction))
+                        request.put("tokens", tokens)
+                        request.put("shops", shopIds)
+                        println(request)
+                        RetrofitClient.getInstance(getApplication()).getClientUnAuthorize(SEND_NOTI_API_URL)
+                            .create(ApiService::class.java)
+                            .sendNoti(request.toString().toRequestBody())
+                            .enqueue(object : Callback<JsonObject?> {
+                                override fun onResponse(
+                                    call: Call<JsonObject?>,
+                                    response: Response<JsonObject?>
+                                ) {
+                                    when {
+                                        response.isSuccessful -> {
+                                            Log.e("createEmergency", response.body().toString())
+                                        }
+                                        else -> {
+                                            Utils.showShortToast(getApplication(), "failCreateEmergency")
+                                        }
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
+                                    Log.e("failCreateEmergency", t.toString())
+                                    Utils.showShortToast(getApplication(), "failCreateEmergency")
+                                    t.printStackTrace()
+                                }
+                            })
                     }
                 }
-
-                override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
-                    Log.e("failCreateEmergency", t.toString())
-                    Utils.showShortToast(getApplication(), "failCreateEmergency")
-                    t.printStackTrace()
+                .addOnFailureListener { exception ->
+                    Utils.showShortToast(getApplication(), "Fail to get user information")
+                    Log.e("UserProfileActivity", exception.message.toString())
                 }
-            })
+        }
     }
 }

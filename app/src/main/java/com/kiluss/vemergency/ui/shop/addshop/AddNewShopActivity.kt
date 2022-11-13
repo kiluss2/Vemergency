@@ -253,7 +253,7 @@ class AddNewShopActivity : AppCompatActivity() {
         shop.created = false
         shop.lastModifiedTime = Calendar.getInstance().timeInMillis.toDouble()
         FirebaseManager.getAuth()?.uid?.let { uid ->
-            shop.uid = uid
+            shop.id = uid
             db.collection(SHOP_PENDING_COLLECTION)
                 .document(uid)
                 .set(shop)

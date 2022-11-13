@@ -143,6 +143,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             lifecycleScope.launch(Dispatchers.IO) {
                 delay(50)
                 launch(Dispatchers.Main) {
+                    // popup marker info
                     if (marker.isInfoWindowShown) {
                         marker.hideInfoWindow()
                     } else {
@@ -151,6 +152,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
                 }
             }
+            // show shop info in bottom sheet
             if (!directing) {
                 marker.tag?.let {
                     val tag = it as Pair<*, *>

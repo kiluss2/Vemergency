@@ -11,10 +11,15 @@
         android:label="MyShopFragment"
         tools:layout="@layout/fragment_my_shop" />
     <fragment
-        android:id="@+id/notificationFragment"
-        android:name="com.kiluss.vemergency.ui.user.main.NotificationFragment"
-        android:label="fragment_notification"
-        tools:layout="@layout/fragment_notification" />
+        android:id="@+id/pendingTransactionFragment"
+        android:name="com.kiluss.vemergency.ui.shop.main.PendingTransactionFragment"
+        android:label="fragment_pending_transaction"
+        tools:layout="@layout/fragment_pending_transaction" />
+    <fragment
+        android:id="@+id/historyTransactionFragment"
+        android:name="com.kiluss.vemergency.ui.shop.main.HistoryTransactionFragment"
+        android:label="fragment_history_transaction"
+        tools:layout="@layout/fragment_history_transaction" />
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.kiluss.vemergency.ui.shop.main.ShopSettingFragment"

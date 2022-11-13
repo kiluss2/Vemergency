@@ -236,7 +236,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
         db.runBatch { batch ->
             for (shop in shops) {
                 val docRef = collectionRef.document()
-                shop.uid = docRef.id
+                shop.id = docRef.id
                 batch.set(docRef, shop)
             }
         }.addOnCompleteListener { task ->

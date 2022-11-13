@@ -16,13 +16,12 @@ import androidx.work.WorkerParameters
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_PENDING_TRANSACTION_FRAGMENT
 import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
-import com.kiluss.vemergency.ui.user.main.MainActivity
+import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
-
-    // [START receive_message]
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
@@ -30,25 +29,24 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Check if message contains a data payload.
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
-
             if (false) {
                 // For long-running tasks (10 seconds or more) use WorkManager.
                 scheduleJob()
             } else {
                 // Handle message within 10 seconds
-                handleNow(remoteMessage.notification?.body)
+                handleData(remoteMessage.data)
             }
         }
         // Check if message contains a notification payload.
         remoteMessage.notification?.let {
             Log.d(TAG, "Message Notification Body: ${it.body}")
-            handleNow(it.body)
+            showNotification(it.body)
         }
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
-    // [END receive_message]
-    // [START on_new_token]
+
+    private fun handleData(data: Map<String, String>) {
+    }
+
     /**
      * Called if the FCM registration token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the
@@ -72,7 +70,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // [END dispatch_job]
     }
 
-    private fun handleNow(data: String?) {
+    private fun showNotification(data: String?) {
         data?.let {
             sendNotification(data)
         }
@@ -83,11 +81,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendNotification(messageBody: String) {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, ShopMainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtra(EXTRA_PENDING_TRANSACTION_FRAGMENT, "")
         val pendingIntent = PendingIntent.getActivity(
             this, 0 /* Request code */, intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
         val channelId = "fcm_default_channel"
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -113,12 +112,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     companion object {
-
         private const val TAG = "MyFirebaseMsgService"
     }
 
     internal class MyWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
-
         override fun doWork(): Result {
             // TODO(developer): add long running task here.
             return Result.success()

@@ -58,7 +58,7 @@ class HomeFragment : Fragment() {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         // Logic to handle location object
-                        viewModel.getNearByShop(location, 1)
+                        viewModel.getNearByShop(location, 10)
                     }
                 }
         }

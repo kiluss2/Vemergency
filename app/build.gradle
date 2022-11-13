@@ -4,6 +4,7 @@ plugins {
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
     id 'com.google.gms.google-services'
     id 'kotlin-parcelize'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
 }
 
 android {
@@ -95,4 +96,6 @@ dependencies {
 
     // work manager
     implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
 }

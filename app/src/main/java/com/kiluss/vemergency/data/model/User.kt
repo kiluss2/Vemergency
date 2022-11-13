@@ -1,7 +1,7 @@
 package com.kiluss.vemergency.data.model
 
 data class User(
-    var uid: String? = null,
+    var id: String? = null,
     var email: String? = null,
     var fullName: String? = null,
     var birthday: String? = null,

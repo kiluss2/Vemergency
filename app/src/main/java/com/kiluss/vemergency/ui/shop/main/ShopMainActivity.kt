@@ -1,5 +1,6 @@
 package com.kiluss.vemergency.ui.shop.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.widget.Toast
@@ -8,11 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_PENDING_TRANSACTION_FRAGMENT
+import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityShopMainBinding
+import com.kiluss.vemergency.ui.shop.rescue.ShopRescueActivity
 
 class ShopMainActivity : AppCompatActivity() {
-
     private var backPressPreviousState = false
     private lateinit var binding: ActivityShopMainBinding
 
@@ -37,6 +40,11 @@ class ShopMainActivity : AppCompatActivity() {
             navigateToHome.observe(this@ShopMainActivity) {
                 binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
             }
+            startRescue.observe(this@ShopMainActivity) {
+                startActivity(Intent(this@ShopMainActivity, ShopRescueActivity::class.java).apply {
+                    putExtra(EXTRA_TRANSACTION, it)
+                })
+            }
         }
     }
 
@@ -56,6 +64,13 @@ class ShopMainActivity : AppCompatActivity() {
             backPressPreviousState = false
         } else if (backPressPreviousState) {
             super.onBackPressed()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.getStringExtra(EXTRA_PENDING_TRANSACTION_FRAGMENT) != null) {
+            binding.bottomNavigationView.selectedItemId = R.id.pendingTransactionFragment
         }
     }
 }

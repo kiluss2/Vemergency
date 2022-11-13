@@ -19,7 +19,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.CAR_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.MOTORCYCLE_REPAIR_SERVICE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Transaction
@@ -28,7 +30,6 @@ import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.Utils
 
 class CreateEmergencyActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityCreateEmergencyBinding
     private var transaction = Transaction()
     private var location: Location? = null
@@ -72,7 +73,7 @@ class CreateEmergencyActivity : AppCompatActivity() {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         this.location = location
-                        viewModel.getNearByShop(location, 1)
+                        viewModel.getNearByShop(location, 1, transaction)
                         viewModel.queryNearShop = true
                     }
                     setupView()
@@ -92,7 +93,6 @@ class CreateEmergencyActivity : AppCompatActivity() {
         dialog = builder.create()
         dialog?.setCanceledOnTouchOutside(false)
         dialog?.setOnDismissListener {
-            viewModel.isStarting = false
             viewModel.queryNearShop = false
         }
     }
@@ -104,15 +104,14 @@ class CreateEmergencyActivity : AppCompatActivity() {
                 if (binding.spinnerCategory.selectedItem.toString().isNotEmpty()) {
                     transaction.content = edtContent.text.toString()
                     transaction.startTime = Calendar.getInstance().timeInMillis.toDouble()
-                    transaction.userUid = FirebaseManager.getAuth()?.uid
+                    transaction.userId = FirebaseManager.getAuth()?.uid
                     // when user let to use current location
                     if (tvLocationPicked.text.isEmpty()) {
                         if (location != null) {
                             transaction.userLocation = LatLng(location?.latitude, location?.longitude)
                             if (viewModel.shopLists.isEmpty()) {
-                                viewModel.isStarting = true
                             } else {
-                                viewModel.sendEmergency(viewModel.shopLists)
+                                viewModel.sendEmergency(viewModel.shopLists, transaction)
                             }
                             setProgressDialog(true)
                         } else {
@@ -125,8 +124,7 @@ class CreateEmergencyActivity : AppCompatActivity() {
                         val location = Location(LocationManager.GPS_PROVIDER)
                         location.latitude = transaction.userLocation?.latitude!!
                         location.longitude = transaction.userLocation?.longitude!!
-                        viewModel.isStarting = true
-                        viewModel.getNearByShop(location, 1)
+                        viewModel.getNearByShop(location, 1, transaction)
                         setProgressDialog(true)
                     }
                 } else {
@@ -164,10 +162,6 @@ class CreateEmergencyActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (viewModel.isStarting) {
-            finish()
-        } else {
-            super.onBackPressed()
-        }
+        super.onBackPressed()
     }
 }

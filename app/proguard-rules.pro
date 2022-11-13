@@ -28,3 +28,4 @@
 -keepclassmembers class com.kiluss.vemergency.data.model.** {
   *;
 }
+

@@ -6,7 +6,7 @@ import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class Shop(
-    var uid: String? = null,
+    var id: String? = null,
     var name: String? = null,
     var owner: String? = null,
     var address: String? = null,
