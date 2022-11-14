@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.shop.rescue
+package com.kiluss.vemergency.ui.user.rescue
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -9,97 +9,68 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.ACTIVE_SHOP_MARKER
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_DIRECTION_STATE
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
+import com.kiluss.vemergency.constant.EXTRA_NEARBY_LIST
 import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
-import com.kiluss.vemergency.constant.LOCATION_INTERVAL_TIME
-import com.kiluss.vemergency.constant.POLYLINE_STROKE_WIDTH_PX
-import com.kiluss.vemergency.constant.SHOP_ARRIVE_DISTANCE
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
-import com.kiluss.vemergency.databinding.ActivityShopRescueBinding
+import com.kiluss.vemergency.databinding.ActivityUserRescueBinding
+import com.kiluss.vemergency.databinding.DialogRescueArrivedBinding
+import com.kiluss.vemergency.databinding.DialogReviewBinding
 import com.kiluss.vemergency.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.osmdroid.bonuspack.routing.OSRMRoadManager
-import org.osmdroid.bonuspack.routing.RoadManager
-import org.osmdroid.util.GeoPoint
-import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.text.MessageFormat
 import java.util.Date
 
-class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var locationRequest: LocationRequest
-    private lateinit var binding: ActivityShopRescueBinding
+class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var binding: ActivityUserRescueBinding
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private var map: GoogleMap? = null
-    private val viewModel: ShopRescueViewModel by viewModels()
+    private val viewModel: UserRescueViewModel by viewModels()
     private var fusedLocationClient: FusedLocationProviderClient? = null
-    private var currentPolyLines: Polyline? = null
     private var directing = false
-    private lateinit var locationCallback: LocationCallback
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityShopRescueBinding.inflate(layoutInflater)
+        binding = ActivityUserRescueBinding.inflate(layoutInflater)
         setContentView(binding.root)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
         observeViewModel()
         registerForLocationService()
+        binding.layoutShopPreview.cvMain.visibility = View.GONE
     }
 
     private fun registerForLocationService() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                Log.i("current location", locationResult.lastLocation.toString())
-                locationResult.lastLocation?.let {
-                    viewModel.transaction.distance?.let { distance ->
-                        if (distance < SHOP_ARRIVE_DISTANCE) {
-                            stopLocationUpdates()
-                        }
-                    }
-                    viewModel.currentLocation = LatLng(it.latitude, it.longitude)
-                    direction(
-                        viewModel.currentLocation,
-                        LatLng(
-                            viewModel.transaction.userLocation?.latitude!!,
-                            viewModel.transaction.userLocation?.longitude!!
-                        )
-                    )
-                }
-            }
-        }
     }
 
     @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
@@ -136,20 +107,6 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         intent.getParcelableExtra<Transaction>(EXTRA_TRANSACTION)?.let {
             val userLocation = LatLng(it.userLocation?.latitude!!, it.userLocation?.longitude!!)
             viewModel.transaction = it
-            if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationClient?.lastLocation?.addOnSuccessListener(this) { lastLocation ->
-                    // Got last known location. In some rare situations this can be null.
-                    if (lastLocation != null) {
-                        // Logic to handle location object
-                        viewModel.currentLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
-                    }
-                }
-                //getUpdateLocation()
-                startLocationUpdates()
-            }
             val markerTitle: String = it.address.toString()
             val markerOptions =
                 MarkerOptions().position(userLocation).title(markerTitle).snippet(it.userFullName).visible(true)
@@ -184,27 +141,33 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             true
         }
-        binding.ivBack.setOnClickListener {
-            directing = false
-            currentPolyLines?.remove()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            binding.tvBottomSheetTitle.text = MessageFormat.format(
-                resources.getText(R.string.text_found_near_by).toString(), viewModel.getNearByShopNumber()
-            )
-            setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
+        setupData()
+    }
+
+    private fun setupData() {
+        intent.getParcelableExtra<Transaction>(EXTRA_TRANSACTION)?.let {
+            viewModel.transaction = it
+            viewModel.getUpdateShopLocationInfo()
+        }
+        intent.getParcelableArrayListExtra<Shop>(EXTRA_NEARBY_LIST)?.let {
+            showAllShopLocation(it.toMutableList())
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun startLocationUpdates() {
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL_TIME)
-            .setWaitForAccurateLocation(false)
-            .build()
-        fusedLocationClient?.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
+    private fun showAllShopLocation(shops: MutableList<Shop>) {
+        for (index in shops.indices) {
+            val shop = shops[index]
+            shop.location?.let {
+                val location = LatLng(
+                    it.getValue(LATITUDE) as Double, it.getValue(LONGITUDE) as Double
+                )
+                val markerTitle = shop.name.toString()
+                val markerOptions =
+                    MarkerOptions().position(location).title(markerTitle).snippet(shop.address).visible(true)
+                val marker = map?.addMarker(markerOptions)
+                marker?.tag = Pair(ACTIVE_SHOP_MARKER, index)
+            }
+        }
     }
 
     private fun setupTransactionInfo() {
@@ -219,17 +182,17 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                 btnSelect.visibility = View.GONE
                 tvPhone.setOnClickListener {
                     if (ContextCompat.checkSelfPermission(
-                            this@ShopRescueActivity,
+                            this@UserRescueActivity,
                             Manifest.permission.CALL_PHONE
                         )
                         != PackageManager.PERMISSION_GRANTED
                     ) {
                         ActivityCompat.requestPermissions(
-                            this@ShopRescueActivity, arrayOf(Manifest.permission.CALL_PHONE),
+                            this@UserRescueActivity, arrayOf(Manifest.permission.CALL_PHONE),
                             0
                         )
                     } else {
-                        val alertDialog = AlertDialog.Builder(this@ShopRescueActivity)
+                        val alertDialog = AlertDialog.Builder(this@UserRescueActivity)
                         alertDialog.apply {
                             setIcon(R.drawable.ic_call)
                             setTitle("Make a phone call?")
@@ -250,6 +213,82 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun observeViewModel() {
         with(viewModel) {
+            arrived.observe(this@UserRescueActivity) {
+                val arrivedDialog =
+                    AlertDialog.Builder(this@UserRescueActivity, R.style.DialogRoundedCorner)
+                        .create()
+                val arrivedDialogBinding =
+                    DialogRescueArrivedBinding.inflate(LayoutInflater.from(this@UserRescueActivity))
+                arrivedDialogBinding.btnOk.setOnClickListener {
+                    arrivedDialog.dismiss()
+                }
+                with(arrivedDialog) {
+                    setView(arrivedDialogBinding.root)
+                    show()
+                }
+                with(binding) {
+                    tvBottomSheetTitle.visibility = View.INVISIBLE
+                    btnFinish.visibility = View.VISIBLE
+                    btnFinish.setOnClickListener {
+                        val reviewDialog =
+                            AlertDialog.Builder(this@UserRescueActivity, R.style.DialogRoundedCorner)
+                                .create()
+                        val reviewDialogBinding =
+                            DialogReviewBinding.inflate(LayoutInflater.from(this@UserRescueActivity))
+                        reviewDialogBinding.btnOk.setOnClickListener {
+                            reviewDialog.dismiss()
+                            viewModel.finishTransaction(
+                                reviewDialogBinding.rbRate.rating.toDouble(),
+                                reviewDialogBinding.edtReview.text.toString()
+                            )
+                        }
+                        with(reviewDialog) {
+                            setView(reviewDialogBinding.root)
+                            show()
+                        }
+                    }
+                }
+            }
+            update.observe(this@UserRescueActivity) {
+                if (viewModel.shop == null) {
+                    viewModel.getShopRescueInfo()
+                }
+                with(binding) {
+                    tvDistance.text = "${getString(R.string.distance)} ${viewModel.transaction.distance} km"
+                    tvEstimateTime.text =
+                        "${getString(R.string.estimate_time)} ${
+                            viewModel.transaction.duration?.toInt()
+                                ?.let { it1 -> Utils.convertSeconds(it1) }
+                        }"
+                    lnDirection.visibility = View.VISIBLE
+                }
+            }
+            shopValue.observe(this@UserRescueActivity) {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                with(binding.layoutShopPreview) {
+                    tvShopTitle.text = shop?.name
+                    tvShopAddress.text = shop?.address
+                    tvService.text = shop?.service
+                    val shopRating = shop?.rating
+                    if (shopRating != null) {
+                        rbRating.visibility = View.VISIBLE
+                        tvNoRating.visibility = View.GONE
+                        rbRating.rating = shopRating.toFloat()
+                    } else {
+                        rbRating.visibility = View.GONE
+                        tvNoRating.visibility = View.VISIBLE
+                    }
+                    shop?.imageUrl?.let {
+                        Glide.with(this@UserRescueActivity).load(shop?.imageUrl).placeholder(R.drawable.default_pic)
+                            .centerCrop()
+                            .into(ivShopImage)
+                    }
+                    cvMain.visibility = View.VISIBLE
+                }
+            }
+            finishActivity.observe(this@UserRescueActivity) {
+                finish()
+            }
         }
     }
 
@@ -258,9 +297,6 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
             when (state) {
                 BOTTOM_SHEET_DIRECTION_STATE -> {
                     bottomSheetBehavior.halfExpandedRatio = 0.4f
-                    ivDirection.visibility = View.GONE
-                    lnDirection.visibility = View.VISIBLE
-                    ivBack.visibility = View.VISIBLE
                 }
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
@@ -322,73 +358,11 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    private fun direction(departure: LatLng, destination: LatLng) {
-        currentPolyLines?.remove()
-        val paths = mutableListOf<List<LatLng>>()
-        val roadManager = OSRMRoadManager(this, "MY_USER_AGENT")
-        val waypoints = arrayListOf<GeoPoint>()
-        waypoints.add(GeoPoint(departure.latitude, departure.longitude))
-        waypoints.add(GeoPoint(destination.latitude, destination.longitude))
-        lifecycleScope.launch(Dispatchers.IO) {
-            val road = roadManager.getRoad(waypoints)
-            launch(Dispatchers.Main) {
-                val steps = RoadManager.buildRoadOverlay(road).actualPoints
-                for (i in 0 until steps.size - 1) {
-                    val path = listOf(
-                        LatLng(steps[i].latitude, steps[i].longitude),
-                        LatLng(steps[i + 1].latitude, steps[i + 1].longitude)
-                    )
-                    paths.add(path)
-                }
-                val option = PolylineOptions().color(getColor(R.color.blue_shazam)).width(POLYLINE_STROKE_WIDTH_PX)
-                for (i in 0 until paths.size) {
-                    option.addAll(paths[i])
-                }
-                currentPolyLines = map?.addPolyline(option)
-                map?.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().apply {
-                    include(departure)
-                    include(destination)
-                }.build(), 300))
-                with(binding) {
-                    val df = DecimalFormat("#.#")
-                    df.roundingMode = RoundingMode.CEILING
-                    viewModel.transaction.distance = df.format(road.mLength).toDouble()
-                    viewModel.transaction.duration = road.mDuration
-                    tvDistance.text = "${getString(R.string.distance)} ${viewModel.transaction.distance} km"
-                    tvEstimateTime.text =
-                        "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
-                    viewModel.updateTransactionStatus()
-                }
-            }
-        }
-    }
-
     override fun onBackPressed() {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         } else {
-            val alertDialog = AlertDialog.Builder(this@ShopRescueActivity)
-            alertDialog.apply {
-                setIcon(R.drawable.ic_call)
-                setTitle("Quit")
-                setMessage("Do you want to quit this transaction?")
-                setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
-                    viewModel.deleteCurrentTransaction()
-                    viewModel.setShopStatusReady()
-                    super.onBackPressed()
-                }
-                setNegativeButton("No") { _, _ ->
-                }
-            }.create().show()
+            super.onBackPressed()
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        stopLocationUpdates()
-    }
-
-    private fun stopLocationUpdates() {
-        fusedLocationClient?.removeLocationUpdates(locationCallback)
     }
 }

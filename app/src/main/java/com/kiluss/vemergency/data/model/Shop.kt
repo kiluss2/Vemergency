@@ -22,5 +22,5 @@ data class Shop(
     var created: Boolean? = null,
     var lastModifiedTime: Double? = null,
     var fcmToken: String? = null,
-    var isReady: Boolean = false,
+    var ready: Boolean = true,
 ) : Parcelable

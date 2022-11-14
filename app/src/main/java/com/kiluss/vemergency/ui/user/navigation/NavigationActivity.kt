@@ -217,7 +217,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                         directing = true
                         setBottomSheetShowingState(BOTTOM_SHEET_DIRECTION_STATE)
                         currentPolyLines?.remove()
-                        binding.tvBottomSheetTitle.text = getString(R.string.direction_from_your_location)
+                        binding.tvBottomSheetTitle.text = getString(R.string.directing_from_your_location)
                         binding.tvDirectionTo.text = shop.name
                         direction(
                             LatLng(location.latitude, location.longitude), LatLng(

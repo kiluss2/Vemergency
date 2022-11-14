@@ -14,7 +14,17 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
+import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
+import com.kiluss.vemergency.constant.EXTRA_EMERGENCY
+import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
+import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
+import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
+import com.kiluss.vemergency.constant.ROLE_ADMIN
+import com.kiluss.vemergency.constant.ROLE_NAN
+import com.kiluss.vemergency.constant.ROLE_SHOP
+import com.kiluss.vemergency.constant.ROLE_USER
+import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.admin.main.AdminMainActivity
@@ -27,7 +37,6 @@ import com.kiluss.vemergency.utils.SharedPrefManager
 import com.kiluss.vemergency.utils.Utils
 
 class LoginFragment : Fragment() {
-
     private var _binding: FragmentLoginBinding? = null
 
     // This property is only valid between onCreateView and
@@ -77,15 +86,19 @@ class LoginFragment : Fragment() {
                             FirebaseManager.init()
                             auth.currentUser?.uid?.let { uid ->
                                 val collectionRole = Utils.getCollectionRole()
+                                // check if this account is a right role
                                 db.collection(collectionRole).document(uid).get()
                                     .addOnSuccessListener { documentSnapshot ->
                                         binding.pbLoading.visibility = View.GONE
                                         if (documentSnapshot.exists()) {
-                                            db.collection(collectionRole).document(uid).update(
-                                                "fcmToken", SharedPrefManager.getString(
-                                                    FCM_DEVICE_TOKEN, ""
+                                            if (collectionRole == ROLE_SHOP) {
+                                                db.collection(collectionRole).document(uid).update(
+                                                    "fcmToken", SharedPrefManager.getString(
+                                                        FCM_DEVICE_TOKEN, ""
+                                                    ),
+                                                    "ready", true
                                                 )
-                                            )
+                                            }
                                             loginSuccess()
                                         } else {
                                             Utils.showLongToast(

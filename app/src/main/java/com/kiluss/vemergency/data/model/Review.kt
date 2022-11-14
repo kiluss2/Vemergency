@@ -6,7 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @kotlinx.serialization.Serializable
 data class Review(
-    var star: Float? = null,
+    var rating: Double? = null,
     var comment: String? = null,
-    var user: String? = null
 ) : Parcelable

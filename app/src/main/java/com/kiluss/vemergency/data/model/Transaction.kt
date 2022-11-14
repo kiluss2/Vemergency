@@ -22,8 +22,10 @@ data class Transaction(
     var endTime: Double? = null,
     var content: String? = null,
     var address: String? = null,
+    var userFcmToken: String? = null,
+    var distance: Double? = null,
+    var duration: Double? = null,
     var userLocation: LatLng? = null,
     var shopLocation: LatLng? = null,
-    var userFcmToken: String? = null,
     var review: Review? = null
 ) : Parcelable

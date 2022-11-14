@@ -3,6 +3,8 @@ package com.kiluss.vemergency.ui.user.emergency
 import android.app.Application
 import android.location.Location
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
@@ -13,7 +15,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
 import com.kiluss.vemergency.constant.GEO_HASH
 import com.kiluss.vemergency.constant.LATITUDE
@@ -44,7 +45,11 @@ import retrofit2.Response
 class CreateEmergencyViewModel(application: Application) : BaseViewModel(application) {
     internal var queryNearShop = true
     private val db = Firebase.firestore
-    internal val shopLists = mutableListOf<Shop>()
+    internal val shopLists = arrayListOf<Shop>()
+    private val _startRescueActivity: MutableLiveData<Unit> by lazy {
+        MutableLiveData<Unit>()
+    }
+    internal val startRescueActivity: LiveData<Unit> = _startRescueActivity
 
     // get active shop near by
     internal fun getNearByShop(location: Location, radiusKmRange: Int, transaction: Transaction) {
@@ -94,13 +99,14 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                             val item = documentSnapshot.toObject<Shop>()
                             item?.let { shop ->
                                 val token = shop.fcmToken
-                                if (token != null && token.isNotEmpty() && shop.created == true) {
+                                if (token != null && token.isNotEmpty() && shop.created == true && shop.ready) {
                                     list.add(shop)
                                 }
                             }
                         }
                         if (list.isNotEmpty()) {
                             shopLists.addAll(list)
+                            sendEmergency(transaction)
                         } else {
                             getNearByShop(location, radiusKmRange + radiusKmRange % 10 + 1, transaction)
                             println(radiusKmRange + radiusKmRange % 10 + 1)
@@ -110,7 +116,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
         }
     }
 
-    internal fun sendEmergency(shopLists: MutableList<Shop>, transaction: Transaction) {
+    private fun sendEmergency(transaction: Transaction) {
         val tokens = JsonArray()
         val shopIds = JsonArray()
         shopLists.forEach {
@@ -140,14 +146,16 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                         RetrofitClient.getInstance(getApplication()).getClientUnAuthorize(SEND_NOTI_API_URL)
                             .create(ApiService::class.java)
                             .sendNoti(request.toString().toRequestBody())
-                            .enqueue(object : Callback<JsonObject?> {
+                            .enqueue(object : Callback<String> {
                                 override fun onResponse(
-                                    call: Call<JsonObject?>,
-                                    response: Response<JsonObject?>
+                                    call: Call<String>,
+                                    response: Response<String>
                                 ) {
                                     when {
                                         response.isSuccessful -> {
                                             Log.e("createEmergency", response.body().toString())
+                                            transaction.id = response.body()
+                                            _startRescueActivity.value = null
                                         }
                                         else -> {
                                             Utils.showShortToast(getApplication(), "failCreateEmergency")
@@ -155,7 +163,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                                     }
                                 }
 
-                                override fun onFailure(call: Call<JsonObject?>, t: Throwable) {
+                                override fun onFailure(call: Call<String>, t: Throwable) {
                                     Log.e("failCreateEmergency", t.toString())
                                     Utils.showShortToast(getApplication(), "failCreateEmergency")
                                     t.printStackTrace()
@@ -165,7 +173,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                 }
                 .addOnFailureListener { exception ->
                     Utils.showShortToast(getApplication(), "Fail to get user information")
-                    Log.e("UserProfileActivity", exception.message.toString())
+                    Log.e("CreateEmergencyActivity", exception.message.toString())
                 }
         }
     }

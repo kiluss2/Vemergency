@@ -63,6 +63,6 @@ class PendingTransactionFragment : Fragment(), PendingTransactionAdapter.OnClick
     }
 
     override fun onSelect(transaction: Transaction, position: Int) {
-        viewModel.deletePendingTransaction(transaction, position)
+        viewModel.startTransaction(transaction, position)
     }
 }

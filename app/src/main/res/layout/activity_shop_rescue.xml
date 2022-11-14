@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:gravity="center"
-                android:text="@string/direction_from_your_location"
+                android:text="@string/directing_from_your_location"
                 android:textStyle="bold" />
 
             <TextView

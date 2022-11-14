@@ -163,7 +163,7 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
             }
     }
 
-    internal fun deletePendingTransaction(transaction: Transaction, position: Int) {
+    internal fun startTransaction(transaction: Transaction, position: Int) {
         transaction.id?.let {
             db.collection(PENDING_TRANSACTION_COLLECTION).document(it).delete()
             val newList = mutableListOf<Transaction>()
@@ -174,7 +174,12 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
             }
             pendingTransactions = newList
             _pendingTransaction.value = pendingTransactions
-            _startRescue.value = transaction
+            FirebaseManager.getAuth()?.uid?.let { id ->
+                db.collection(SHOP_COLLECTION).document(id).update("ready", false)
+            }
+            _startRescue.value = transaction.apply {
+                shopId = FirebaseManager.getAuth()?.uid
+            }
         }
     }
 }

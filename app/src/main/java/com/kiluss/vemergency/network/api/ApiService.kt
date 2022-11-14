@@ -8,7 +8,6 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface ApiService {
-
     @POST("1/upload")
     fun uploadPhoto(
         @Body params: RequestBody
@@ -18,5 +17,5 @@ interface ApiService {
     @POST("noti")
     fun sendNoti(
         @Body params: RequestBody
-    ): Call<JsonObject>
+    ): Call<String>
 }

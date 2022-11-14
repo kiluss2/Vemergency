@@ -25,7 +25,7 @@
     <string name="distance">Distance: </string>
     <string name="estimate_time">Estimate time: </string>
     <string name="direction_to">Direction to </string>
-    <string name="direction_from_your_location">Direction from your location</string>
+    <string name="directing_from_your_location">Directing from your location</string>
     <string name="or_use_your_location_by_default">or just leave it to use your current location by default</string>
     <string name="please_fill_all_field">Please fill all field</string>
     <string name="confirm_password_not_match">Confirm password is not match</string>
@@ -44,4 +44,8 @@
     <string name="input_title">Input title</string>
     <string name="shop_name">Shop name</string>
     <string name="select">Select</string>
+    <string name="rescue_service_is_arrived">Rescue service is arrived</string>
+    <string name="finish">finish</string>
+    <string name="give_star">Give star</string>
+    <string name="write_your_review">Write your review</string>
 </resources>

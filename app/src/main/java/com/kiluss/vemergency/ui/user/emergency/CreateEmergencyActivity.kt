@@ -20,13 +20,16 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.CAR_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.EXTRA_NEARBY_LIST
 import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
 import com.kiluss.vemergency.constant.MOTORCYCLE_REPAIR_SERVICE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.ActivityCreateEmergencyBinding
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
+import com.kiluss.vemergency.ui.user.rescue.UserRescueActivity
 import com.kiluss.vemergency.utils.Utils
 
 class CreateEmergencyActivity : AppCompatActivity() {
@@ -55,9 +58,17 @@ class CreateEmergencyActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         with(viewModel) {
+            startRescueActivity.observe(this@CreateEmergencyActivity) {
+                startActivity(Intent(this@CreateEmergencyActivity, UserRescueActivity::class.java).apply {
+                    putExtra(EXTRA_TRANSACTION, transaction)
+                    putExtra(EXTRA_NEARBY_LIST, shopLists)
+                })
+                finish()
+            }
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(
                 this@CreateEmergencyActivity,
@@ -73,8 +84,6 @@ class CreateEmergencyActivity : AppCompatActivity() {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         this.location = location
-                        viewModel.getNearByShop(location, 1, transaction)
-                        viewModel.queryNearShop = true
                     }
                     setupView()
                 }
@@ -107,12 +116,10 @@ class CreateEmergencyActivity : AppCompatActivity() {
                     transaction.userId = FirebaseManager.getAuth()?.uid
                     // when user let to use current location
                     if (tvLocationPicked.text.isEmpty()) {
-                        if (location != null) {
+                        val currentLocation = location
+                        if (currentLocation != null) {
                             transaction.userLocation = LatLng(location?.latitude, location?.longitude)
-                            if (viewModel.shopLists.isEmpty()) {
-                            } else {
-                                viewModel.sendEmergency(viewModel.shopLists, transaction)
-                            }
+                            viewModel.getNearByShop(currentLocation, 1, transaction)
                             setProgressDialog(true)
                         } else {
                             Utils.showShortToast(
