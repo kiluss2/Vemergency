@@ -7,6 +7,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -24,8 +26,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.kiluss.vemergency.R
@@ -56,6 +61,7 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
     private val viewModel: UserRescueViewModel by viewModels()
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var directing = false
+    private var shopMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +72,7 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment!!.getMapAsync(this)
         observeViewModel()
         registerForLocationService()
+        // gone shop info when transaction is pending
         binding.layoutShopPreview.cvMain.visibility = View.GONE
     }
 
@@ -107,7 +114,7 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         intent.getParcelableExtra<Transaction>(EXTRA_TRANSACTION)?.let {
             val userLocation = LatLng(it.userLocation?.latitude!!, it.userLocation?.longitude!!)
             viewModel.transaction = it
-            val markerTitle: String = it.address.toString()
+            val markerTitle: String = it.userAddress.toString()
             val markerOptions =
                 MarkerOptions().position(userLocation).title(markerTitle).snippet(it.userFullName).visible(true)
             map?.addMarker(markerOptions)
@@ -173,7 +180,7 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setupTransactionInfo() {
         with(viewModel.transaction) {
             with(binding.layoutUserInfo) {
-                tvAddress.text = address
+                btnLocation.visibility = View.GONE
                 tvPhone.text = userPhone
                 tvService.text = service
                 tvContent.text = content
@@ -249,9 +256,23 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
-            update.observe(this@UserRescueActivity) {
+            update.observe(this@UserRescueActivity) { transaction ->
                 if (viewModel.shop == null) {
                     viewModel.getShopRescueInfo()
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        delay(100)
+                        launch(Dispatchers.Main) {
+                            map?.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    LatLng(
+                                        viewModel.transaction.shopLocation?.latitude!!,
+                                        viewModel.transaction.shopLocation?.longitude!!
+                                    ),
+                                    16f
+                                )
+                            )
+                        }
+                    }
                 }
                 with(binding) {
                     tvDistance.text = "${getString(R.string.distance)} ${viewModel.transaction.distance} km"
@@ -261,27 +282,78 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                                 ?.let { it1 -> Utils.convertSeconds(it1) }
                         }"
                     lnDirection.visibility = View.VISIBLE
+                    transaction.shopLocation?.let {
+                        val markerTitle = shop?.name.toString()
+                        val markerOptions =
+                            it.latitude?.let { lat ->
+                                it.longitude?.let { lng ->
+                                    LatLng(
+                                        lat, lng
+                                    )
+                                }
+                            }?.let { position ->
+                                MarkerOptions().icon(
+                                    bitmapDescriptorFromVector(R.drawable.ic_shop_rescue_marker, 2)
+                                )
+                                    .position(position).title(markerTitle).visible(true)
+                            }
+                        markerOptions?.let {
+                            shopMarker?.remove()
+                            shopMarker = map?.addMarker(markerOptions)
+                        }
+                    }
                 }
             }
             shopValue.observe(this@UserRescueActivity) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                binding.tvBottomSheetTitle.text = shop?.name
                 with(binding.layoutShopPreview) {
                     tvShopTitle.text = shop?.name
                     tvShopAddress.text = shop?.address
                     tvService.text = shop?.service
+                    tvPhone.text = shop?.phone
                     val shopRating = shop?.rating
                     if (shopRating != null) {
                         rbRating.visibility = View.VISIBLE
-                        tvNoRating.visibility = View.GONE
+                        tvReviewCount.text = MessageFormat.format(
+                            resources.getText(R.string.reviews).toString(),
+                            shop?.reviewCount
+                        )
                         rbRating.rating = shopRating.toFloat()
                     } else {
                         rbRating.visibility = View.GONE
-                        tvNoRating.visibility = View.VISIBLE
                     }
                     shop?.imageUrl?.let {
                         Glide.with(this@UserRescueActivity).load(shop?.imageUrl).placeholder(R.drawable.default_pic)
                             .centerCrop()
                             .into(ivShopImage)
+                    }
+                    tvPhone.setOnClickListener {
+                        if (ContextCompat.checkSelfPermission(
+                                this@UserRescueActivity,
+                                Manifest.permission.CALL_PHONE
+                            )
+                            != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            ActivityCompat.requestPermissions(
+                                this@UserRescueActivity, arrayOf(Manifest.permission.CALL_PHONE),
+                                0
+                            )
+                        } else {
+                            val alertDialog = AlertDialog.Builder(this@UserRescueActivity)
+                            alertDialog.apply {
+                                setIcon(R.drawable.ic_call)
+                                setTitle("Make a phone call?")
+                                setMessage("Do you want to make a phone call?")
+                                setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
+                                    // make phone call
+                                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:${shop?.phone}"))
+                                    context.startActivity(intent)
+                                }
+                                setNegativeButton("No") { _, _ ->
+                                }
+                            }.create().show()
+                        }
                     }
                     cvMain.visibility = View.VISIBLE
                 }
@@ -290,6 +362,19 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                 finish()
             }
         }
+    }
+
+    private fun bitmapDescriptorFromVector(vectorResId: Int, scale: Int): BitmapDescriptor {
+        val vectorDrawable = ContextCompat.getDrawable(this, vectorResId)
+        vectorDrawable!!.setBounds(0, 0, vectorDrawable.intrinsicWidth * scale, vectorDrawable.intrinsicHeight * scale)
+        val bitmap = Bitmap.createBitmap(
+            vectorDrawable.intrinsicWidth * scale,
+            vectorDrawable.intrinsicHeight * scale,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        vectorDrawable.draw(canvas)
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 
     private fun setBottomSheetShowingState(state: String) {

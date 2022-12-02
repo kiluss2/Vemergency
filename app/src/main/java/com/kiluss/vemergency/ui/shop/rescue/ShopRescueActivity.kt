@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +45,7 @@ import com.kiluss.vemergency.constant.POLYLINE_STROKE_WIDTH_PX
 import com.kiluss.vemergency.constant.SHOP_ARRIVE_DISTANCE
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.ActivityShopRescueBinding
+import com.kiluss.vemergency.databinding.DialogShopTransactionFinishBinding
 import com.kiluss.vemergency.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -136,6 +138,7 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         intent.getParcelableExtra<Transaction>(EXTRA_TRANSACTION)?.let {
             val userLocation = LatLng(it.userLocation?.latitude!!, it.userLocation?.longitude!!)
             viewModel.transaction = it
+            viewModel.addCurrentTransactionListener()
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
@@ -150,7 +153,7 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                 //getUpdateLocation()
                 startLocationUpdates()
             }
-            val markerTitle: String = it.address.toString()
+            val markerTitle: String = it.userAddress.toString()
             val markerOptions =
                 MarkerOptions().position(userLocation).title(markerTitle).snippet(it.userFullName).visible(true)
             map?.addMarker(markerOptions)
@@ -210,7 +213,7 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setupTransactionInfo() {
         with(viewModel.transaction) {
             with(binding.layoutUserInfo) {
-                tvAddress.text = address
+                btnLocation.visibility = View.GONE
                 tvPhone.text = userPhone
                 tvService.text = service
                 tvContent.text = content
@@ -250,6 +253,29 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun observeViewModel() {
         with(viewModel) {
+            finishDialog.observe(this@ShopRescueActivity) { review ->
+                val finishDialog =
+                    AlertDialog.Builder(this@ShopRescueActivity, R.style.DialogRoundedCorner)
+                        .create()
+                val dialogBinding =
+                    DialogShopTransactionFinishBinding.inflate(LayoutInflater.from(this@ShopRescueActivity))
+                with(dialogBinding) {
+                    btnOk.setOnClickListener {
+                        finishDialog.dismiss()
+                        finish()
+                    }
+                    if (review != null) {
+                        rbRate.rating = review.rating?.toFloat()!!
+                        tvComment.text = review.comment
+                    } else {
+                        rbRate.visibility = View.GONE
+                    }
+                }
+                with(finishDialog) {
+                    setView(dialogBinding.root)
+                    show()
+                }
+            }
         }
     }
 
@@ -354,6 +380,8 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                     df.roundingMode = RoundingMode.CEILING
                     viewModel.transaction.distance = df.format(road.mLength).toDouble()
                     viewModel.transaction.duration = road.mDuration
+                    viewModel.transaction.shopLocation =
+                        com.kiluss.vemergency.data.model.LatLng(departure.latitude, departure.longitude)
                     tvDistance.text = "${getString(R.string.distance)} ${viewModel.transaction.distance} km"
                     tvEstimateTime.text =
                         "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
@@ -366,10 +394,12 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onBackPressed() {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        } else if (viewModel.transactionFinished) {
+            super.onBackPressed()
         } else {
             val alertDialog = AlertDialog.Builder(this@ShopRescueActivity)
             alertDialog.apply {
-                setIcon(R.drawable.ic_call)
+                setIcon(R.drawable.ic_exit)
                 setTitle("Quit")
                 setMessage("Do you want to quit this transaction?")
                 setPositiveButton("Yes") { _: DialogInterface?, _: Int ->

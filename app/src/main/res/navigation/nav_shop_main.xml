@@ -16,10 +16,9 @@
         android:label="fragment_pending_transaction"
         tools:layout="@layout/fragment_pending_transaction" />
     <fragment
-        android:id="@+id/historyTransactionFragment"
-        android:name="com.kiluss.vemergency.ui.shop.main.HistoryTransactionFragment"
-        android:label="fragment_history_transaction"
-        tools:layout="@layout/fragment_history_transaction" />
+        android:id="@+id/shopHistoryTransactionFragment"
+        android:name="com.kiluss.vemergency.ui.shop.main.ShopHistoryTransactionFragment"
+        android:label="ShopHistoryTransactionFragment" />
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.kiluss.vemergency.ui.shop.main.ShopSettingFragment"

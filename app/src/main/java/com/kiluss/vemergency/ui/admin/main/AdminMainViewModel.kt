@@ -12,7 +12,13 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.ADMIN_COLLECTION
+import com.kiluss.vemergency.constant.GEO_HASH
+import com.kiluss.vemergency.constant.ACTIVE_SHOP_ITEM_PER_PAGE
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.SHOP_CLONE_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.User
@@ -23,9 +29,8 @@ import org.json.JSONArray
 import java.time.Instant
 
 class AdminMainViewModel(application: Application) : BaseViewModel(application) {
-
     private lateinit var shopGoogleMaps: ArrayList<Shop>
-    private var lastDocument: Double? = null
+    private var lastActiveShopModifiedTime: Double? = null
     private var user = User()
     private val db = Firebase.firestore
     private var questionCollectionQuery: Query? = null
@@ -95,9 +100,9 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     internal fun getActiveShop() {
         questionCollectionQuery = db.collection(SHOP_CLONE_COLLECTION)
-            .orderBy("lastModifiedTime\$app_debug", Query.Direction.DESCENDING)
+            .orderBy("lastModifiedTime", Query.Direction.DESCENDING)
         questionCollectionQuery?.let {
-            it.limit(ITEM_PER_PAGE)
+            it.limit(ACTIVE_SHOP_ITEM_PER_PAGE)
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -113,7 +118,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
                         currentList.addAll(list)
                         _allShop.value = currentList
                         // Get the last visible document
-                        lastDocument = if (task.result.size() > 0) {
+                        lastActiveShopModifiedTime = if (task.result.size() > 0) {
                             currentList[currentList.size - 1].lastModifiedTime
                         } else {
                             null
@@ -131,8 +136,8 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     internal fun getMoreActiveShop() {
         questionCollectionQuery?.let {
-            it.startAfter(lastDocument)
-                .limit(ITEM_PER_PAGE)
+            it.startAfter(lastActiveShopModifiedTime)
+                .limit(ACTIVE_SHOP_ITEM_PER_PAGE)
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -147,7 +152,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
                         currentList.addAll(list)
                         _allShop.value = currentList
                         // Get the last visible document
-                        lastDocument = if (task.result.size() > 0) {
+                        lastActiveShopModifiedTime = if (task.result.size() > 0) {
                             currentList[currentList.size - 1].lastModifiedTime
                         } else {
                             null

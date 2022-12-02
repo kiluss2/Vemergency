@@ -6,7 +6,7 @@ package com.kiluss.vemergency.constant
 const val IMAGE_API_URL = "https://freeimage.host/api/"
 const val IMAGE_API_KEY = "6d207e02198a847aa98d0a2a901485a5"
 const val PROVINCE_API_URL = "https://provinces.open-api.vn/api/"
-const val SEND_NOTI_API_URL = "https://d484-2405-4802-60bf-da80-74fa-df75-eef3-8171.ap.ngrok.io/core/"
+const val SEND_NOTI_API_URL = "https://3e51-2405-4802-60b6-42a0-e9f3-6990-cc07-4a60.ap.ngrok.io/core/"
 const val SAVED_LOGIN_ACCOUNT_KEY = "saved_login_account_key"
 const val SIGN_IN_KEY = "sign_in_key"
 const val SHARED_PREFERENCE_KEY = "shared_prefs_key"
@@ -76,7 +76,7 @@ const val GEO_HASH = "geohash"
 // admin
 const val EXTRA_SHOP_PENDING = "extra_shop_pending"
 const val EXTRA_SHOP_DETAIL = "extra_shop_detail"
-const val ITEM_PER_PAGE = 10L
+const val ACTIVE_SHOP_ITEM_PER_PAGE = 10L
 
 // SHOP RESCUE
 const val LOCATION_INTERVAL_TIME = 4000L

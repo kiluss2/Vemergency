@@ -1,6 +1,7 @@
 package com.kiluss.vemergency.ui.user.rescue
 
 import android.app.Application
+import android.icu.util.Calendar
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -58,6 +59,19 @@ class UserRescueViewModel(application: Application) : BaseViewModel(application)
         return shopCloneLists.size + activeShopLists.size
     }
 
+    internal fun getShopRescueInfo() {
+        transaction.shopId?.let {
+            db.collection(SHOP_COLLECTION).document(it).get().addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    shop = documentSnapshot.toObject<Shop>()
+                    _shopValue.value = shop
+                }
+            }.addOnFailureListener { exception ->
+                Log.e("ShopInfoUserRescue", exception.message.toString())
+            }
+        }
+    }
+
     internal fun getUpdateShopLocationInfo() {
         transaction.id?.let {
             db.collection(CURRENT_TRANSACTION_COLLECTION).document(it).addSnapshotListener { snapshot, e ->
@@ -68,9 +82,11 @@ class UserRescueViewModel(application: Application) : BaseViewModel(application)
                 if (snapshot != null && snapshot.exists()) {
                     transaction = snapshot.toObject(Transaction::class.java)!!
                     transaction.distance?.let { distance ->
-                        if (distance < SHOP_ARRIVE_DISTANCE) {
-                            _arrived.value =
-                                getApplication<Application>().getString(R.string.rescue_service_is_arrived)
+                        if (distance < SHOP_ARRIVE_DISTANCE && _arrived.value == null) {
+                            if (shop == null) {
+                                _update.value = transaction
+                            }
+                            _arrived.value = getApplication<Application>().getString(R.string.rescue_service_is_arrived)
                             return@addSnapshotListener
                         } else {
                             _update.value = transaction
@@ -85,43 +101,56 @@ class UserRescueViewModel(application: Application) : BaseViewModel(application)
 
     internal fun finishTransaction(userRating: Double, comment: String) {
         transaction.id?.let {
-            db.collection(CURRENT_TRANSACTION_COLLECTION).document(it).delete()
-            db.collection(HISTORY_TRANSACTION_COLLECTION).document(it).set(transaction)
+            transaction.review = Review(userRating, comment)
+            transaction.endTime = Calendar.getInstance().timeInMillis.toDouble()
+            transaction.review?.let { review ->
+                db.collection(CURRENT_TRANSACTION_COLLECTION).document(it).update("review", review)
+            }
+            db.collection(HISTORY_TRANSACTION_COLLECTION).document(it).set(
+                hashMapOf(
+                    "id" to it,
+                    "userId" to transaction.userId,
+                    "shopId" to transaction.shopId,
+                    "userImage" to transaction.userImage,
+                    "shopImage" to shop?.imageUrl,
+                    "shopId" to transaction.shopId,
+                    "userFullName" to transaction.userFullName,
+                    "service" to transaction.service,
+                    "endTime" to transaction.endTime,
+                    "userLocation" to transaction.userLocation,
+                    "userPhone" to transaction.userPhone,
+                    "shopName" to shop?.name,
+                    "shopAddress" to shop?.address,
+                    "shopPhone" to shop?.phone,
+                    "review" to hashMapOf(
+                        "rating" to userRating,
+                        "comment" to comment
+                    )
+                )
+            )
             transaction.shopId?.let { shopId ->
                 if (shop != null) {
-                    var rating = 0.0
-                    rating = if (shop?.rating != null) {
-                        (shop?.rating!! * transaction.review?.rating!!) / 2
+                    val rating = if (shop?.rating != null) {
+                        (shop?.rating!! + userRating) / 2
                     } else {
                         userRating
                     }
+                    val reviewCount = shop?.reviewCount
+                    shop?.reviewCount = if (reviewCount != null) {
+                        reviewCount + 1
+                    } else {
+                        1
+                    }
                     db.collection(SHOP_COLLECTION).document(shopId).update(
                         "ready", true,
-                        "review",
-                        Review(rating, comment)
+                        "rating", rating,
+                        "reviewCount", shop?.reviewCount
                     )
                 } else {
                     db.collection(SHOP_COLLECTION).document(shopId).update("ready", true)
                 }
                 _finishActivity.value = null
             }
-        }
-    }
-
-    internal fun getShopRescueInfo() {
-        transaction.shopId?.let {
-            db.collection(SHOP_COLLECTION)
-                .document(it)
-                .get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        shop = documentSnapshot.toObject<Shop>()
-                        _shopValue.value = shop
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("ShopInfoUserRescue", exception.message.toString())
-                }
         }
     }
 }

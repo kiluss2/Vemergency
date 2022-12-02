@@ -136,7 +136,8 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                             userFcmToken = SharedPrefManager.getString(FCM_DEVICE_TOKEN, "")
                             userFullName = userInfo.fullName
                             userPhone = userInfo.phone
-                            address = userInfo.address
+                            userAddress = userInfo.address
+                            userImage = userInfo.imageUrl
                         }
                         val request = JSONObject()
                         request.put("transaction", Json.encodeToString(transaction))

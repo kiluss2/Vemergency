@@ -2,15 +2,19 @@ package com.kiluss.vemergency.ui.user.navigation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,10 +26,27 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.ACTIVE_SHOP_MARKER
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_DIRECTION_STATE
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
+import com.kiluss.vemergency.constant.CLONE_SHOP_MARKER
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.POLYLINE_STROKE_WIDTH_PX
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
@@ -41,7 +62,6 @@ import java.text.DecimalFormat
 import java.text.MessageFormat
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
-
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private var map: GoogleMap? = null
     private lateinit var binding: ActivityNavigationBinding
@@ -50,6 +70,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     private var currentLocation: Location? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var shopCloneAdapter: ShopPreviewAdapter? = null
+    private var shopActiveAdapter: ShopPreviewAdapter? = null
     private var currentPolyLines: Polyline? = null
     private var directing = false
 
@@ -65,7 +86,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
+    @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         initBottomSheet()
@@ -186,24 +207,55 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
 //        }
     }
 
+    @SuppressLint("MissingPermission")
     private fun setShopPreviewInfo(shop: Shop) {
         binding.tvBottomSheetTitle.text = shop.name
         with(binding.layoutShopPreview) {
             tvShopTitle.text = shop.name
             tvShopAddress.text = shop.address
             tvService.text = shop.service
+            tvPhone.text = shop.phone
             val shopRating = shop.rating
             if (shopRating != null) {
                 rbRating.visibility = View.VISIBLE
-                tvNoRating.visibility = View.GONE
+                tvReviewCount.text = MessageFormat.format(
+                    resources.getText(R.string.reviews).toString(),
+                    shop.reviewCount
+                )
                 rbRating.rating = shopRating.toFloat()
             } else {
                 rbRating.visibility = View.GONE
-                tvNoRating.visibility = View.VISIBLE
             }
             shop.imageUrl?.let {
                 Glide.with(this@NavigationActivity).load(shop.imageUrl).placeholder(R.drawable.default_pic).centerCrop()
                     .into(ivShopImage)
+            }
+            tvPhone.setOnClickListener {
+                if (ContextCompat.checkSelfPermission(
+                        this@NavigationActivity,
+                        Manifest.permission.CALL_PHONE
+                    )
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this@NavigationActivity, arrayOf(Manifest.permission.CALL_PHONE),
+                        0
+                    )
+                } else {
+                    val alertDialog = AlertDialog.Builder(this@NavigationActivity)
+                    alertDialog.apply {
+                        setIcon(R.drawable.ic_call)
+                        setTitle("Make a phone call?")
+                        setMessage("Do you want to make a phone call?")
+                        setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
+                            // make phone call
+                            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:${shop.phone}"))
+                            context.startActivity(intent)
+                        }
+                        setNegativeButton("No") { _, _ ->
+                        }
+                    }.create().show()
+                }
             }
         }
         binding.ivDirection.setOnClickListener {
@@ -234,6 +286,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         with(viewModel) {
             allShop.observe(this@NavigationActivity) {
                 showAllShopLocation(it)
+                shopActiveAdapter?.updateData(it)
+                binding.tvBottomSheetTitle.text = MessageFormat.format(
+                    resources.getText(R.string.text_found_near_by).toString(), getNearByShopNumber()
+                )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
             cloneShop.observe(this@NavigationActivity) {
@@ -254,7 +310,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     if (!directing) {
                         bottomSheetBehavior.halfExpandedRatio = 0.5f
                         layoutShopPreview.cvMain.visibility = View.GONE
-                        rvShopList.visibility = View.VISIBLE
+                        lnShopList.visibility = View.VISIBLE
                         ivDirection.visibility = View.GONE
                         lnDirection.visibility = View.GONE
                         ivBack.visibility = View.GONE
@@ -264,7 +320,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     if (!directing) {
                         bottomSheetBehavior.halfExpandedRatio = 0.42f
                         layoutShopPreview.cvMain.visibility = View.VISIBLE
-                        rvShopList.visibility = View.GONE
+                        lnShopList.visibility = View.GONE
                         ivDirection.visibility = View.VISIBLE
                         lnDirection.visibility = View.GONE
                         ivBack.visibility = View.GONE
@@ -273,7 +329,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 BOTTOM_SHEET_DIRECTION_STATE -> {
                     bottomSheetBehavior.halfExpandedRatio = 0.4f
                     layoutShopPreview.cvMain.visibility = View.GONE
-                    rvShopList.visibility = View.GONE
+                    lnShopList.visibility = View.GONE
                     ivDirection.visibility = View.GONE
                     lnDirection.visibility = View.VISIBLE
                     ivBack.visibility = View.VISIBLE
@@ -281,7 +337,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
                     layoutShopPreview.cvMain.visibility = View.GONE
-                    rvShopList.visibility = View.GONE
+                    lnShopList.visibility = View.GONE
                 }
             }
         }
@@ -341,10 +397,17 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     }
 
     private fun setUpRecyclerViewListView() {
-        shopCloneAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
+        shopActiveAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
         with(binding.rvShopList) {
+            adapter = shopActiveAdapter
+            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.HORIZONTAL, false)
+            setHasFixedSize(true)
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        }
+        shopCloneAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
+        with(binding.rvShopCloneList) {
             adapter = shopCloneAdapter
-            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.HORIZONTAL, false)
             setHasFixedSize(true)
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }

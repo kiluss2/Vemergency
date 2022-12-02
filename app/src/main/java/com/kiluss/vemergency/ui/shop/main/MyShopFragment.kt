@@ -25,7 +25,6 @@ import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 
 class MyShopFragment : Fragment() {
-
     private var _binding: FragmentMyShopBinding? = null
     private val binding get() = _binding!!
 
@@ -136,6 +135,13 @@ class MyShopFragment : Fragment() {
                         }
                         shop.service?.let {
                             binding.tvService.text = it
+                        }
+                        val rating = shop.rating
+                        if (rating != null) {
+                            binding.rbShopRating.rating = rating.toFloat()
+                            binding.rbShopRating.visibility = View.VISIBLE
+                        } else {
+                            binding.rbShopRating.visibility = View.INVISIBLE
                         }
                         Glide.with(this@MyShopFragment)
                             .load(shop.imageUrl)

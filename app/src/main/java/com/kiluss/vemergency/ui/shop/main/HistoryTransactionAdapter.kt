@@ -8,32 +8,31 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
-import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
-import com.kiluss.vemergency.databinding.ItemListPendingTransactionBinding
-import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
+import com.kiluss.vemergency.databinding.ItemListHistoryTransactionBinding
 import com.kiluss.vemergency.utils.TransactionDiff
 import java.util.Date
 
-class PendingTransactionAdapter(
+class HistoryTransactionAdapter(
     private var transactions: MutableList<Transaction>,
     private val context: Context,
     private val listener: OnClickListener
-) : RecyclerView.Adapter<PendingTransactionAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<HistoryTransactionAdapter.ViewHolder>() {
     interface OnClickListener {
         fun onSelect(transaction: Transaction, position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemListPendingTransactionBinding.inflate(inflater, parent, false))
+        return ViewHolder(ItemListHistoryTransactionBinding.inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -42,29 +41,30 @@ class PendingTransactionAdapter(
 
     override fun getItemCount() = transactions.size
 
-    inner class ViewHolder(private val binding: ItemListPendingTransactionBinding) :
+    inner class ViewHolder(private val binding: ItemListHistoryTransactionBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
             with(transaction) {
                 with(binding) {
-                    btnLocation.setOnClickListener {
-                        context.startActivity(Intent(context, NavigationActivity::class.java).apply {
-                            putExtra(EXTRA_SHOP_LOCATION, Shop().apply {
-                                location = hashMapOf(
-                                    "latitude" to userLocation?.latitude!!,
-                                    "longitude" to userLocation?.longitude!!
-                                )
-                            })
-                        })
-                    }
+                    tvUserFullName.text = userFullName
+                    review?.rating?.let { rbRate.rating = it.toFloat() }
                     tvPhone.text = userPhone
                     tvService.text = service
-                    tvContent.text = content
-                    tvFullName.text = userFullName
-                    tvTime.text = startTime?.toLong()?.let { Date(it).toString() }
-                    btnSelect.setOnClickListener {
+                    review?.comment?.let {
+                        if (it.isNotEmpty()) {
+                            tvComment.visibility = View.VISIBLE
+                            tvComment.text = it
+                        }
+                    }
+                    tvTime.text = endTime?.toLong()?.let { Date(it).toString() }
+                    binding.root.setOnClickListener {
                         listener.onSelect(transaction, adapterPosition)
                     }
+                    Glide.with(context)
+                        .load(userImage.toString())
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_account_avatar)
+                        .into(ivUser)
                     tvPhone.setOnClickListener {
                         if (ContextCompat.checkSelfPermission(
                                 context,

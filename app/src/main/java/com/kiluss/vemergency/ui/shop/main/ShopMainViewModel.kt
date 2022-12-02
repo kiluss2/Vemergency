@@ -5,14 +5,17 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.kiluss.vemergency.constant.HISTORY_TRANSACTION_COLLECTION
 import com.kiluss.vemergency.constant.PENDING_TRANSACTION_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
+import com.kiluss.vemergency.data.model.Review
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.ui.base.BaseViewModel
@@ -25,6 +28,7 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
     private var myShop: Shop? = null
     val db = Firebase.firestore
     private var pendingTransactions = mutableListOf<Transaction>()
+    private var historyTransactions = mutableListOf<Transaction>()
     private val _avatarBitmap: MutableLiveData<Bitmap> by lazy {
         MutableLiveData<Bitmap>()
     }
@@ -45,6 +49,10 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<MutableList<Transaction>>()
     }
     internal val pendingTransaction: LiveData<MutableList<Transaction>> = _pendingTransaction
+    private val _historyTransaction: MutableLiveData<MutableList<Transaction>> by lazy {
+        MutableLiveData<MutableList<Transaction>>()
+    }
+    internal val historyTransaction: LiveData<MutableList<Transaction>> = _historyTransaction
     private val _startRescue: MutableLiveData<Transaction> by lazy {
         MutableLiveData<Transaction>()
     }
@@ -135,6 +143,7 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
     internal fun getPendingTransaction() {
         db.collection(PENDING_TRANSACTION_COLLECTION)
             .whereArrayContains("shops", FirebaseManager.getAuth()?.uid.toString())
+            .orderBy("startTime")
             .get()
             .addOnSuccessListener { documents ->
                 pendingTransactions.clear()
@@ -142,12 +151,13 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                     val transaction = Transaction().apply {
                         document.data["id"]?.let { id = it as String }
                         document.data["userId"]?.let { userId = it as String }
+                        document.data["userImage"]?.let { userImage = it as String }
                         document.data["userFullName"]?.let { userFullName = it as String }
                         document.data["userPhone"]?.let { userPhone = it as String }
                         document.data["service"]?.let { service = it as String }
                         document.data["startTime"]?.let { startTime = it as Double }
                         document.data["content"]?.let { content = it as String }
-                        document.data["address"]?.let { address = it as String }
+                        document.data["userAddress"]?.let { userAddress = it as String }
                         document.data["userLocation"]?.let {
                             val location = it as HashMap<*, *>
                             userLocation = LatLng(location["latitude"] as Double, location["longitude"] as Double)
@@ -159,12 +169,13 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                 _pendingTransaction.value = pendingTransactions
             }
             .addOnFailureListener { exception ->
-                Utils.showLongToast(getApplication(), exception.toString())
+                Log.e("pending transaction", exception.toString())
             }
     }
 
     internal fun startTransaction(transaction: Transaction, position: Int) {
         transaction.id?.let {
+            // remove pending transaction
             db.collection(PENDING_TRANSACTION_COLLECTION).document(it).delete()
             val newList = mutableListOf<Transaction>()
             for (index in pendingTransactions.indices) {
@@ -181,5 +192,41 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
                 shopId = FirebaseManager.getAuth()?.uid
             }
         }
+    }
+
+    internal fun getHistoryTransaction() {
+        db.collection(HISTORY_TRANSACTION_COLLECTION)
+            .whereEqualTo("shopId", FirebaseManager.getAuth()?.uid.toString())
+            .orderBy("endTime", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                historyTransactions.clear()
+                for (document in documents) {
+                    val transaction = Transaction().apply {
+                        document.data["id"]?.let { id = it as String }
+                        document.data["userId"]?.let { userId = it as String }
+                        document.data["shopId"]?.let { shopId = it as String }
+                        document.data["userImage"]?.let { userImage = it as String }
+                        document.data["userFullName"]?.let { userFullName = it as String }
+                        document.data["userPhone"]?.let { userPhone = it as String }
+                        document.data["service"]?.let { service = it as String }
+                        document.data["endTime"]?.let { endTime = it as Double }
+                        document.data["userAddress"]?.let { userAddress = it as String }
+                        document.data["userLocation"]?.let {
+                            val location = it as HashMap<*, *>
+                            userLocation = LatLng(location["latitude"] as Double, location["longitude"] as Double)
+                        }
+                        document.data["review"]?.let {
+                            val reviewData = it as HashMap<*, *>
+                            review = Review(reviewData["rating"] as Double, reviewData["comment"] as String)
+                        }
+                    }
+                    historyTransactions.add(transaction)
+                }
+                _historyTransaction.value = historyTransactions
+            }
+            .addOnFailureListener { exception ->
+                Log.e("history transaction", exception.toString())
+            }
     }
 }

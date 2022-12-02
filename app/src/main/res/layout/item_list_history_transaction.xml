@@ -11,44 +11,45 @@
         android:id="@+id/clMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:background="@android:color/white"
+        android:paddingBottom="10dp">
 
-        <Button
-            android:id="@+id/btnLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivUser"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginHorizontal="11.3dp"
             android:layout_marginTop="6.5dp"
             android:layout_marginBottom="5.8dp"
-            android:text="@string/show_rescue_location"
-            app:layout_constraintBottom_toTopOf="@+id/tvFullName"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textAlignment="viewStart"
+            android:textColor="@color/yellow_orange"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/ivPhone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivFullName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/ic_person"
-            app:layout_constraintEnd_toStartOf="@id/tvFullName"
-            app:layout_constraintStart_toStartOf="@id/btnLocation"
-            app:layout_constraintTop_toBottomOf="@id/btnLocation" />
-
         <TextView
-            android:id="@+id/tvFullName"
+            android:id="@+id/tvUserFullName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAlignment="viewStart"
-            android:textSize="16dp"
-            app:layout_constraintBottom_toBottomOf="@id/ivFullName"
+            android:layout_marginStart="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivFullName"
-            app:layout_constraintTop_toTopOf="@id/ivFullName" />
+            app:layout_constraintStart_toEndOf="@id/ivUser"
+            app:layout_constraintTop_toTopOf="@id/ivUser" />
+
+        <RatingBar
+            android:id="@+id/rbRate"
+            style="@style/Widget.AppCompat.RatingBar.Small"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:isIndicator="true"
+            android:theme="@style/RatingBar"
+            app:layout_constraintStart_toStartOf="@id/tvUserFullName"
+            app:layout_constraintTop_toBottomOf="@+id/tvUserFullName" />
 
         <ImageView
             android:id="@+id/ivPhone"
@@ -57,8 +58,8 @@
             android:layout_marginTop="5dp"
             android:src="@drawable/ic_call"
             app:layout_constraintEnd_toStartOf="@id/tvPhone"
-            app:layout_constraintStart_toStartOf="@id/btnLocation"
-            app:layout_constraintTop_toBottomOf="@id/ivFullName" />
+            app:layout_constraintStart_toStartOf="@id/ivUser"
+            app:layout_constraintTop_toBottomOf="@id/ivUser" />
 
         <TextView
             android:id="@+id/tvPhone"
@@ -81,8 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:src="@drawable/ic_time"
-            app:layout_constraintEnd_toStartOf="@id/tvTime"
-            app:layout_constraintStart_toStartOf="@+id/btnLocation"
+            app:layout_constraintStart_toStartOf="@+id/ivUser"
             app:layout_constraintTop_toBottomOf="@+id/ivPhone" />
 
         <TextView
@@ -106,7 +106,7 @@
             android:layout_marginTop="5dp"
             android:src="@drawable/ic_tool"
             app:layout_constraintEnd_toStartOf="@id/tvService"
-            app:layout_constraintStart_toStartOf="@+id/btnLocation"
+            app:layout_constraintStart_toStartOf="@+id/ivUser"
             app:layout_constraintTop_toBottomOf="@+id/ivTime" />
 
         <TextView
@@ -124,25 +124,16 @@
             app:layout_constraintTop_toTopOf="@id/ivService" />
 
         <TextView
-            android:id="@+id/tvContent"
+            android:id="@+id/tvComment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
             android:textSize="16dp"
-            app:layout_constraintBottom_toTopOf="@id/btnSelect"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivService" />
-
-        <Button
-            android:id="@+id/btnSelect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:backgroundTint="@color/blue_crayola"
-            android:text="@string/select"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvContent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

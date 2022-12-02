@@ -7,7 +7,6 @@ data class User(
     var birthday: String? = null,
     var address: String? = null,
     var phone: String? = null,
-    var reviews: String? = null,
     var imageUrl: String? = null,
     var lastModifiedTime: Double? = null,
     var inEmergency: Boolean? = null,

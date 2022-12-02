@@ -189,8 +189,6 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
     internal fun getShopClone() = shopCloneLists
 
     internal fun getNearByShopNumber(): Int {
-        println(shopCloneLists.size)
-        println(activeShopLists.size)
         return shopCloneLists.size + activeShopLists.size
     }
 }

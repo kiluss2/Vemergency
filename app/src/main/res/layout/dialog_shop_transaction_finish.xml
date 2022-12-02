@@ -8,6 +8,7 @@
         android:id="@+id/ivBackground"
         android:layout_width="match_parent"
         android:layout_height="150dp"
+        android:contentDescription="@string/app_name"
         android:scaleType="centerCrop"
         android:src="@drawable/login_background"
         app:layout_constraintTop_toTopOf="parent" />
@@ -17,14 +18,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="@string/give_star"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:text="@string/transaction_finished"
         android:textColor="@color/blue_crayola"
-        android:textSize="18dp"
+        android:textSize="20dp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/rbRate"
         app:layout_constraintTop_toBottomOf="@+id/ivBackground" />
 
     <RatingBar
         android:id="@+id/rbRate"
+        style="@style/Widget.AppCompat.RatingBar.Indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:rating="5"
@@ -33,13 +38,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvShopArrive" />
 
-    <EditText
-        android:id="@+id/edtReview"
+    <TextView
+        android:id="@+id/tvComment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:hint="@string/write_your_review"
-        android:inputType="textMultiLine"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
         app:layout_constraintTop_toBottomOf="@+id/rbRate" />
 
 
@@ -48,10 +53,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="ok"
+        android:text="@string/ok"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtReview" />
+        app:layout_constraintTop_toBottomOf="@+id/tvComment" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
