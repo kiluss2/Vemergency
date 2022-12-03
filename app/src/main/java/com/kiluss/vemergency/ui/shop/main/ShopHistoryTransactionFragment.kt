@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.FragmentShopHistoryTransactionBinding
 
-class ShopHistoryTransactionFragment : Fragment(), HistoryTransactionAdapter.OnClickListener {
+class ShopHistoryTransactionFragment : Fragment(), ShopHistoryTransactionAdapter.OnClickListener {
     private var _binding: FragmentShopHistoryTransactionBinding? = null
     private val binding get() = _binding!!
-    private var historyTransactionAdapter: HistoryTransactionAdapter? = null
+    private var historyTransactionAdapter: ShopHistoryTransactionAdapter? = null
 
     // view model ktx
     private val viewModel: ShopMainViewModel by activityViewModels()
@@ -48,7 +48,7 @@ class ShopHistoryTransactionFragment : Fragment(), HistoryTransactionAdapter.OnC
     }
 
     private fun setUpRecyclerViewListView() {
-        historyTransactionAdapter = HistoryTransactionAdapter(mutableListOf(), requireActivity(), this)
+        historyTransactionAdapter = ShopHistoryTransactionAdapter(mutableListOf(), requireActivity(), this)
         with(binding.rvTransaction) {
             adapter = historyTransactionAdapter
             layoutManager = LinearLayoutManager(requireActivity())

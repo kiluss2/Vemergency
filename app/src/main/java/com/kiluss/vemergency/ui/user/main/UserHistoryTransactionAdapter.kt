@@ -1,4 +1,4 @@
-package com.kiluss.vemergency.ui.shop.main
+package com.kiluss.vemergency.ui.user.main
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -17,22 +17,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Transaction
-import com.kiluss.vemergency.databinding.ItemListHistoryTransactionBinding
+import com.kiluss.vemergency.databinding.ItemListShopHistoryTransactionBinding
 import com.kiluss.vemergency.utils.TransactionDiff
 import java.util.Date
 
-class HistoryTransactionAdapter(
+class UserHistoryTransactionAdapter(
     private var transactions: MutableList<Transaction>,
     private val context: Context,
     private val listener: OnClickListener
-) : RecyclerView.Adapter<HistoryTransactionAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<UserHistoryTransactionAdapter.ViewHolder>() {
     interface OnClickListener {
         fun onSelect(transaction: Transaction, position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemListHistoryTransactionBinding.inflate(inflater, parent, false))
+        return ViewHolder(ItemListShopHistoryTransactionBinding.inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -41,7 +41,7 @@ class HistoryTransactionAdapter(
 
     override fun getItemCount() = transactions.size
 
-    inner class ViewHolder(private val binding: ItemListHistoryTransactionBinding) :
+    inner class ViewHolder(private val binding: ItemListShopHistoryTransactionBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
             with(transaction) {

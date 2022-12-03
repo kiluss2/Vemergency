@@ -1,27 +1,24 @@
 package com.kiluss.vemergency.ui.user.main
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Transaction
-import com.kiluss.vemergency.databinding.FragmentShopHistoryTransactionBinding
 import com.kiluss.vemergency.databinding.FragmentUserHistoryTransactionBinding
-import com.kiluss.vemergency.ui.shop.main.HistoryTransactionAdapter
 import com.kiluss.vemergency.ui.shop.main.ShopMainViewModel
 
-class UserHistoryTransactionFragment  : Fragment(), HistoryTransactionAdapter.OnClickListener {
+class UserHistoryTransactionFragment : Fragment(), UserHistoryTransactionAdapter.OnClickListener {
     private var _binding: FragmentUserHistoryTransactionBinding? = null
     private val binding get() = _binding!!
-    private var historyTransactionAdapter: HistoryTransactionAdapter? = null
+    private var historyTransactionAdapter: UserHistoryTransactionAdapter? = null
 
     // view model ktx
-    private val viewModel: ShopMainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,7 +49,7 @@ class UserHistoryTransactionFragment  : Fragment(), HistoryTransactionAdapter.On
     }
 
     private fun setUpRecyclerViewListView() {
-        historyTransactionAdapter = HistoryTransactionAdapter(mutableListOf(), requireActivity(), this)
+        historyTransactionAdapter = UserHistoryTransactionAdapter(mutableListOf(), requireActivity(), this)
         with(binding.rvTransaction) {
             adapter = historyTransactionAdapter
             layoutManager = LinearLayoutManager(requireActivity())
