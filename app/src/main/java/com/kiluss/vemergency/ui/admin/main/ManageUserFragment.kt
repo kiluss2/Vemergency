@@ -1,60 +1,105 @@
 package com.kiluss.vemergency.ui.admin.main
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.kiluss.vemergency.R
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
+import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
+import com.kiluss.vemergency.data.model.User
+import com.kiluss.vemergency.databinding.FragmentManageUserBinding
+import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
+import com.kiluss.vemergency.utils.OnLoadMoreListener
+import com.kiluss.vemergency.utils.RecyclerViewLoadMoreScroll
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class ManageUserFragment : Fragment(), UserGridAdapter.OnClickListener {
+    private var _binding: FragmentManageUserBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: AdminMainViewModel by activityViewModels()
+    private var allUserAdapter: UserGridAdapter? = null
+    lateinit var scrollListener: RecyclerViewLoadMoreScroll
+    private lateinit var layoutManager: GridLayoutManager
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ManageUserFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class ManageUserFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentManageUserBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeViewModel()
+        setUpRecyclerViewGridView(2)
+        setRVScrollListener()
+        viewModel.getAllUser()
+    }
+
+    private fun observeViewModel() {
+        with(viewModel) {
+            allUser.observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    allUserAdapter?.updateData(it)
+                    binding.tvNoUserFound.visibility = View.GONE
+                } else {
+                    binding.tvNoUserFound.visibility = View.VISIBLE
+                }
+                scrollListener.setLoaded()
+                setProgressBarStatus(false)
+            }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_manage_user, container, false)
+    private fun setUpRecyclerViewGridView(column: Int) {
+        layoutManager = GridLayoutManager(requireActivity(), column)
+        allUserAdapter = UserGridAdapter(mutableListOf(), requireActivity(), this)
+        with(binding.rvUserList) {
+            adapter = allUserAdapter
+            layoutManager = this@ManageUserFragment.layoutManager
+            setHasFixedSize(true)
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ManageUserFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ManageUserFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun setRVScrollListener() {
+        scrollListener = RecyclerViewLoadMoreScroll(layoutManager)
+        scrollListener.setOnLoadMoreListener(object :
+            OnLoadMoreListener {
+            override fun onLoadMore() {
+                setProgressBarStatus(true)
+                viewModel.getMoreAllUser()
             }
+        })
+        binding.rvUserList.addOnScrollListener(scrollListener)
+    }
+
+    private fun setProgressBarStatus(status: Boolean) {
+        binding.pbLoading.visibility = if (status) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    override fun onOpenUserDetail(user: User) {
+        startActivity(Intent(requireActivity(), ApproveShopActivity::class.java).apply {
+            putExtra(EXTRA_USER_DETAIL, user)
+        })
     }
 }

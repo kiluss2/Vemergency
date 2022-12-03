@@ -76,7 +76,9 @@ const val GEO_HASH = "geohash"
 // admin
 const val EXTRA_SHOP_PENDING = "extra_shop_pending"
 const val EXTRA_SHOP_DETAIL = "extra_shop_detail"
-const val ACTIVE_SHOP_ITEM_PER_PAGE = 10L
+const val ACTIVE_SHOP_ITEM_PER_PAGE = 8L
+const val TRANSACTION_ITEM_PER_PAGE = 3L
+const val EXTRA_USER_DETAIL = "extra_user_detail"
 
 // SHOP RESCUE
 const val LOCATION_INTERVAL_TIME = 4000L

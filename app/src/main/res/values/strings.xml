@@ -60,4 +60,6 @@
     <string name="active_shop">Active shop</string>
     <string name="inactive_shop">Inactive shop</string>
     <string name="show_rescue_location">show rescue location</string>
+    <string name="all_user">All user</string>
+    <string name="transaction_pending">Transaction pending</string>
 </resources>

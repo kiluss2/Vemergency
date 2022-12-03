@@ -11,13 +11,12 @@
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
     <fragment
+        android:id="@+id/userHistoryTransactionFragment"
+        android:name="com.kiluss.vemergency.ui.user.main.UserHistoryTransactionFragment"
+        android:label="UserHistoryTransactionFragment" />
+    <fragment
         android:id="@+id/settingFragment"
         android:name="com.kiluss.vemergency.ui.user.main.SettingFragment"
         android:label="fragment_setting"
         tools:layout="@layout/fragment_setting" />
-    <fragment
-        android:id="@+id/notificationFragment"
-        android:name="com.kiluss.vemergency.ui.user.main.NotificationFragment"
-        android:label="fragment_notification"
-        tools:layout="@layout/fragment_notification" />
 </navigation>

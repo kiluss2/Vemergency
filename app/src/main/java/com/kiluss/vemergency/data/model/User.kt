@@ -1,5 +1,9 @@
 package com.kiluss.vemergency.data.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class User(
     var id: String? = null,
     var email: String? = null,
@@ -11,4 +15,4 @@ data class User(
     var lastModifiedTime: Double? = null,
     var inEmergency: Boolean? = null,
     var fcmToken: String? = null
-)
+) : Parcelable

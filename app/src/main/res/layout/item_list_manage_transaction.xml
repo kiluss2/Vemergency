@@ -21,12 +21,6 @@
             android:layout_marginHorizontal="11.3dp"
             android:layout_marginTop="6.5dp"
             android:layout_marginBottom="5.8dp"
-            android:ellipsize="middle"
-            android:singleLine="true"
-            android:textAlignment="viewStart"
-            android:textColor="@color/yellow_orange"
-            android:textSize="18dp"
-            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/ivPhone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -123,29 +117,48 @@
             app:layout_constraintStart_toEndOf="@id/ivService"
             app:layout_constraintTop_toTopOf="@id/ivService" />
 
-        <ImageView
-            android:id="@+id/ivAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/ic_location"
-            app:layout_constraintEnd_toStartOf="@id/tvAddress"
-            app:layout_constraintStart_toStartOf="@+id/ivUser"
-            app:layout_constraintTop_toBottomOf="@+id/ivService" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivShop"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="11.3dp"
+            android:layout_marginTop="6.5dp"
+            android:layout_marginBottom="5.8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivService" />
 
         <TextView
-            android:id="@+id/tvAddress"
+            android:id="@+id/tvShopName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAlignment="viewStart"
-            android:textSize="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/ivAddress"
+            android:layout_marginVertical="2dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toTopOf="@id/tvShopAddress"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivAddress"
-            app:layout_constraintTop_toTopOf="@id/ivAddress" />
+            app:layout_constraintStart_toEndOf="@id/ivShop"
+            app:layout_constraintTop_toTopOf="@id/ivShop" />
+
+        <TextView
+            android:id="@+id/tvShopAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="2dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toTopOf="@id/tvShopPhone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivShop"
+            app:layout_constraintTop_toBottomOf="@id/tvShopName" />
+
+        <TextView
+            android:id="@+id/tvShopPhone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="2dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toTopOf="@id/tvComment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivShop"
+            app:layout_constraintTop_toBottomOf="@id/tvShopAddress" />
 
         <TextView
             android:id="@+id/tvComment"
@@ -158,6 +171,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivAddress" />
+            app:layout_constraintTop_toBottomOf="@id/tvShopPhone" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

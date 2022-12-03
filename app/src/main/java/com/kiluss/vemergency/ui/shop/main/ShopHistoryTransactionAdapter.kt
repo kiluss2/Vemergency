@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.data.model.Transaction
-import com.kiluss.vemergency.databinding.ItemListHistoryTransactionBinding
+import com.kiluss.vemergency.databinding.ItemListShopHistoryTransactionBinding
 import com.kiluss.vemergency.utils.TransactionDiff
 import java.util.Date
 
@@ -32,7 +32,7 @@ class ShopHistoryTransactionAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemListHistoryTransactionBinding.inflate(inflater, parent, false))
+        return ViewHolder(ItemListShopHistoryTransactionBinding.inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -41,7 +41,7 @@ class ShopHistoryTransactionAdapter(
 
     override fun getItemCount() = transactions.size
 
-    inner class ViewHolder(private val binding: ItemListHistoryTransactionBinding) :
+    inner class ViewHolder(private val binding: ItemListShopHistoryTransactionBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
             with(transaction) {
