@@ -29,6 +29,8 @@
     <string name="directing_from_your_location">Directing from your location</string>
     <string name="or_use_your_location_by_default">or just leave it to use your current location by default</string>
     <string name="please_fill_all_field">Please fill all field</string>
+    <string name="please_fill_in_this_field">Please fill in this field</string>
+    <string name="phone_number_is_existed">Phone number is existed</string>
     <string name="confirm_password_not_match">Confirm password is not match</string>
     <string name="upload_shop_proof_photo">Upload shop proof photo:</string>
     <string name="pick_image">Pick image <font color='#FF0000'>*</font></string>
