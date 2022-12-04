@@ -17,7 +17,6 @@ import com.kiluss.vemergency.databinding.FragmentSignupBinding
 import com.kiluss.vemergency.utils.Utils
 
 class SignupFragment : Fragment() {
-
     private var _binding: FragmentSignupBinding? = null
     private val binding get() = _binding!!
     private lateinit var auth: FirebaseAuth
@@ -55,7 +54,7 @@ class SignupFragment : Fragment() {
                                 auth.uid?.let {
                                     db.collection(Utils.getCollectionRole())
                                         .document(it)
-                                        .set(HashMap<String, Any>())
+                                        .set(hashMapOf("id" to it, "userName" to auth.currentUser?.email))
                                         .addOnSuccessListener {
                                             // Sign in success, update UI with the signed-in user's information
                                             Toast.makeText(

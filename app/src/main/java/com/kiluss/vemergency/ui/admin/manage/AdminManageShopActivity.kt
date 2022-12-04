@@ -1,5 +1,6 @@
 package com.kiluss.vemergency.ui.admin.manage
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
@@ -7,20 +8,36 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
 import com.kiluss.vemergency.constant.HTTP_PREFIX
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityAdminManageShopBinding
 import com.kiluss.vemergency.ui.shop.edit.EditShopProfileActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
+import java.text.MessageFormat
 
 class AdminManageShopActivity : AppCompatActivity() {
+    private val startForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                //  you will get result here in result.data
+                result.data?.getParcelableExtra<Shop>(EXTRA_SHOP_DETAIL)?.let {
+                    shop = it
+                    setUpView()
+                }
+            }
+        }
     private lateinit var binding: ActivityAdminManageShopBinding
     private lateinit var shop: Shop
 
@@ -55,6 +72,12 @@ class AdminManageShopActivity : AppCompatActivity() {
         }
         shop.service?.let {
             binding.tvService.text = it
+        }
+        shop.reviewCount?.let {
+            binding.tvReviewCount.text = MessageFormat.format(
+                resources.getText(R.string.reviews).toString(),
+                it
+            )
         }
         val rating = shop.rating
         if (rating != null) {
@@ -108,7 +131,7 @@ class AdminManageShopActivity : AppCompatActivity() {
             startActivity(urlIntent)
         }
         binding.ivEdit.setOnClickListener {
-            startActivity(Intent(this, EditShopProfileActivity::class.java).apply {
+            startForResult.launch(Intent(this, EditShopProfileActivity::class.java).apply {
                 putExtra(EXTRA_SHOP_DETAIL, shop)
             })
         }
@@ -119,9 +142,10 @@ class AdminManageShopActivity : AppCompatActivity() {
                 setTitle(getString(R.string.delete_question))
                 setMessage(getString(R.string.do_you_want_to_delete))
                 setPositiveButton(getString(R.string.yes)) { _: DialogInterface?, _: Int ->
-                    // make phone call
-                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + binding.tvPhoneNumber.text))
-                    startActivity(intent)
+                    shop.id?.let { it1 ->
+                        Firebase.firestore.collection(SHOP_COLLECTION).document(it1).delete()
+                        finish()
+                    }
                 }
                 setNegativeButton(getString(R.string.no)) { _, _ ->
                 }

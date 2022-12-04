@@ -27,7 +27,14 @@
         android:theme="@style/Theme.Vemergency"
         tools:targetApi="31">
         <activity
-            android:name=".AdminManageShopActivity"
+            android:name=".ui.admin.manage.AdminManageUserActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".ui.admin.manage.AdminManageShopActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

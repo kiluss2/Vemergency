@@ -140,8 +140,7 @@
                     android:id="@+id/edtOpenTime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:inputType="numberDecimal" />
+                    android:layout_margin="5dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -155,8 +154,7 @@
                     android:id="@+id/edtWebsite"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:inputType="numberDecimal" />
+                    android:layout_margin="5dp" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
         </RelativeLayout>

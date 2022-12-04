@@ -160,6 +160,9 @@ class EditShopProfileActivity : AppCompatActivity() {
                     .addOnSuccessListener {
                         hideProgressbar()
                         Utils.showShortToast(this@EditShopProfileActivity, "Edit successful")
+                        setResult(Activity.RESULT_OK, Intent().apply {
+                            putExtra(EXTRA_SHOP_DETAIL, shop)
+                        })
                         finish()
                     }
                     .addOnFailureListener {

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.FragmentManageUserBinding
-import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
+import com.kiluss.vemergency.ui.admin.manage.AdminManageUserActivity
 import com.kiluss.vemergency.utils.OnLoadMoreListener
 import com.kiluss.vemergency.utils.RecyclerViewLoadMoreScroll
 
@@ -38,7 +38,6 @@ class ManageUserFragment : Fragment(), UserGridAdapter.OnClickListener {
         observeViewModel()
         setUpRecyclerViewGridView(2)
         setRVScrollListener()
-        viewModel.getAllUser()
     }
 
     private fun observeViewModel() {
@@ -94,11 +93,10 @@ class ManageUserFragment : Fragment(), UserGridAdapter.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-
     }
 
     override fun onOpenUserDetail(user: User) {
-        startActivity(Intent(requireActivity(), ApproveShopActivity::class.java).apply {
+        startActivity(Intent(requireActivity(), AdminManageUserActivity::class.java).apply {
             putExtra(EXTRA_USER_DETAIL, user)
         })
     }

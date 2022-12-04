@@ -48,6 +48,7 @@ class AdminMainActivity : AppCompatActivity() {
         super.onResume()
         viewModel.getShopPendingInfo()
         viewModel.getActiveShop()
+        viewModel.getAllUser()
     }
 
     override fun onBackPressed() {

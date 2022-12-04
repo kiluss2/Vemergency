@@ -23,6 +23,7 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
 import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
+import java.text.MessageFormat
 
 class MyShopFragment : Fragment() {
     private var _binding: FragmentMyShopBinding? = null
@@ -135,6 +136,12 @@ class MyShopFragment : Fragment() {
                         }
                         shop.service?.let {
                             binding.tvService.text = it
+                        }
+                        shop.reviewCount?.let {
+                            binding.tvReviewCount.text = MessageFormat.format(
+                                resources.getText(R.string.reviews).toString(),
+                                it
+                            )
                         }
                         val rating = shop.rating
                         if (rating != null) {
