@@ -25,8 +25,8 @@ class AdminMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //Initialize the bottom navigation view
-        //create bottom navigation view object
+        // Initialize the bottom navigation view
+        // create bottom navigation view object
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
 
         observeViewModel()

@@ -27,7 +27,6 @@ import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.IMAGE_API_URL
 import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
-import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityEditShopProfileBinding
 import com.kiluss.vemergency.network.api.ApiService
@@ -126,10 +125,10 @@ class EditShopProfileActivity : AppCompatActivity() {
                 } else {
                     showProgressbar()
                     db.collection(SHOP_COLLECTION)
-                        .whereEqualTo("email", edtPhoneNumber.text.toString())
+                        .whereEqualTo("phone", edtPhoneNumber.text.toString())
                         .get()
                         .addOnSuccessListener {
-                            if (it.size() != 0) {
+                            if (it.size() != 0 && edtPhoneNumber.text.toString() != shop.phone) {
                                 edtPhoneNumber.error = getString(R.string.phone_number_is_existed)
                                 hideProgressbar()
                             } else {
@@ -154,7 +153,7 @@ class EditShopProfileActivity : AppCompatActivity() {
             shop.website = edtWebsite.text.toString()
             imageUrl?.let { shop.imageUrl = it }
             shop.lastModifiedTime = android.icu.util.Calendar.getInstance().timeInMillis.toDouble()
-            FirebaseManager.getAuth()?.uid?.let {
+            shop.id?.let {
                 db.collection(SHOP_COLLECTION)
                     .document(it)
                     .set(shop)

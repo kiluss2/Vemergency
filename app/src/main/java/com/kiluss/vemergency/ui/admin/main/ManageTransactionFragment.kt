@@ -42,7 +42,7 @@ class ManageTransactionFragment : Fragment(), ManageTransactionAdapter.OnClickLi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
-        setUpRecyclerViewGridView(2)
+        setUpRecyclerViewGridView()
         setRVScrollListener()
         viewModel.getHistoryTransaction()
         viewModel.getPendingTransaction()
@@ -84,7 +84,7 @@ class ManageTransactionFragment : Fragment(), ManageTransactionAdapter.OnClickLi
         }
     }
 
-    private fun setUpRecyclerViewGridView(column: Int) {
+    private fun setUpRecyclerViewGridView() {
         historyLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
         pendingLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
         currentLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)

@@ -158,8 +158,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                         val shop = doc.toObject<Shop>()
                         val lat = shop?.location?.getValue(LATITUDE)
                         val lng = shop?.location?.getValue(LONGITUDE)
-                        // We have to filter out a few false positives due to GeoHash
-                        // accuracy, but most will match
+                        // We have to filter out a few false positives due to GeoHash accuracy, but most will match
                         if (lat != null && lng != null) {
                             val docLocation = GeoLocation(lat as Double, lng as Double)
                             val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)

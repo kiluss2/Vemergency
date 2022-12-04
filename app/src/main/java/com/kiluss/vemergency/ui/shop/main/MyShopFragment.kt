@@ -140,8 +140,10 @@ class MyShopFragment : Fragment() {
                         if (rating != null) {
                             binding.rbShopRating.rating = rating.toFloat()
                             binding.rbShopRating.visibility = View.VISIBLE
+                            binding.tvReviewCount.visibility = View.VISIBLE
                         } else {
-                            binding.rbShopRating.visibility = View.INVISIBLE
+                            binding.rbShopRating.visibility = View.GONE
+                            binding.tvReviewCount.visibility = View.GONE
                         }
                         Glide.with(this@MyShopFragment)
                             .load(shop.imageUrl)

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
@@ -25,7 +26,9 @@ import com.kiluss.vemergency.constant.ROLE_NAN
 import com.kiluss.vemergency.constant.ROLE_SHOP
 import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
+import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.FragmentLoginBinding
 import com.kiluss.vemergency.ui.admin.main.AdminMainActivity
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
@@ -154,9 +157,27 @@ class LoginFragment : Fragment() {
                         )
                     }
                     EXTRA_EMERGENCY -> {
-                        requireActivity().startActivity(
-                            Intent(requireActivity(), CreateEmergencyActivity::class.java)
-                        )
+                        auth.currentUser?.uid?.let { uid ->
+                            db.collection(USER_COLLECTION).document(uid)
+                                .get()
+                                .addOnSuccessListener {
+                                    it.toObject<User>()?.let { result ->
+                                        if (result.phone != null && result.phone.toString().isNotEmpty()) {
+                                            requireActivity().startActivity(
+                                                Intent(requireActivity(), CreateEmergencyActivity::class.java)
+                                            )
+                                        } else {
+                                            requireActivity().startActivity(
+                                                Intent(requireActivity(), EditUserProfileActivity::class.java)
+                                            )
+                                            Utils.showLongToast(
+                                                requireContext(),
+                                                getString(R.string.please_update_your_information_first)
+                                            )
+                                        }
+                                    }
+                                }
+                        }
                     }
                 }
             }

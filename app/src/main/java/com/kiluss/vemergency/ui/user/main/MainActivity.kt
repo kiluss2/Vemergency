@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpOnClickView() {
-        binding.fabAddPlace.setOnClickListener {
+        binding.fabCreateTransaction.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java).apply {
                 putExtra(
                     LOGIN_FRAGMENT_EXTRA,

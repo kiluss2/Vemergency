@@ -24,7 +24,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.IMAGE_API_URL
 import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
@@ -33,6 +32,7 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
 import com.kiluss.vemergency.network.api.ApiService
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import org.json.JSONObject
@@ -40,10 +40,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 class EditUserProfileActivity : AppCompatActivity() {
-
     private var imageUrl: String? = null
     private var imageBase64: String? = null
     private var user = User()
@@ -99,8 +98,24 @@ class EditUserProfileActivity : AppCompatActivity() {
             }
 
             btnSave.setOnClickListener {
-                showProgressbar()
-                uploadImage()
+                if (edtFullName.text.isEmpty()) {
+                    edtFullName.error = getString(R.string.please_fill_in_this_field)
+                } else if (edtPhoneNumber.text.isEmpty()) {
+                    edtPhoneNumber.error = getString(R.string.please_fill_in_this_field)
+                } else {
+                    showProgressbar()
+                    db.collection(USER_COLLECTION)
+                        .whereEqualTo("phone", edtPhoneNumber.text.toString())
+                        .get()
+                        .addOnSuccessListener {
+                            if (it.size() != 0 && edtPhoneNumber.text.toString() != user.phone) {
+                                edtPhoneNumber.error = getString(R.string.phone_number_is_existed)
+                                hideProgressbar()
+                            } else {
+                                uploadImage()
+                            }
+                        }
+                }
             }
             ivProfile.setOnClickListener {
                 pickImage()

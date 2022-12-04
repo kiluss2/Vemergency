@@ -19,7 +19,7 @@
     <string name="pending_request">Pending request</string>
     <string name="list_shop_activated">List shop activated</string>
     <string name="no_item">No item</string>
-    <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} place near by}</string>
+    <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} places near by}</string>
     <string name="reviews">{0,choice,0#No review|1#1 review|1&lt;{0} reviews}</string>
     <string name="finding_near_by_place">finding near by place..</string>
     <string name="no_review">No review</string>
@@ -57,11 +57,22 @@
     <string name="no_request_currently">No request currently</string>
     <string name="waiting_for_rescue_service">Waiting for rescue service</string>
     <string name="transaction_finished">Transaction finished</string>
-    <string name="ok">ok</string>
+    <string name="ok">OK</string>
     <string name="going_to_your_location">going to your location</string>
     <string name="active_shop">Active shop</string>
     <string name="inactive_shop">Inactive shop</string>
     <string name="show_rescue_location">show rescue location</string>
     <string name="all_user">All user</string>
     <string name="transaction_pending">Transaction pending</string>
+    <string name="full_name">Full name <font color='#FF0000'>*</font></string>
+    <string name="please_update_your_information_first">Please update your information first</string>
+    <string name="edit">edit</string>
+    <string name="delete">delete</string>
+    <string name="service">Service</string>
+    <string name="make_a_phone_call">Make a phone call?</string>
+    <string name="do_you_want_phone_call">Do you want to make a phone call?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_question">Delete?</string>
+    <string name="do_you_want_to_delete">Do you want to delete?</string>
 </resources>
