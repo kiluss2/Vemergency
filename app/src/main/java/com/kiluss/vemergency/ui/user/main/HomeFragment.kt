@@ -19,6 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_EMERGENCY
 import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
@@ -29,7 +30,6 @@ import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 import java.text.MessageFormat
 
 class HomeFragment : Fragment() {
-
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -84,6 +84,14 @@ class HomeFragment : Fragment() {
                 putExtra(
                     LOGIN_FRAGMENT_EXTRA,
                     EXTRA_USER_PROFILE
+                )
+            })
+        }
+        binding.btnAskForRescue.setOnClickListener {
+            startActivity(Intent(requireActivity(), LoginActivity::class.java).apply {
+                putExtra(
+                    LOGIN_FRAGMENT_EXTRA,
+                    EXTRA_EMERGENCY
                 )
             })
         }

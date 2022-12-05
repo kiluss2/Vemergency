@@ -36,14 +36,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpOnClickView() {
-        binding.fabCreateTransaction.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java).apply {
-                putExtra(
-                    LOGIN_FRAGMENT_EXTRA,
-                    EXTRA_EMERGENCY
-                )
-            })
-        }
+
     }
 
     override fun onBackPressed() {
