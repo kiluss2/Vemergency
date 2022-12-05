@@ -75,4 +75,6 @@
     <string name="no">No</string>
     <string name="delete_question">Delete?</string>
     <string name="do_you_want_to_delete">Do you want to delete?</string>
+    <string name="ask_for_rescue">Ask for rescue</string>
+    <string name="ask_for_rescue_service">Ask for rescue service</string>
 </resources>
