@@ -7,8 +7,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clCreateShop"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tvCreateToManage"
@@ -89,28 +89,39 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
-                    <androidx.appcompat.widget.AppCompatRatingBar
-                        android:id="@+id/rbUserRating"
+                    <TextView
+                        android:id="@+id/tvService"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/tvShopName"
                         android:layout_centerHorizontal="true"
+                        android:layout_marginHorizontal="40dp"
+                        android:layout_marginTop="10dp"
+                        android:text="This shop have not set service yet"
+                        android:textColor="#fff"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatRatingBar
+                        android:id="@+id/rbShopRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvService"
+                        android:layout_centerHorizontal="true"
                         android:layout_marginStart="40dp"
                         android:layout_marginTop="10dp"
-                        android:isIndicator="true"
+                        style="@style/Widget.AppCompat.RatingBar.Indicator"
                         android:numStars="5"
                         android:rating="3.5"
                         android:theme="@style/RatingBar" />
 
                     <TextView
-                        android:id="@+id/tvService"
+                        android:id="@+id/tvReviewCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/rbUserRating"
+                        android:layout_below="@+id/rbShopRating"
                         android:layout_centerHorizontal="true"
                         android:layout_marginHorizontal="40dp"
                         android:layout_marginTop="10dp"
-                        android:text="This shop have not set service yet"
                         android:textColor="#fff"
                         android:textSize="16sp" />
                 </RelativeLayout>

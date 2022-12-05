@@ -64,33 +64,25 @@
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <TextView
+            android:id="@+id/tvProfileLabel"
             style="@style/viewParent.headerText.settingsMiniTitle"
-            android:text="Profile" />
+            android:text="Profile"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvEditProfile"
             style="@style/viewParent.headerText.settingsTextIcon"
             android:text="Edit Profile"
-            app:drawableStartCompat="@drawable/ic_edit_profile" />
+            app:drawableStartCompat="@drawable/ic_edit_profile"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvChangePassword"
             style="@style/viewParent.headerText.settingsTextIcon"
             android:layout_marginTop="10dp"
             android:text="Change Password"
-            app:drawableStartCompat="@drawable/ic_edit_password" />
-
-        <TextView
-            style="@style/viewParent.headerText.settingsMiniTitle"
-            android:text="Notifications" />
-
-        <Switch
-            android:id="@+id/swNotification"
-            style="@style/settingsText"
-            android:checked="true"
-            android:drawableStart="@drawable/ic_notifications"
-            android:text="Notifications"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
+            app:drawableStartCompat="@drawable/ic_edit_password"
+            android:visibility="gone"/>
 
         <TextView
             style="@style/viewParent.headerText.settingsMiniTitle"
@@ -104,7 +96,7 @@
         <TextView
             android:id="@+id/tvSignOut"
             style="@style/viewParent.headerText.settingsTextIcon"
-            android:text="@string/textview_text_signout"
+            android:text="@string/textview_text_sign_out"
             app:drawableStartCompat="@drawable/ic_logout" />
 
 

@@ -9,22 +9,32 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.GEO_HASH
+import com.kiluss.vemergency.constant.HISTORY_TRANSACTION_COLLECTION
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.SHOP_CLONE_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
+import com.kiluss.vemergency.data.model.LatLng
+import com.kiluss.vemergency.data.model.Review
 import com.kiluss.vemergency.data.model.Shop
+import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
+import com.kiluss.vemergency.utils.Utils
 
 class MainViewModel(application: Application) : BaseViewModel(application) {
-
     private var user = User()
     private val db = Firebase.firestore
     private var nearByShopNumber = 0
+    private var historyTransactions = mutableListOf<Transaction>()
     private val _progressBarStatus: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
@@ -41,6 +51,10 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<Int>()
     }
     internal val nearByShopCount: LiveData<Int> = _nearByShopCount
+    private val _historyTransaction: MutableLiveData<MutableList<Transaction>> by lazy {
+        MutableLiveData<MutableList<Transaction>>()
+    }
+    internal val historyTransaction: LiveData<MutableList<Transaction>> = _historyTransaction
 
     internal fun getUserInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
@@ -67,9 +81,16 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
     internal fun getUserData() = user
 
     internal fun signOut() {
+        removeFcmToken()
         FirebaseManager.getAuth()?.signOut() //End user session
         FirebaseManager.logout()
         getUserInfo()
+    }
+
+    private fun removeFcmToken() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+        }
     }
 
     private fun hideProgressbar() {
@@ -84,7 +105,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         val tasks = mutableListOf<Task<QuerySnapshot>>()
         for (b in bounds) {
             val q = db.collection(SHOP_CLONE_COLLECTION)
-                .orderBy("location\$app_debug.$GEO_HASH")
+                .orderBy("location.$GEO_HASH")
                 .startAt(b.startHash)
                 .endAt(b.endHash)
             tasks.add(q.get())
@@ -122,7 +143,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
         for (b in bounds) {
             val q = db.collection(SHOP_COLLECTION)
-                .orderBy("location\$app_debug.$GEO_HASH")
+                .orderBy("location.$GEO_HASH")
                 .startAt(b.startHash)
                 .endAt(b.endHash)
             tasks.add(q.get())
@@ -137,8 +158,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                         val shop = doc.toObject<Shop>()
                         val lat = shop?.location?.getValue(LATITUDE)
                         val lng = shop?.location?.getValue(LONGITUDE)
-                        // We have to filter out a few false positives due to GeoHash
-                        // accuracy, but most will match
+                        // We have to filter out a few false positives due to GeoHash accuracy, but most will match
                         if (lat != null && lng != null) {
                             val docLocation = GeoLocation(lat as Double, lng as Double)
                             val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)
@@ -149,6 +169,42 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                     }
                 }
                 getNearByCloneShop(location, radiusKmRange)
+            }
+    }
+
+    internal fun getHistoryTransaction() {
+        db.collection(HISTORY_TRANSACTION_COLLECTION)
+            .whereEqualTo("userId", FirebaseManager.getAuth()?.uid.toString())
+            .orderBy("endTime", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                historyTransactions.clear()
+                for (document in documents) {
+                    val transaction = Transaction().apply {
+                        document.data["id"]?.let { id = it as String }
+                        document.data["userId"]?.let { userId = it as String }
+                        document.data["shopId"]?.let { shopId = it as String }
+                        document.data["shopImage"]?.let { shopImage = it as String }
+                        document.data["shopName"]?.let { shopName = it as String }
+                        document.data["shopPhone"]?.let { shopPhone = it as String }
+                        document.data["service"]?.let { service = it as String }
+                        document.data["endTime"]?.let { endTime = it as Double }
+                        document.data["shopAddress"]?.let { shopAddress = it as String }
+                        document.data["userLocation"]?.let {
+                            val location = it as HashMap<*, *>
+                            userLocation = LatLng(location["latitude"] as Double, location["longitude"] as Double)
+                        }
+                        document.data["review"]?.let {
+                            val reviewData = it as HashMap<*, *>
+                            review = Review(reviewData["rating"] as Double, reviewData["comment"] as String)
+                        }
+                    }
+                    historyTransactions.add(transaction)
+                }
+                _historyTransaction.value = historyTransactions
+            }
+            .addOnFailureListener { exception ->
+                Log.e("history transaction", exception.toString())
             }
     }
 }

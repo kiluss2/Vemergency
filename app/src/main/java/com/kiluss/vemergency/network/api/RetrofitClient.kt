@@ -1,7 +1,6 @@
-package com.kiluss.bookrate.network.api
+package com.kiluss.vemergency.network.api
 
 import android.content.Context
-import com.kiluss.vemergency.constant.API_URL
 import com.kiluss.vemergency.utils.SingletonHolder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -15,9 +14,9 @@ import javax.net.ssl.X509TrustManager
 class RetrofitClient private constructor(private val context: Context) {
     companion object : SingletonHolder<RetrofitClient, Context>(::RetrofitClient)
 
-    fun getClientUnAuthorize(): Retrofit {
+    fun getClientUnAuthorize(url: String): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(API_URL)
+            .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

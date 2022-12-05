@@ -86,13 +86,13 @@ class ApproveShopActivity : AppCompatActivity() {
             }
             binding.ivDecline.setOnClickListener {
                 showProgressbar()
-                shop.uid?.let { it1 -> declineShop(it1) }
+                shop.id?.let { it1 -> declineShop(it1) }
             }
         }
     }
 
     private fun approveShop(shop: Shop) {
-        shop.uid?.let { uid ->
+        shop.id?.let { uid ->
             db.collection(SHOP_COLLECTION)
                 .document(uid)
                 .set(shop)

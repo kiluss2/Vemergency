@@ -44,5 +44,11 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:drawablePadding">20dp</item>
     </style>
-    <style name="viewParent.headerText.settingsTextIcon" parent="settingsText"/>
+
+    <style name="viewParent.headerText.settingsTextIcon" parent="settingsText" />
+
+    <style name="DialogRoundedCorner" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:windowMinWidthMinor">87.5%</item>
+    </style>
 </resources>

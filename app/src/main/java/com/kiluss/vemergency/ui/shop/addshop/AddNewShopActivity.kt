@@ -26,14 +26,25 @@ import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.CAR_MOTORCYCLE_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.CAR_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
+import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.GEO_HASH
+import com.kiluss.vemergency.constant.IMAGE_API_URL
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
+import com.kiluss.vemergency.constant.MOTORCYCLE_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.LatLng
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityAddNewShopBinding
-import com.kiluss.vemergency.network.api.ImageService
+import com.kiluss.vemergency.network.api.ApiService
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
 import com.kiluss.vemergency.utils.URIPathHelper
@@ -45,14 +56,13 @@ import retrofit2.Response
 import java.io.File
 
 class AddNewShopActivity : AppCompatActivity() {
-
     private var imageUrl: String? = null
     private lateinit var binding: ActivityAddNewShopBinding
     private var imageBase64: String? = null
     private var shop = Shop()
     private var location: LatLng? = null
     private val db = Firebase.firestore
-    private lateinit var imageApi: ImageService
+    private lateinit var imageApi: ApiService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -91,7 +101,7 @@ class AddNewShopActivity : AppCompatActivity() {
         binding = ActivityAddNewShopBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ApiService::class.java)
     }
 
     private fun setupView() {
@@ -104,24 +114,41 @@ class AddNewShopActivity : AppCompatActivity() {
                 pickLocationFromGalleryForResult.launch(intent)
             }
             btnSubmit.setOnClickListener {
-                if (edtName.text.isEmpty()) {
-                    edtName.error = "Name can not empty"
-                }
-                if (edtAddress.text.isEmpty()) {
-                    edtAddress.error = "Address can not empty"
-                }
-                if (edtPhone.text.isEmpty()) {
-                    edtPhone.error = "Phone can not empty"
-                }
-                if (tvLocationPicked.text.isEmpty()) {
-                    Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
-                }
-                if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && edtPhone.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
-                    showProgressbar()
-                    uploadShopImage()
-                }
+                db.collection("shops").whereEqualTo("phone", edtPhone.text.toString())
+                    .get().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            if (!task.result.isEmpty) {
+                                edtPhone.error = "Phone number is already taken"
+                            } else {
+                                upLoadInfo()
+                            }
+                        } else {
+                            Log.d("add new shop", "Error getting documents: ", task.exception)
+                        }
+                    }
             }
             setupSpinnerCategory()
+        }
+    }
+
+    private fun upLoadInfo() {
+        with(binding) {
+            if (edtName.text.isEmpty()) {
+                edtName.error = "Name can not empty"
+            }
+            if (edtAddress.text.isEmpty()) {
+                edtAddress.error = "Address can not empty"
+            }
+            if (edtPhone.text.isEmpty()) {
+                edtPhone.error = "Phone can not empty"
+            }
+            if (tvLocationPicked.text.isEmpty()) {
+                Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
+            }
+            if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && edtPhone.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
+                showProgressbar()
+                uploadShopImage()
+            }
         }
     }
 
@@ -189,7 +216,7 @@ class AddNewShopActivity : AppCompatActivity() {
     private fun uploadShopImage() {
         val iBase64 = imageBase64
         if (iBase64 != null) {
-            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
+            imageApi.uploadPhoto(Utils.createRequestBodyForImage(iBase64))
                 .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
                         call: Call<JsonObject?>,
@@ -253,17 +280,17 @@ class AddNewShopActivity : AppCompatActivity() {
         shop.created = false
         shop.lastModifiedTime = Calendar.getInstance().timeInMillis.toDouble()
         FirebaseManager.getAuth()?.uid?.let { uid ->
-            shop.uid = uid
+            shop.id = uid
             db.collection(SHOP_PENDING_COLLECTION)
                 .document(uid)
                 .set(shop)
                 .addOnSuccessListener {
                     db.collection(SHOP_COLLECTION)
                         .document(uid)
-                        .set(Shop().apply {
-                            pendingApprove = true
-                            created = false
-                        })
+                        .update(
+                            "pendingApprove", true,
+                            "created", false
+                        )
                     hideProgressbar()
                     startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
                         putExtra(EXTRA_CREATED_SHOP, "created")

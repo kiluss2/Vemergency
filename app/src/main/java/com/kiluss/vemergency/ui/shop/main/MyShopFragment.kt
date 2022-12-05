@@ -23,9 +23,9 @@ import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentMyShopBinding
 import com.kiluss.vemergency.ui.shop.addshop.AddNewShopActivity
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
+import java.text.MessageFormat
 
 class MyShopFragment : Fragment() {
-
     private var _binding: FragmentMyShopBinding? = null
     private val binding get() = _binding!!
 
@@ -136,6 +136,21 @@ class MyShopFragment : Fragment() {
                         }
                         shop.service?.let {
                             binding.tvService.text = it
+                        }
+                        shop.reviewCount?.let {
+                            binding.tvReviewCount.text = MessageFormat.format(
+                                resources.getText(R.string.reviews).toString(),
+                                it
+                            )
+                        }
+                        val rating = shop.rating
+                        if (rating != null) {
+                            binding.rbShopRating.rating = rating.toFloat()
+                            binding.rbShopRating.visibility = View.VISIBLE
+                            binding.tvReviewCount.visibility = View.VISIBLE
+                        } else {
+                            binding.rbShopRating.visibility = View.GONE
+                            binding.tvReviewCount.visibility = View.GONE
                         }
                         Glide.with(this@MyShopFragment)
                             .load(shop.imageUrl)

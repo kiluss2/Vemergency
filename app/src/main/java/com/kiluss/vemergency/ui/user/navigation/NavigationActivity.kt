@@ -2,29 +2,23 @@ package com.kiluss.vemergency.ui.user.navigation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Color
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -32,12 +26,27 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.maps.android.PolyUtil
-import com.kiluss.vemergency.BuildConfig.MAPS_API_KEY
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.ACTIVE_SHOP_MARKER
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_DIRECTION_STATE
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
+import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
+import com.kiluss.vemergency.constant.CLONE_SHOP_MARKER
+import com.kiluss.vemergency.constant.EXTRA_LAUNCH_MAP
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
+import com.kiluss.vemergency.constant.LATITUDE
+import com.kiluss.vemergency.constant.LONGITUDE
+import com.kiluss.vemergency.constant.POLYLINE_STROKE_WIDTH_PX
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityNavigationBinding
 import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
@@ -45,8 +54,6 @@ import com.kiluss.vemergency.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONException
-import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.util.GeoPoint
@@ -55,7 +62,6 @@ import java.text.DecimalFormat
 import java.text.MessageFormat
 
 class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewAdapter.OnClickListener {
-
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private var map: GoogleMap? = null
     private lateinit var binding: ActivityNavigationBinding
@@ -64,6 +70,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     private var currentLocation: Location? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var shopCloneAdapter: ShopPreviewAdapter? = null
+    private var shopActiveAdapter: ShopPreviewAdapter? = null
     private var currentPolyLines: Polyline? = null
     private var directing = false
 
@@ -71,8 +78,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         super.onCreate(savedInstanceState)
         binding = ActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        checkLocationPermission()
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
@@ -81,7 +86,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
+    @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         initBottomSheet()
@@ -120,12 +125,12 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     this, Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                fusedLocationClient?.lastLocation?.addOnSuccessListener(this) { location ->
+                fusedLocationClient?.lastLocation?.addOnSuccessListener(this) { lastLocation ->
                     // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
+                    if (lastLocation != null) {
                         // Logic to handle location object
-                        viewModel.getNearByShop(location, 5)
-                        viewModel.getNearByCloneShop(location, 1)
+                        viewModel.getNearByShop(lastLocation, 5)
+                        viewModel.getNearByCloneShop(lastLocation, 1)
                     }
                 }
             }
@@ -148,7 +153,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             if (!directing) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.tvBottomSheetTitle.text = MessageFormat.format(
-                    resources.getText(R.string.text_found_near_by).toString(), viewModel.getShopClone().size
+                    resources.getText(R.string.text_found_near_by).toString(), viewModel.getNearByShopNumber()
                 )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
@@ -159,6 +164,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
             lifecycleScope.launch(Dispatchers.IO) {
                 delay(50)
                 launch(Dispatchers.Main) {
+                    // popup marker info
                     if (marker.isInfoWindowShown) {
                         marker.hideInfoWindow()
                     } else {
@@ -167,6 +173,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     map?.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.position, 16f))
                 }
             }
+            // show shop info in bottom sheet
             if (!directing) {
                 marker.tag?.let {
                     val tag = it as Pair<*, *>
@@ -200,24 +207,55 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
 //        }
     }
 
+    @SuppressLint("MissingPermission")
     private fun setShopPreviewInfo(shop: Shop) {
         binding.tvBottomSheetTitle.text = shop.name
         with(binding.layoutShopPreview) {
             tvShopTitle.text = shop.name
             tvShopAddress.text = shop.address
             tvService.text = shop.service
+            tvPhone.text = shop.phone
             val shopRating = shop.rating
             if (shopRating != null) {
                 rbRating.visibility = View.VISIBLE
-                tvNoRating.visibility = View.GONE
+                tvReviewCount.text = MessageFormat.format(
+                    resources.getText(R.string.reviews).toString(),
+                    shop.reviewCount
+                )
                 rbRating.rating = shopRating.toFloat()
             } else {
                 rbRating.visibility = View.GONE
-                tvNoRating.visibility = View.VISIBLE
             }
             shop.imageUrl?.let {
                 Glide.with(this@NavigationActivity).load(shop.imageUrl).placeholder(R.drawable.default_pic).centerCrop()
                     .into(ivShopImage)
+            }
+            tvPhone.setOnClickListener {
+                if (ContextCompat.checkSelfPermission(
+                        this@NavigationActivity,
+                        Manifest.permission.CALL_PHONE
+                    )
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this@NavigationActivity, arrayOf(Manifest.permission.CALL_PHONE),
+                        0
+                    )
+                } else {
+                    val alertDialog = AlertDialog.Builder(this@NavigationActivity)
+                    alertDialog.apply {
+                        setIcon(R.drawable.ic_call)
+                        setTitle("Make a phone call?")
+                        setMessage("Do you want to make a phone call?")
+                        setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
+                            // make phone call
+                            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:${shop.phone}"))
+                            context.startActivity(intent)
+                        }
+                        setNegativeButton("No") { _, _ ->
+                        }
+                    }.create().show()
+                }
             }
         }
         binding.ivDirection.setOnClickListener {
@@ -231,7 +269,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                         directing = true
                         setBottomSheetShowingState(BOTTOM_SHEET_DIRECTION_STATE)
                         currentPolyLines?.remove()
-                        binding.tvBottomSheetTitle.text = getString(R.string.direction_from_your_location)
+                        binding.tvBottomSheetTitle.text = getString(R.string.directing_from_your_location)
                         binding.tvDirectionTo.text = shop.name
                         direction(
                             LatLng(location.latitude, location.longitude), LatLng(
@@ -248,6 +286,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         with(viewModel) {
             allShop.observe(this@NavigationActivity) {
                 showAllShopLocation(it)
+                shopActiveAdapter?.updateData(it)
+                binding.tvBottomSheetTitle.text = MessageFormat.format(
+                    resources.getText(R.string.text_found_near_by).toString(), getNearByShopNumber()
+                )
                 setBottomSheetShowingState(BOTTOM_SHEET_LIST_SHOP_STATE)
             }
             cloneShop.observe(this@NavigationActivity) {
@@ -268,7 +310,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     if (!directing) {
                         bottomSheetBehavior.halfExpandedRatio = 0.5f
                         layoutShopPreview.cvMain.visibility = View.GONE
-                        rvShopList.visibility = View.VISIBLE
+                        lnShopList.visibility = View.VISIBLE
                         ivDirection.visibility = View.GONE
                         lnDirection.visibility = View.GONE
                         ivBack.visibility = View.GONE
@@ -278,7 +320,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     if (!directing) {
                         bottomSheetBehavior.halfExpandedRatio = 0.42f
                         layoutShopPreview.cvMain.visibility = View.VISIBLE
-                        rvShopList.visibility = View.GONE
+                        lnShopList.visibility = View.GONE
                         ivDirection.visibility = View.VISIBLE
                         lnDirection.visibility = View.GONE
                         ivBack.visibility = View.GONE
@@ -287,7 +329,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 BOTTOM_SHEET_DIRECTION_STATE -> {
                     bottomSheetBehavior.halfExpandedRatio = 0.4f
                     layoutShopPreview.cvMain.visibility = View.GONE
-                    rvShopList.visibility = View.GONE
+                    lnShopList.visibility = View.GONE
                     ivDirection.visibility = View.GONE
                     lnDirection.visibility = View.VISIBLE
                     ivBack.visibility = View.VISIBLE
@@ -295,7 +337,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                 else -> {
                     tvBottomSheetTitle.text = resources.getText(R.string.app_name)
                     layoutShopPreview.cvMain.visibility = View.GONE
-                    rvShopList.visibility = View.GONE
+                    lnShopList.visibility = View.GONE
                 }
             }
         }
@@ -355,10 +397,17 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
     }
 
     private fun setUpRecyclerViewListView() {
-        shopCloneAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
+        shopActiveAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
         with(binding.rvShopList) {
+            adapter = shopActiveAdapter
+            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.HORIZONTAL, false)
+            setHasFixedSize(true)
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        }
+        shopCloneAdapter = ShopPreviewAdapter(mutableListOf(), this, this)
+        with(binding.rvShopCloneList) {
             adapter = shopCloneAdapter
-            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager = LinearLayoutManager(this@NavigationActivity, LinearLayoutManager.HORIZONTAL, false)
             setHasFixedSize(true)
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
@@ -398,98 +447,36 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
         }
     }
 
-    private fun checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            ) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                AlertDialog.Builder(this).setTitle("Location Permission Needed")
-                    .setMessage("This app needs the Location permission, please accept to use location functionality")
-                    .setPositiveButton(
-                        "OK"
-                    ) { _, _ ->
-                        //Prompt the user once explanation has been shown
-                        requestLocationPermission()
-                    }.create().show()
-            } else {
-                // No explanation needed, we can request the permission.
-                requestLocationPermission()
-            }
-        } else {
-            //checkBackgroundLocation()
-        }
-    }
-
-    private fun checkBackgroundLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestBackgroundLocationPermission()
-        }
-    }
-
-    private fun requestLocationPermission() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-            ), MY_PERMISSIONS_REQUEST_LOCATION
-        )
-    }
-
-    private fun requestBackgroundLocationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ), MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION
-            )
-        } else {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSIONS_REQUEST_LOCATION
-            )
-        }
-    }
-
-    private fun directionApi() {
-        val path: MutableList<List<LatLng>> = ArrayList()
-        val urlDirections =
-            "http://router.project-osrm.org/route/v1/driving/16.057258%2C108.215804&loc=16.033316%2C108.224602&loc=16.081816%2C108.146324?overview=false"
-        "https://maps.googleapis.com/maps/api/directions/json?origin=16.073503,108.161034&destination=16.072937,108.213773&key=$MAPS_API_KEY"
-        val directionsRequest = object : StringRequest(Method.GET, urlDirections, Response.Listener { response ->
-            try {
-                val jsonResponse = JSONObject(response)
-                println(response.toString())
-                // Get routes
-                val routes = jsonResponse.getJSONArray("routes")
-                val legs = routes.getJSONObject(0).getJSONArray("legs")
-                val steps = legs.getJSONObject(0).getJSONArray("steps")
-                for (i in 0 until steps.length()) {
-                    val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
-                    path.add(PolyUtil.decode(points))
-                }
-                for (i in 0 until path.size) {
-                    map?.addPolyline(
-                        PolylineOptions().addAll(path[i]).color(Color.BLUE).jointType(JointType.ROUND)
-                            .width(POLYLINE_STROKE_WIDTH_PX)
-                    )
-                }
-            } catch (exception: JSONException) {
-                exception.printStackTrace()
-            }
-        }, Response.ErrorListener {}) {}
-        val requestQueue = Volley.newRequestQueue(this)
-        requestQueue.add(directionsRequest)
-    }
-
+    //    private fun directionApi() {
+//        val path: MutableList<List<LatLng>> = ArrayList()
+//        val urlDirections =
+//            "http://router.project-osrm.org/route/v1/driving/16.057258%2C108.215804&loc=16.033316%2C108.224602&loc=16.081816%2C108.146324?overview=false"
+//        "https://maps.googleapis.com/maps/api/directions/json?origin=16.073503,108.161034&destination=16.072937,108.213773&key=$MAPS_API_KEY"
+//        val directionsRequest = object : StringRequest(Method.GET, urlDirections, Response.Listener { response ->
+//            try {
+//                val jsonResponse = JSONObject(response)
+//                println(response.toString())
+//                // Get routes
+//                val routes = jsonResponse.getJSONArray("routes")
+//                val legs = routes.getJSONObject(0).getJSONArray("legs")
+//                val steps = legs.getJSONObject(0).getJSONArray("steps")
+//                for (i in 0 until steps.length()) {
+//                    val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
+//                    path.add(PolyUtil.decode(points))
+//                }
+//                for (i in 0 until path.size) {
+//                    map?.addPolyline(
+//                        PolylineOptions().addAll(path[i]).color(Color.BLUE).jointType(JointType.ROUND)
+//                            .width(POLYLINE_STROKE_WIDTH_PX)
+//                    )
+//                }
+//            } catch (exception: JSONException) {
+//                exception.printStackTrace()
+//            }
+//        }, Response.ErrorListener {}) {}
+//        val requestQueue = Volley.newRequestQueue(this)
+//        requestQueue.add(directionsRequest)
+//    }
     private fun direction(departure: LatLng, destination: LatLng) {
         val paths = mutableListOf<List<LatLng>>()
         val roadManager = OSRMRoadManager(this, "MY_USER_AGENT")
@@ -523,66 +510,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback, ShopPreviewA
                     tvEstimateTime.text =
                         "${getString(R.string.estimate_time)} ${Utils.convertSeconds(road.mDuration.toInt())}"
                 }
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_LOCATION -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        val mMap = map
-                        mMap?.isMyLocationEnabled = true
-                        // Now check background location
-                        checkBackgroundLocation()
-                    }
-                } else {
-                    // permission denied
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
-                    // Check if we are in a state where the user has denied the permission and
-                    // selected Don't ask again
-                    if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                            this, Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                    ) {
-                        startActivity(
-                            Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", this.packageName, null),
-                            ),
-                        )
-                    }
-                }
-                return
-            }
-            MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        Toast.makeText(
-                            this, "Granted Background Location Permission", Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } else {
-                    // permission denied
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show()
-                }
-                return
             }
         }
     }

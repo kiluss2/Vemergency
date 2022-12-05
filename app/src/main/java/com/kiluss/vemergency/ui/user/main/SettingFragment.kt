@@ -20,7 +20,6 @@ import com.kiluss.vemergency.databinding.FragmentSettingBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
 
 class SettingFragment : Fragment() {
-
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
 
@@ -108,13 +107,22 @@ class SettingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (FirebaseManager.getCurrentUser() == null) {
-            Glide.with(this)
-                .load(R.drawable.ic_account_avatar)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .dontAnimate()
-                .into(binding.profileCircleImageView)
+        with(binding) {
+            if (FirebaseManager.getCurrentUser() == null) {
+                Glide.with(this@SettingFragment)
+                    .load(R.drawable.ic_account_avatar)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .dontAnimate()
+                    .into(binding.profileCircleImageView)
+                tvProfileLabel.visibility = View.GONE
+                tvEditProfile.visibility = View.GONE
+                tvChangePassword.visibility = View.GONE
+            } else {
+                tvProfileLabel.visibility = View.VISIBLE
+                tvEditProfile.visibility = View.VISIBLE
+                tvChangePassword.visibility = View.VISIBLE
+            }
         }
     }
 
