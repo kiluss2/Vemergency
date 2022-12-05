@@ -88,23 +88,25 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/cvRescue"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="15dp"
-        android:layout_marginVertical="25dp"
+        android:layout_marginVertical="30dp"
         app:cardCornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/clFind">
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/ivBg"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="0dp"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
                 android:src="@drawable/find_rescue"
@@ -133,10 +135,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:backgroundTint="@color/blue_crayola"
                 android:layout_marginVertical="5dp"
+                android:backgroundTint="@color/blue_crayola"
                 android:text="@string/ask_for_rescue"
-                app:layout_constraintBottom_toBottomOf="@+id/tvAskForRescue"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ivBg" />
