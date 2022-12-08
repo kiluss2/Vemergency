@@ -67,7 +67,7 @@ object Utils {
     internal fun createRequestBodyForImage(imageBase64: String) = run {
         MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("key", API_KEY)
+            .addFormDataPart("key", IMAGE_API_KEY)
             .addFormDataPart("source", imageBase64)
             .build()
     }

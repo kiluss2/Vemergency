@@ -15,11 +15,11 @@ import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.FragmentManageShopBinding
 import com.kiluss.vemergency.ui.admin.approve.ApproveShopActivity
+import com.kiluss.vemergency.ui.admin.manage.AdminManageShopActivity
 import com.kiluss.vemergency.utils.OnLoadMoreListener
 import com.kiluss.vemergency.utils.RecyclerViewLoadMoreScroll
 
 class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdapter.OnClickListener {
-
     private var _binding: FragmentManageShopBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AdminMainViewModel by activityViewModels()
@@ -127,9 +127,8 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
     }
 
     override fun onOpenShopDetail(shop: Shop) {
-        startActivity(Intent(requireActivity(), ApproveShopActivity::class.java).apply {
-            putExtra(EXTRA_SHOP_PENDING, shop)
-            putExtra(EXTRA_SHOP_DETAIL, "")
+        startActivity(Intent(requireActivity(), AdminManageShopActivity::class.java).apply {
+            putExtra(EXTRA_SHOP_DETAIL, shop)
         })
     }
 }

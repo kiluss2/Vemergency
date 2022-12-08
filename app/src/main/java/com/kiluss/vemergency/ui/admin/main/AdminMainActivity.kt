@@ -9,14 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
 import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityAdminMainBinding
 
 class AdminMainActivity : AppCompatActivity() {
 
-    private var backPressPreviousState: Boolean = false
+    private var backPressPreviousState = false
     private lateinit var binding: ActivityAdminMainBinding
 
     // view model ktx
@@ -26,8 +25,8 @@ class AdminMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //Initialize the bottom navigation view
-        //create bottom navigation view object
+        // Initialize the bottom navigation view
+        // create bottom navigation view object
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navFragment))
 
         observeViewModel()
@@ -39,7 +38,6 @@ class AdminMainActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         with(viewModel) {
-
         }
     }
 
@@ -50,17 +48,22 @@ class AdminMainActivity : AppCompatActivity() {
         super.onResume()
         viewModel.getShopPendingInfo()
         viewModel.getActiveShop()
+        viewModel.getAllUser()
     }
 
     override fun onBackPressed() {
-        if (backPressPreviousState) {
-            super.onBackPressed()
-        } else {
+        val id = findNavController(R.id.navFragment).currentDestination?.id
+        if (id == R.id.manageShopFragment && !backPressPreviousState) {
             backPressPreviousState = true
-            Toast.makeText(this, getString(R.string.press_one_more_time_to_exit), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Press one more time to exit", Toast.LENGTH_SHORT).show()
             Handler().postDelayed({
                 backPressPreviousState = false
-            }, DELAY_BACK_TO_EXIT_TIME)
+            }, 3000)
+        } else if (id != R.id.manageShopFragment) {
+            super.onBackPressed()
+            backPressPreviousState = false
+        } else if (backPressPreviousState) {
+            super.onBackPressed()
         }
     }
 

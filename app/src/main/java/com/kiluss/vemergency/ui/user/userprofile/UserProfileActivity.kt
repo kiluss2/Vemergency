@@ -16,6 +16,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
 import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
@@ -23,7 +24,6 @@ import com.kiluss.vemergency.databinding.ActivityUserProfileBinding
 import com.kiluss.vemergency.utils.Utils
 
 class UserProfileActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityUserProfileBinding
     private var user: User? = null
     private val db = Firebase.firestore
@@ -83,9 +83,12 @@ class UserProfileActivity : AppCompatActivity() {
     private fun setupView() {
         with(binding) {
             ivEdit.setOnClickListener {
-                startActivity(Intent(this@UserProfileActivity, EditUserProfileActivity::class.java))
+                startActivity(Intent(this@UserProfileActivity, EditUserProfileActivity::class.java).apply {
+                    putExtra(EXTRA_USER_DETAIL, user)
+                })
             }
             btnLogout.setOnClickListener {
+                removeFcmToken()
                 FirebaseManager.getAuth()?.signOut() //End user session
                 FirebaseManager.logout()
                 finish()
@@ -117,6 +120,12 @@ class UserProfileActivity : AppCompatActivity() {
                     }.create().show()
                 }
             }
+        }
+    }
+
+    private fun removeFcmToken() {
+        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
         }
     }
 

@@ -82,18 +82,6 @@
 
         <TextView
             style="@style/viewParent.headerText.settingsMiniTitle"
-            android:text="Notifications" />
-
-        <Switch
-            android:id="@+id/swNotification"
-            style="@style/settingsText"
-            android:checked="true"
-            android:drawableStart="@drawable/ic_notifications"
-            android:text="Notifications"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-        <TextView
-            style="@style/viewParent.headerText.settingsMiniTitle"
             android:text="Regional" />
 
         <TextView
@@ -104,7 +92,7 @@
         <TextView
             android:id="@+id/tvSignOut"
             style="@style/viewParent.headerText.settingsTextIcon"
-            android:text="@string/textview_text_signout"
+            android:text="@string/textview_text_sign_out"
             app:drawableStartCompat="@drawable/ic_logout" />
 
 

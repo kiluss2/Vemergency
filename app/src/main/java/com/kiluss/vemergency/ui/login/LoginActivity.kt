@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kiluss.vemergency.constant.ROLE_NAN
+import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityLoginBinding
@@ -14,7 +15,6 @@ import com.kiluss.vemergency.ui.user.launcher.PickRoleActivity
 import com.kiluss.vemergency.utils.SharedPrefManager
 
 class LoginActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityLoginBinding
     private lateinit var loginPagerAdapter: LoginPagerAdapter
     lateinit var viewPager: ViewPager2
@@ -28,7 +28,8 @@ class LoginActivity : AppCompatActivity() {
             binding.lnSplash.visibility = View.GONE
         }
         viewPager = binding.vpLogin
-        loginPagerAdapter = LoginPagerAdapter(this)
+        loginPagerAdapter =
+            LoginPagerAdapter(this, SharedPrefManager.getString(SHARE_PREF_ROLE, ROLE_USER) ?: ROLE_USER)
         viewPager.adapter = loginPagerAdapter
 
         TabLayoutMediator(binding.tlLogin, viewPager) { tab, position ->

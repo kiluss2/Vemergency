@@ -12,14 +12,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
-import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentShopSettingBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
+import com.kiluss.vemergency.ui.shop.edit.EditShopProfileActivity
 
 class ShopSettingFragment : Fragment() {
-
     private var _binding: FragmentShopSettingBinding? = null
     private val binding get() = _binding!!
 
@@ -47,10 +47,10 @@ class ShopSettingFragment : Fragment() {
                 viewModel.navigateToHome()
             }
             tvEditProfile.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
+                startActivity(Intent(activity, EditShopProfileActivity::class.java).apply {
                     putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_EDIT_USER_PROFILE
+                        EXTRA_SHOP_DETAIL,
+                        viewModel.getShopData()
                     )
                 })
             }
@@ -72,22 +72,17 @@ class ShopSettingFragment : Fragment() {
 
     private fun observeViewModel() {
         with(viewModel) {
-            avatarBitmap.observe(viewLifecycleOwner) {
-                if (FirebaseManager.getCurrentUser() != null) {
-                    it?.let {
-                        Glide.with(this@ShopSettingFragment)
-                            .load(it)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .dontAnimate()
-                            .into(binding.profileCircleImageView)
-                    }
-                }
-            }
             shop.observe(viewLifecycleOwner) {
                 with(binding) {
                     FirebaseManager.getAuth()?.currentUser?.email?.let {
                         usernameTextView.text = it
+                    }
+                    it?.imageUrl?.let {
+                        Glide.with(this@ShopSettingFragment)
+                            .load(it)
+                            .placeholder(R.drawable.ic_account_avatar)
+                            .centerCrop()
+                            .into(binding.profileCircleImageView)
                     }
                 }
             }
@@ -97,7 +92,7 @@ class ShopSettingFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         if (FirebaseManager.getCurrentUser() == null) {
-            Glide.with(this)
+            Glide.with(this@ShopSettingFragment)
                 .load(R.drawable.ic_account_avatar)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)

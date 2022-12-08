@@ -17,7 +17,7 @@ class ShopDiff(
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return (oldList[oldItemPosition].uid == newList[newItemPosition].uid)
+        return (oldList[oldItemPosition].id == newList[newItemPosition].id)
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

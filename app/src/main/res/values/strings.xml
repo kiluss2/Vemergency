@@ -10,21 +10,71 @@
     <string name="prompt_password_confirm">confirm password</string>
     <string name="permission_denied">Permission Denied</string>
     <string name="textview_text_settings">Settings</string>
-    <string name="textview_text_signout">Sign out</string>
+    <string name="textview_text_sign_out">Sign out</string>
     <string name="this_account_is_not_belong_to_this_role">This account is not belong to this role</string>
     <string name="create_to_manage_your_shop">Create to manage your shop</string>
     <string name="press_one_more_time_to_exit">Press one more time to exit</string>
     <string name="fail_to_create_shop">Fail to create shop</string>
     <string name="waiting_for_approve">Waiting for approve</string>
     <string name="pending_request">Pending request</string>
-    <string name="list_shop_actived">List shop actived</string>
+    <string name="list_shop_activated">List shop activated</string>
     <string name="no_item">No item</string>
-    <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} place near by}</string>
+    <string name="text_found_near_by">{0,choice,0#no place near by you|1#found 1 place near by|1&lt;found {0} places near by}</string>
+    <string name="reviews">{0,choice,0#No review|1#1 review|1&lt;{0} reviews}</string>
     <string name="finding_near_by_place">finding near by place..</string>
     <string name="no_review">No review</string>
     <string name="distance">Distance: </string>
     <string name="estimate_time">Estimate time: </string>
     <string name="direction_to">Direction to </string>
-    <string name="direction_from_your_location">Direction from your location</string>
+    <string name="directing_from_your_location">Directing from your location</string>
     <string name="or_use_your_location_by_default">or just leave it to use your current location by default</string>
+    <string name="please_fill_all_field">Please fill all field</string>
+    <string name="please_fill_in_this_field">Please fill in this field</string>
+    <string name="phone_number_is_existed">Phone number is existed</string>
+    <string name="confirm_password_not_match">Confirm password is not match</string>
+    <string name="upload_shop_proof_photo">Upload shop proof photo:</string>
+    <string name="pick_image">Pick image <font color='#FF0000'>*</font></string>
+    <string name="pick_location">Pick location <font color='#FF0000'>*</font></string>
+    <string name="submit">Submit</string>
+    <string name="website">Website</string>
+    <string name="category">Category <font color='#FF0000'>*</font></string>
+    <string name="open_time">Open time</string>
+    <string name="phone">Phone</string>
+    <string name="phone_number">Phone number <font color='#FF0000'>*</font></string>
+    <string name="owner">Owner</string>
+    <string name="owner_name">Owner name</string>
+    <string name="address_label">Address <font color='#FF0000'>*</font></string>
+    <string name="address">Address</string>
+    <string name="input_title">Input title</string>
+    <string name="shop_name">Shop name <font color='#FF0000'>*</font></string>
+    <string name="select">Select</string>
+    <string name="rescue_service_is_arrived">Rescue service is arrived</string>
+    <string name="finish">finish</string>
+    <string name="give_star">Give star</string>
+    <string name="write_your_review">Write your review</string>
+    <string name="transaction_history">Transaction history</string>
+    <string name="no_history">No history</string>
+    <string name="no_request_currently">No request currently</string>
+    <string name="waiting_for_rescue_service">Waiting for rescue service</string>
+    <string name="transaction_finished">Transaction finished</string>
+    <string name="ok">OK</string>
+    <string name="going_to_your_location">going to your location</string>
+    <string name="active_shop">Active shop</string>
+    <string name="inactive_shop">Inactive shop</string>
+    <string name="show_rescue_location">show rescue location</string>
+    <string name="all_user">All user</string>
+    <string name="transaction_pending">Transaction pending</string>
+    <string name="full_name">Full name <font color='#FF0000'>*</font></string>
+    <string name="please_update_your_information_first">Please update your information first</string>
+    <string name="edit">edit</string>
+    <string name="delete">delete</string>
+    <string name="service">Service</string>
+    <string name="make_a_phone_call">Make a phone call?</string>
+    <string name="do_you_want_phone_call">Do you want to make a phone call?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_question">Delete?</string>
+    <string name="do_you_want_to_delete">Do you want to delete?</string>
+    <string name="ask_for_rescue">Ask for rescue</string>
+    <string name="ask_for_rescue_service">Ask for rescue service</string>
 </resources>

@@ -12,13 +12,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.databinding.FragmentSignupBinding
-import com.kiluss.vemergency.utils.SharedPrefManager
 import com.kiluss.vemergency.utils.Utils
 
 class SignupFragment : Fragment() {
-
     private var _binding: FragmentSignupBinding? = null
     private val binding get() = _binding!!
     private lateinit var auth: FirebaseAuth
@@ -36,9 +34,7 @@ class SignupFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // Initialize Firebase Auth
         auth = Firebase.auth
-        //signupApi = RetrofitClient.getInstance(requireContext()).getClientUnAuthorize().create(BookService::class.java)
         binding.btnSignUp.setOnClickListener {
-            binding.loading.visibility = View.VISIBLE
             performSignUp()
         }
     }
@@ -50,6 +46,7 @@ class SignupFragment : Fragment() {
             val passwordConfirm = edtPasswordConfirm.text.toString()
             if (password != "" && username != "" && passwordConfirm != "") {
                 if (password == passwordConfirm) {
+                    binding.loading.visibility = View.VISIBLE
                     auth.createUserWithEmailAndPassword(username, password)
                         .addOnCompleteListener(requireActivity()) { task ->
                             if (task.isSuccessful) {
@@ -57,7 +54,7 @@ class SignupFragment : Fragment() {
                                 auth.uid?.let {
                                     db.collection(Utils.getCollectionRole())
                                         .document(it)
-                                        .set(HashMap<String, Any>())
+                                        .set(hashMapOf("id" to it, "userName" to auth.currentUser?.email))
                                         .addOnSuccessListener {
                                             // Sign in success, update UI with the signed-in user's information
                                             Toast.makeText(
@@ -71,7 +68,7 @@ class SignupFragment : Fragment() {
                                             auth.signOut()
                                             Utils.showShortToast(
                                                 this@SignupFragment.requireContext(),
-                                                "Fail to update profile"
+                                                e.message.toString()
                                             )
                                             Log.e(ContentValues.TAG, "Error adding document", e)
                                         }
@@ -84,10 +81,15 @@ class SignupFragment : Fragment() {
                                 Toast.makeText(activity, task.exception?.message, Toast.LENGTH_SHORT).show()
                             }
                         }
+                } else {
+                    Utils.showLongToast(
+                        this@SignupFragment.requireActivity(),
+                        getString(R.string.confirm_password_not_match)
+                    )
                 }
             } else {
                 auth.signOut()
-                Toast.makeText(requireContext(), "Please fill all field", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.please_fill_all_field), Toast.LENGTH_LONG).show()
             }
         }
     }

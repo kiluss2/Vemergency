@@ -21,17 +21,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.kiluss.bookrate.network.api.RetrofitClient
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
+import com.kiluss.vemergency.constant.IMAGE_API_URL
 import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
 import com.kiluss.vemergency.constant.USER_COLLECTION
-import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.databinding.ActivityEditUserProfileBinding
-import com.kiluss.vemergency.network.api.ImageService
+import com.kiluss.vemergency.network.api.ApiService
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import org.json.JSONObject
@@ -39,16 +39,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 class EditUserProfileActivity : AppCompatActivity() {
-
     private var imageUrl: String? = null
     private var imageBase64: String? = null
     private var user = User()
     private val db = Firebase.firestore
     private lateinit var binding: ActivityEditUserProfileBinding
-    private lateinit var imageApi: ImageService
+    private lateinit var imageApi: ApiService
     private val requestManageStoragePermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     private val pickImageFromGalleryForResult = registerForActivityResult(
@@ -80,12 +79,34 @@ class EditUserProfileActivity : AppCompatActivity() {
         binding = ActivityEditUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
-        getUserData()
-        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize().create(ImageService::class.java)
+        imageApi = RetrofitClient.getInstance(this).getClientUnAuthorize(IMAGE_API_URL).create(ApiService::class.java)
     }
 
     private fun setupView() {
         with(binding) {
+            intent.getParcelableExtra<User>(EXTRA_USER_DETAIL)?.let {
+                user = it
+            }
+            user.fullName?.let {
+                binding.edtFullName.setText(it)
+            }
+            user.birthday?.let {
+                binding.tvBirthDayPicker.text = it
+            }
+            user.address?.let {
+                binding.edtAddress.setText(it)
+            }
+            user.phone?.let {
+                binding.edtPhoneNumber.setText(it)
+            }
+            user.userName?.let {
+                binding.tvUserName.text = it
+            }
+            Glide.with(this@EditUserProfileActivity)
+                .load(user.imageUrl)
+                .placeholder(R.drawable.ic_account_avatar)
+                .centerCrop()
+                .into(binding.ivProfile)
             val dateSetListener =
                 DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                     val birthday = "$year-${monthOfYear + 1}-$dayOfMonth"
@@ -96,14 +117,30 @@ class EditUserProfileActivity : AppCompatActivity() {
             binding.tvBirthDayPicker.setOnClickListener {
                 setUpDatePicker(dateSetListener)
             }
-
             btnSave.setOnClickListener {
-                showProgressbar()
-                uploadImage()
+                if (edtFullName.text.isEmpty()) {
+                    edtFullName.error = getString(R.string.please_fill_in_this_field)
+                } else if (edtPhoneNumber.text.isEmpty()) {
+                    edtPhoneNumber.error = getString(R.string.please_fill_in_this_field)
+                } else {
+                    showProgressbar()
+                    db.collection(USER_COLLECTION)
+                        .whereEqualTo("phone", edtPhoneNumber.text.toString())
+                        .get()
+                        .addOnSuccessListener {
+                            if (it.size() != 0 && edtPhoneNumber.text.toString() != user.phone) {
+                                edtPhoneNumber.error = getString(R.string.phone_number_is_existed)
+                                hideProgressbar()
+                            } else {
+                                uploadImage()
+                            }
+                        }
+                }
             }
             ivProfile.setOnClickListener {
                 pickImage()
             }
+            hideProgressbar()
         }
     }
 
@@ -114,16 +151,19 @@ class EditUserProfileActivity : AppCompatActivity() {
             user.phone = edtPhoneNumber.text.toString()
             imageUrl?.let { user.imageUrl = it }
             user.lastModifiedTime = android.icu.util.Calendar.getInstance().timeInMillis.toDouble()
-            FirebaseManager.getAuth()?.uid?.let {
+            user.id?.let {
                 db.collection(USER_COLLECTION)
                     .document(it)
                     .set(user)
                     .addOnSuccessListener {
                         hideProgressbar()
                         Utils.showShortToast(this@EditUserProfileActivity, "Edit successful")
+                        setResult(Activity.RESULT_OK, Intent().apply {
+                            putExtra(EXTRA_USER_DETAIL, user)
+                        })
                         finish()
                     }
-                    .addOnFailureListener { e ->
+                    .addOnFailureListener {
                         hideProgressbar()
                         Utils.showShortToast(this@EditUserProfileActivity, "Fail to update profile")
                         Log.e(ContentValues.TAG, "Error adding document")
@@ -135,7 +175,7 @@ class EditUserProfileActivity : AppCompatActivity() {
     private fun uploadImage() {
         val iBase64 = imageBase64
         if (iBase64 != null) {
-            imageApi.upload(Utils.createRequestBodyForImage(iBase64))
+            imageApi.uploadPhoto(Utils.createRequestBodyForImage(iBase64))
                 .enqueue(object : Callback<JsonObject?> {
                     override fun onResponse(
                         call: Call<JsonObject?>,
@@ -222,48 +262,5 @@ class EditUserProfileActivity : AppCompatActivity() {
 
     private fun hideProgressbar() {
         binding.pbLoading.visibility = View.GONE
-    }
-
-    private fun getUserData() {
-        FirebaseManager.getAuth()?.uid?.let { uid ->
-            binding.tvEmail.text = FirebaseManager.getAuth()?.currentUser?.email
-            db.collection(USER_COLLECTION)
-                .document(uid)
-                .get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        documentSnapshot.toObject<User>()?.let { result ->
-                            user = result
-                            user.fullName?.let {
-                                binding.edtFullName.setText(it)
-                            }
-                            user.birthday?.let {
-                                binding.tvBirthDayPicker.text = it
-                            }
-                            user.address?.let {
-                                binding.edtAddress.setText(it)
-                            }
-                            user.phone?.let {
-                                binding.edtPhoneNumber.setText(it)
-                            }
-                            Glide.with(this@EditUserProfileActivity)
-                                .load(user.imageUrl)
-                                .placeholder(R.drawable.ic_account_avatar)
-                                .centerCrop()
-                                .into(binding.ivProfile)
-                        }
-                    }
-                    hideProgressbar()
-                }
-                .addOnFailureListener { exception ->
-                    hideProgressbar()
-                    Utils.showShortToast(this@EditUserProfileActivity, "Fail to get user information")
-                    Log.e("Main Activity", exception.message.toString())
-                }
-            if (FirebaseManager.getAuth()?.uid == null) {
-                hideProgressbar()
-                Utils.showShortToast(this@EditUserProfileActivity, "Fail to get auth")
-            }
-        }
     }
 }

@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.DELAY_BACK_TO_EXIT_TIME
 import com.kiluss.vemergency.constant.EXTRA_EMERGENCY
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -18,7 +17,7 @@ import com.kiluss.vemergency.ui.login.LoginActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private var backPressPreviousState: Boolean = false
+    private var backPressPreviousState = false
     private lateinit var binding: ActivityMainBinding
 
     // view model ktx
@@ -37,25 +36,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpOnClickView() {
-        binding.fabAddPlace.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java).apply {
-                putExtra(
-                    LOGIN_FRAGMENT_EXTRA,
-                    EXTRA_EMERGENCY
-                )
-            })
-        }
+
     }
 
     override fun onBackPressed() {
-        if (backPressPreviousState) {
-            super.onBackPressed()
-        } else {
+        val id = findNavController(R.id.navFragment).currentDestination?.id
+        if (id == R.id.homeFragment && !backPressPreviousState) {
             backPressPreviousState = true
             Toast.makeText(this, "Press one more time to exit", Toast.LENGTH_SHORT).show()
             Handler().postDelayed({
                 backPressPreviousState = false
-            }, DELAY_BACK_TO_EXIT_TIME)
+            }, 3000)
+        } else if (id != R.id.homeFragment) {
+            super.onBackPressed()
+            backPressPreviousState = false
+        } else if (backPressPreviousState) {
+            super.onBackPressed()
         }
     }
 

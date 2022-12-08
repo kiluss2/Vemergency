@@ -66,12 +66,36 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvShopList"
+        <LinearLayout
+            android:id="@+id/lnShopList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle" />
+            app:layout_constraintTop_toBottomOf="@id/tvBottomSheetTitle">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/active_shop" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvShopList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/inactive_shop" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvShopCloneList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <include
             android:id="@+id/layoutShopPreview"
@@ -97,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:gravity="center"
-                android:text="@string/direction_from_your_location"
+                android:text="@string/directing_from_your_location"
                 android:textStyle="bold" />
 
             <TextView
@@ -115,7 +139,5 @@
                 android:text="@string/estimate_time" />
 
         </LinearLayout>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
