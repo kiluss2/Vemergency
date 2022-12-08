@@ -127,7 +127,7 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     private fun removeFcmToken() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
-            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+            db.collection(SHOP_COLLECTION).document(uid).update("fcmToken", "")
         }
     }
 

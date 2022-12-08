@@ -12,15 +12,15 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
-import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
-import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
+import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentAdminSettingBinding
+import com.kiluss.vemergency.ui.admin.profile.AdminEditProfileActivity
+import com.kiluss.vemergency.ui.admin.profile.AdminProfileActivity
 import com.kiluss.vemergency.ui.login.LoginActivity
 
 class AdminSettingFragment : Fragment() {
-
     private var _binding: FragmentAdminSettingBinding? = null
     private val binding get() = _binding!!
 
@@ -40,7 +40,6 @@ class AdminSettingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
         setupView()
-        viewModel.getUserInfo()
     }
 
     private fun setupView() {
@@ -51,19 +50,13 @@ class AdminSettingFragment : Fragment() {
                 }
             }
             rlPersonalDetail.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
-                    putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_USER_PROFILE
-                    )
+                startActivity(Intent(activity, AdminProfileActivity::class.java).apply {
+                    putExtra(EXTRA_USER_DETAIL, viewModel.getUserData())
                 })
             }
             tvEditProfile.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
-                    putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_EDIT_USER_PROFILE
-                    )
+                startActivity(Intent(activity, AdminEditProfileActivity::class.java).apply {
+                    putExtra(EXTRA_USER_DETAIL, viewModel.getUserData())
                 })
             }
             tvChangePassword.setOnClickListener {

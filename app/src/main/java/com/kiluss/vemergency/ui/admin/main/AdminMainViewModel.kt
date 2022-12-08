@@ -91,7 +91,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
     }
     internal val currentTransaction: LiveData<MutableList<Transaction>> = _currentTransaction
 
-    internal fun getUserInfo() {
+    internal fun getAdminInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
             db.collection(ADMIN_COLLECTION)
                 .document(it)

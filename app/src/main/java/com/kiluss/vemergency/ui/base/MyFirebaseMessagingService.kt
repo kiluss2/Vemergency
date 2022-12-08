@@ -91,7 +91,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val channelId = "fcm_default_channel"
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("FCM Message")
+            .setContentTitle("New rescue request!")
             .setContentText(messageBody)
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_call)
