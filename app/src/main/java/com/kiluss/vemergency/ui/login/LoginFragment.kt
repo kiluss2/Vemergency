@@ -26,6 +26,7 @@ import com.kiluss.vemergency.constant.ROLE_NAN
 import com.kiluss.vemergency.constant.ROLE_SHOP
 import com.kiluss.vemergency.constant.ROLE_USER
 import com.kiluss.vemergency.constant.SHARE_PREF_ROLE
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.USER_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.data.model.User
@@ -94,7 +95,7 @@ class LoginFragment : Fragment() {
                                     .addOnSuccessListener { documentSnapshot ->
                                         binding.pbLoading.visibility = View.GONE
                                         if (documentSnapshot.exists()) {
-                                            if (collectionRole == ROLE_SHOP) {
+                                            if (collectionRole == SHOP_COLLECTION) {
                                                 db.collection(collectionRole).document(uid).update(
                                                     "fcmToken", SharedPrefManager.getString(
                                                         FCM_DEVICE_TOKEN, ""

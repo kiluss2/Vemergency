@@ -72,22 +72,17 @@ class ShopSettingFragment : Fragment() {
 
     private fun observeViewModel() {
         with(viewModel) {
-            avatarBitmap.observe(viewLifecycleOwner) {
-                if (FirebaseManager.getCurrentUser() != null) {
-                    it?.let {
-                        Glide.with(this@ShopSettingFragment)
-                            .load(it)
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .dontAnimate()
-                            .into(binding.profileCircleImageView)
-                    }
-                }
-            }
             shop.observe(viewLifecycleOwner) {
                 with(binding) {
                     FirebaseManager.getAuth()?.currentUser?.email?.let {
                         usernameTextView.text = it
+                    }
+                    it?.imageUrl?.let {
+                        Glide.with(this@ShopSettingFragment)
+                            .load(it)
+                            .placeholder(R.drawable.ic_account_avatar)
+                            .centerCrop()
+                            .into(binding.profileCircleImageView)
                     }
                 }
             }
@@ -97,7 +92,7 @@ class ShopSettingFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         if (FirebaseManager.getCurrentUser() == null) {
-            Glide.with(this)
+            Glide.with(this@ShopSettingFragment)
                 .load(R.drawable.ic_account_avatar)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)

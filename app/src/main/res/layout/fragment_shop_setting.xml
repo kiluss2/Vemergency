@@ -82,18 +82,6 @@
 
         <TextView
             style="@style/viewParent.headerText.settingsMiniTitle"
-            android:text="Notifications" />
-
-        <Switch
-            android:id="@+id/swNotification"
-            style="@style/settingsText"
-            android:checked="true"
-            android:drawableStart="@drawable/ic_notifications"
-            android:text="Notifications"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-        <TextView
-            style="@style/viewParent.headerText.settingsMiniTitle"
             android:text="Regional" />
 
         <TextView
