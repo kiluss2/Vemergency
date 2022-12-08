@@ -21,7 +21,6 @@ import com.kiluss.vemergency.ui.base.BaseViewModel
 
 class UserRescueViewModel(application: Application) : BaseViewModel(application) {
     private var activeShopLists = mutableListOf<Shop>()
-    private var shopCloneLists = mutableListOf<Shop>()
     private val db = Firebase.firestore
     internal var transaction = Transaction()
     internal var currentLocation = LatLng(0.0, 0.0)
@@ -47,16 +46,11 @@ class UserRescueViewModel(application: Application) : BaseViewModel(application)
     }
     internal val finishActivity: LiveData<Unit> = _finishActivity
 
-    internal fun getShopCloneInfo(position: Int) = shopCloneLists[position]
-
     internal fun getActiveShopInfo(position: Int) = activeShopLists[position]
 
-    internal fun getShopClone() = shopCloneLists
-
     internal fun getNearByShopNumber(): Int {
-        println(shopCloneLists.size)
         println(activeShopLists.size)
-        return shopCloneLists.size + activeShopLists.size
+        return activeShopLists.size
     }
 
     internal fun getShopRescueInfo() {

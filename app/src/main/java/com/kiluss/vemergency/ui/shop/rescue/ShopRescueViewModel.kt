@@ -18,6 +18,7 @@ import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.ui.base.BaseViewModel
 
 class ShopRescueViewModel(application: Application) : BaseViewModel(application) {
+    internal var shopInfo = Shop()
     private var activeShopLists = mutableListOf<Shop>()
     private var shopCloneLists = mutableListOf<Shop>()
     private val db = Firebase.firestore
@@ -47,6 +48,10 @@ class ShopRescueViewModel(application: Application) : BaseViewModel(application)
 
     internal fun updateTransactionStatus() {
         transaction.id?.let {
+            transaction.shopName = shopInfo.name
+            transaction.shopAddress = shopInfo.address
+            transaction.shopImage = shopInfo.imageUrl
+            transaction.shopPhone = shopInfo.phone
             db.collection(CURRENT_TRANSACTION_COLLECTION)
                 .document(it)
                 .set(transaction)

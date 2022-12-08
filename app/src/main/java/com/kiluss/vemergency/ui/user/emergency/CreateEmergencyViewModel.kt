@@ -15,6 +15,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonArray
+import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
 import com.kiluss.vemergency.constant.GEO_HASH
 import com.kiluss.vemergency.constant.LATITUDE
@@ -53,8 +54,11 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
 
     // get active shop near by
     internal fun getNearByShop(location: Location, radiusKmRange: Int, transaction: Transaction) {
-        if (radiusKmRange >= 200) {
-            Utils.showLongToast(getApplication(), "Can't find any service near by you")
+        if (radiusKmRange >= 100) {
+            Utils.showLongToast(
+                getApplication(),
+                getApplication<Application>().getString(R.string.can_not_find_any_service_near_by_you_in_100_km)
+            )
         } else if (queryNearShop) {
             val center = GeoLocation(location.latitude, location.longitude)
             // query $radiusKmRange km around the location
@@ -120,11 +124,8 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
         val tokens = JsonArray()
         val shopIds = JsonArray()
         shopLists.forEach {
-            val shopToken = it.fcmToken
-            if (shopToken != null && shopToken.isNotEmpty() && it.created == true) {
-                tokens.add(shopToken)
-                shopIds.add(it.id)
-            }
+            tokens.add(it.fcmToken)
+            shopIds.add(it.id)
         }
         FirebaseManager.getAuth()?.uid?.let {
             db.collection(USER_COLLECTION)

@@ -331,7 +331,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     internal fun getPendingTransaction() {
         pendingTransactionCollectionQuery = db.collection(PENDING_TRANSACTION_COLLECTION)
-            .orderBy("endTime", Query.Direction.DESCENDING)
+            .orderBy("startTime", Query.Direction.DESCENDING)
         pendingTransactionCollectionQuery?.let {
             it.limit(TRANSACTION_ITEM_PER_PAGE)
                 .get()
@@ -395,7 +395,7 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     internal fun getCurrentTransaction() {
         currentTransactionCollectionQuery = db.collection(CURRENT_TRANSACTION_COLLECTION)
-            .orderBy("endTime", Query.Direction.DESCENDING)
+            .orderBy("startTime", Query.Direction.DESCENDING)
         currentTransactionCollectionQuery?.let {
             it.limit(TRANSACTION_ITEM_PER_PAGE)
                 .get()

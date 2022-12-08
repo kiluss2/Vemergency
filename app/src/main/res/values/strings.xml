@@ -77,4 +77,5 @@
     <string name="do_you_want_to_delete">Do you want to delete?</string>
     <string name="ask_for_rescue">Ask for rescue</string>
     <string name="ask_for_rescue_service">Ask for rescue service</string>
+    <string name="can_not_find_any_service_near_by_you_in_100_km">Can\'t find any service near by you in 100 km</string>
 </resources>

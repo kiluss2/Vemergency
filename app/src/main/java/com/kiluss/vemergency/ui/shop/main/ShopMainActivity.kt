@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_PENDING_TRANSACTION_FRAGMENT
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityShopMainBinding
@@ -43,6 +44,7 @@ class ShopMainActivity : AppCompatActivity() {
             startRescue.observe(this@ShopMainActivity) {
                 startActivity(Intent(this@ShopMainActivity, ShopRescueActivity::class.java).apply {
                     putExtra(EXTRA_TRANSACTION, it)
+                    putExtra(EXTRA_SHOP_DETAIL, viewModel.myShop)
                 })
             }
         }

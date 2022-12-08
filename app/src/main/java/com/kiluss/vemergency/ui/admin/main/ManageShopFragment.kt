@@ -124,6 +124,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
 
     override fun onResume() {
         super.onResume()
+        viewModel.getShopPendingInfo()
     }
 
     override fun onOpenShopDetail(shop: Shop) {

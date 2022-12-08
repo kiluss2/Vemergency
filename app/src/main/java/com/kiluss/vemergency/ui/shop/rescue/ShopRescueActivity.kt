@@ -39,10 +39,12 @@ import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_DIRECTION_STATE
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_LIST_SHOP_STATE
 import com.kiluss.vemergency.constant.BOTTOM_SHEET_SHOP_PREVIEW_STATE
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
 import com.kiluss.vemergency.constant.LOCATION_INTERVAL_TIME
 import com.kiluss.vemergency.constant.POLYLINE_STROKE_WIDTH_PX
 import com.kiluss.vemergency.constant.SHOP_ARRIVE_DISTANCE
+import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.databinding.ActivityShopRescueBinding
 import com.kiluss.vemergency.databinding.DialogShopTransactionFinishBinding
@@ -78,6 +80,9 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment!!.getMapAsync(this)
         observeViewModel()
         registerForLocationService()
+        intent.getParcelableExtra<Shop>(EXTRA_SHOP_DETAIL)?.let {
+            viewModel.shopInfo = it
+        }
     }
 
     private fun registerForLocationService() {
@@ -349,7 +354,6 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun direction(departure: LatLng, destination: LatLng) {
-        currentPolyLines?.remove()
         val paths = mutableListOf<List<LatLng>>()
         val roadManager = OSRMRoadManager(this, "MY_USER_AGENT")
         val waypoints = arrayListOf<GeoPoint>()
@@ -370,6 +374,7 @@ class ShopRescueActivity : AppCompatActivity(), OnMapReadyCallback {
                 for (i in 0 until paths.size) {
                     option.addAll(paths[i])
                 }
+                currentPolyLines?.remove()
                 currentPolyLines = map?.addPolyline(option)
                 map?.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().apply {
                     include(departure)

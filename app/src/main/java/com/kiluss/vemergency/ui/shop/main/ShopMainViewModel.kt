@@ -1,7 +1,6 @@
 package com.kiluss.vemergency.ui.shop.main
 
 import android.app.Application
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,14 +24,10 @@ import com.kiluss.vemergency.utils.Utils
  * Created by sonlv on 10/17/2022
  */
 class ShopMainViewModel(application: Application) : BaseViewModel(application) {
-    private var myShop: Shop? = null
+    internal var myShop: Shop? = null
     val db = Firebase.firestore
     private var pendingTransactions = mutableListOf<Transaction>()
     private var historyTransactions = mutableListOf<Transaction>()
-    private val _avatarBitmap: MutableLiveData<Bitmap> by lazy {
-        MutableLiveData<Bitmap>()
-    }
-    internal val avatarBitmap: LiveData<Bitmap> = _avatarBitmap
     private val _progressBarStatus: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
@@ -57,6 +52,10 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
         MutableLiveData<Transaction>()
     }
     internal val startRescue: LiveData<Transaction> = _startRescue
+    private val _dialogTransactionDone: MutableLiveData<Unit> by lazy {
+        MutableLiveData<Unit>()
+    }
+    internal val dialogTransactionDone: LiveData<Unit> = _dialogTransactionDone
 
     internal fun getShopInfo() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let {
@@ -175,21 +174,36 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     internal fun startTransaction(transaction: Transaction, position: Int) {
         transaction.id?.let {
-            // remove pending transaction
-            db.collection(PENDING_TRANSACTION_COLLECTION).document(it).delete()
-            val newList = mutableListOf<Transaction>()
-            for (index in pendingTransactions.indices) {
-                if (index != position) {
-                    newList.add(pendingTransactions[index].copy())
+            db.collection(PENDING_TRANSACTION_COLLECTION).document(it).get().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val document = task.result
+                    if (document != null) {
+                        if (document.exists()) {
+                            // remove pending transaction
+                            db.collection(PENDING_TRANSACTION_COLLECTION).document(it).delete()
+                                .addOnSuccessListener {
+                                    val newList = mutableListOf<Transaction>()
+                                    for (index in pendingTransactions.indices) {
+                                        if (index != position) {
+                                            newList.add(pendingTransactions[index].copy())
+                                        }
+                                    }
+                                    pendingTransactions = newList
+                                    _pendingTransaction.value = pendingTransactions
+                                    FirebaseManager.getAuth()?.uid?.let { id ->
+                                        db.collection(SHOP_COLLECTION).document(id).update("ready", false)
+                                    }
+                                    _startRescue.value = transaction.apply {
+                                        shopId = FirebaseManager.getAuth()?.uid
+                                    }
+                                }
+                        } else {
+                            _dialogTransactionDone.value = null
+                        }
+                    }
+                } else {
+                    Log.d("TAG", "Error: ", task.exception)
                 }
-            }
-            pendingTransactions = newList
-            _pendingTransaction.value = pendingTransactions
-            FirebaseManager.getAuth()?.uid?.let { id ->
-                db.collection(SHOP_COLLECTION).document(id).update("ready", false)
-            }
-            _startRescue.value = transaction.apply {
-                shopId = FirebaseManager.getAuth()?.uid
             }
         }
     }

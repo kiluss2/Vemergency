@@ -46,7 +46,6 @@ class AdminMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.getShopPendingInfo()
         viewModel.getActiveShop()
         viewModel.getAllUser()
     }

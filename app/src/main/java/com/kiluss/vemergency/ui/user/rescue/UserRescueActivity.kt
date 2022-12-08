@@ -114,11 +114,6 @@ class UserRescueActivity : AppCompatActivity(), OnMapReadyCallback {
         intent.getParcelableExtra<Transaction>(EXTRA_TRANSACTION)?.let {
             val userLocation = LatLng(it.userLocation?.latitude!!, it.userLocation?.longitude!!)
             viewModel.transaction = it
-            val markerTitle: String = it.userAddress.toString()
-            val markerOptions =
-                MarkerOptions().position(userLocation).title(markerTitle).snippet(it.userFullName).visible(true)
-            map?.addMarker(markerOptions)
-            markerOptions.anchor(0f, 0.5f)
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             map?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16f))
             setupTransactionInfo()
