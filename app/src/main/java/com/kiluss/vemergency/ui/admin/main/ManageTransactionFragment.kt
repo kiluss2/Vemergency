@@ -115,7 +115,7 @@ class ManageTransactionFragment : Fragment(), ManageTransactionAdapter.OnClickLi
     }
 
     private fun setRVScrollListener() {
-        historyScrollListener = RecyclerViewLoadMoreScroll(historyLayoutManager)
+        historyScrollListener = RecyclerViewLoadMoreScroll(historyLayoutManager, false)
         historyScrollListener.setOnLoadMoreListener(object :
             OnLoadMoreListener {
             override fun onLoadMore() {
@@ -124,7 +124,7 @@ class ManageTransactionFragment : Fragment(), ManageTransactionAdapter.OnClickLi
             }
         })
         binding.rvHistoryTransaction.addOnScrollListener(historyScrollListener)
-        pendingScrollListener = RecyclerViewLoadMoreScroll(pendingLayoutManager)
+        pendingScrollListener = RecyclerViewLoadMoreScroll(pendingLayoutManager, true)
         pendingScrollListener.setOnLoadMoreListener(object :
             OnLoadMoreListener {
             override fun onLoadMore() {
@@ -133,7 +133,7 @@ class ManageTransactionFragment : Fragment(), ManageTransactionAdapter.OnClickLi
             }
         })
         binding.rvPendingTransaction.addOnScrollListener(pendingScrollListener)
-        currentScrollListener = RecyclerViewLoadMoreScroll(currentLayoutManager)
+        currentScrollListener = RecyclerViewLoadMoreScroll(currentLayoutManager, true)
         currentScrollListener.setOnLoadMoreListener(object :
             OnLoadMoreListener {
             override fun onLoadMore() {

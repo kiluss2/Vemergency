@@ -90,7 +90,7 @@ class ManageShopFragment : Fragment(), ShopAdapter.OnClickListener, ShopGridAdap
     }
 
     private fun setRVScrollListener() {
-        scrollListener = RecyclerViewLoadMoreScroll(layoutManager)
+        scrollListener = RecyclerViewLoadMoreScroll(layoutManager, true)
         scrollListener.setOnLoadMoreListener(object :
             OnLoadMoreListener {
             override fun onLoadMore() {

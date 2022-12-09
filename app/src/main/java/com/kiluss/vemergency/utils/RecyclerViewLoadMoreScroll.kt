@@ -6,12 +6,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 class RecyclerViewLoadMoreScroll : RecyclerView.OnScrollListener {
-
     private lateinit var onLoadMoreListener: OnLoadMoreListener
     private var isLoading: Boolean = false
     private var lastVisibleItem: Int = 0
     private var totalItemCount: Int = 0
     private var layoutManager: RecyclerView.LayoutManager
+    private var vertical = true
 
     fun setLoaded() {
         isLoading = false
@@ -25,14 +25,19 @@ class RecyclerViewLoadMoreScroll : RecyclerView.OnScrollListener {
         this.onLoadMoreListener = mOnLoadMoreListener
     }
 
-    constructor(layoutManager: RecyclerView.LayoutManager) {
+    constructor(layoutManager: RecyclerView.LayoutManager, vertical: Boolean) {
         this.layoutManager = layoutManager
+        this.vertical = vertical
     }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
 
-        if (dy <= 0) return
+        if (vertical && dy <= 0) {
+            return
+        } else if (!vertical && dx <= 0) {
+            return
+        }
 
         totalItemCount = layoutManager.itemCount
 
