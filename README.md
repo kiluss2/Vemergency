@@ -9,6 +9,7 @@ Emergency android app for vehicle
   
   Tính năng cứu hộ khi nhiều cửa hàng nhận cùng một giao dịch: https://youtu.be/G467JhRt9gI
   
+### Ảnh in app:
 ![Screenshot_1670232829](https://user-images.githubusercontent.com/69423922/206237445-85cad5ef-c66a-41a1-a7b7-464d84eeb6b5.png)
 ![GFDS](https://user-images.githubusercontent.com/69423922/206260066-7d11e7be-4025-4aa5-ab4a-a638db2209f3.png)
 ![Screenshot_1670237640](https://user-images.githubusercontent.com/69423922/206260171-4719e4e8-8698-4d7f-9a38-bace80029457.png)
