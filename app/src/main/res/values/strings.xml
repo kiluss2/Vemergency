@@ -15,7 +15,7 @@
     <string name="create_to_manage_your_shop">Create to manage your shop</string>
     <string name="press_one_more_time_to_exit">Press one more time to exit</string>
     <string name="fail_to_create_shop">Fail to create shop</string>
-    <string name="waiting_for_approve">Waiting for approve</string>
+    <string name="waiting_for_approve">Waiting for approval</string>
     <string name="pending_request">Pending request</string>
     <string name="list_shop_activated">List shop activated</string>
     <string name="no_item">No item</string>

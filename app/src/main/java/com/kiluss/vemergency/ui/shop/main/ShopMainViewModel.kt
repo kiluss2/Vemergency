@@ -121,13 +121,17 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     internal fun signOut() {
         removeFcmToken()
-        FirebaseManager.getAuth()?.signOut() //End user session
-        FirebaseManager.logout()
     }
 
     private fun removeFcmToken() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
-            db.collection(SHOP_COLLECTION).document(uid).update("fcmToken", "")
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "").addOnSuccessListener {
+                FirebaseManager.getAuth()?.signOut() //End user session
+                FirebaseManager.logout()
+            }.addOnFailureListener {
+                FirebaseManager.getAuth()?.signOut() //End user session
+                FirebaseManager.logout()
+            }
         }
     }
 

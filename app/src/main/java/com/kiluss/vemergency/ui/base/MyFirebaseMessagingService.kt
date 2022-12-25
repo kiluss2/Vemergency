@@ -16,6 +16,7 @@ import androidx.work.WorkerParameters
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
 import com.kiluss.vemergency.constant.EXTRA_PENDING_TRANSACTION_FRAGMENT
 import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
@@ -40,7 +41,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Check if message contains a notification payload.
         remoteMessage.notification?.let {
             Log.d(TAG, "Message Notification Body: ${it.body}")
-            showNotification(it.body)
+            showNotification(it)
         }
     }
 
@@ -70,9 +71,20 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // [END dispatch_job]
     }
 
-    private fun showNotification(data: String?) {
-        data?.let {
-            sendNotification(data)
+    private fun showNotification(data: RemoteMessage.Notification) {
+        println(data.title.toString())
+        when (data.title.toString()) {
+            "New rescue request" -> {
+                data.body?.let {
+                    showRescueNotification(it)
+                }
+            }
+            "Congratulations! Your shop is accepted" -> {
+                showAcceptShopNotification(data.title!!)
+            }
+            "Your shop is rejected" -> {
+                showAcceptShopNotification(data.title!!)
+            }
         }
     }
 
@@ -80,7 +92,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         SharedPrefManager.putString(FCM_DEVICE_TOKEN, token)
     }
 
-    private fun sendNotification(messageBody: String) {
+    private fun showRescueNotification(messageBody: String) {
         val intent = Intent(this, ShopMainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.putExtra(EXTRA_PENDING_TRANSACTION_FRAGMENT, "")
@@ -93,6 +105,37 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle("New rescue request!")
             .setContentText(messageBody)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_call)
+            .setSound(defaultSoundUri)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Channel human readable title",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+    }
+
+    private fun showAcceptShopNotification(messageBody: String) {
+        val intent = Intent(this, ShopMainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtra(EXTRA_CREATE_SHOP, "")
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0 /* Request code */, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val channelId = "fcm_default_channel"
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setContentTitle(messageBody)
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_call)
             .setSound(defaultSoundUri)

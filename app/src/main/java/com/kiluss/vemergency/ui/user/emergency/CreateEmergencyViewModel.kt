@@ -147,7 +147,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                         println(request)
                         RetrofitClient.getInstance(getApplication()).getClientUnAuthorize(SEND_NOTI_API_URL)
                             .create(ApiService::class.java)
-                            .sendNoti(request.toString().toRequestBody())
+                            .sendNotiEmergency(request.toString().toRequestBody())
                             .enqueue(object : Callback<String> {
                                 override fun onResponse(
                                     call: Call<String>,

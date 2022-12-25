@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
+import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
 import com.kiluss.vemergency.constant.EXTRA_PENDING_TRANSACTION_FRAGMENT
 import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_TRANSACTION
@@ -73,6 +74,9 @@ class ShopMainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         if (intent?.getStringExtra(EXTRA_PENDING_TRANSACTION_FRAGMENT) != null) {
             binding.bottomNavigationView.selectedItemId = R.id.pendingTransactionFragment
+        }
+        if (intent?.getStringExtra(EXTRA_CREATE_SHOP) != null) {
+            binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
         }
     }
 }

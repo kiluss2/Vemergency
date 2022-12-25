@@ -15,7 +15,19 @@ interface ApiService {
 
     @Headers("Content-Type: application/json;charset=UTF-8")
     @POST("noti")
-    fun sendNoti(
+    fun sendNotiEmergency(
+        @Body params: RequestBody
+    ): Call<String>
+
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    @POST("acceptShopNoti")
+    fun sendNotiAcceptShop(
+        @Body params: RequestBody
+    ): Call<String>
+
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    @POST("rejectShopNoti")
+    fun sendNotiRejectShop(
         @Body params: RequestBody
     ): Call<String>
 }

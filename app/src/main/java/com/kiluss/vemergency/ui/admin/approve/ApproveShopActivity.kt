@@ -17,15 +17,27 @@ import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.*
+import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
+import com.kiluss.vemergency.constant.EXTRA_SHOP_LOCATION
+import com.kiluss.vemergency.constant.EXTRA_SHOP_PENDING
+import com.kiluss.vemergency.constant.HTTP_PREFIX
+import com.kiluss.vemergency.constant.SEND_NOTI_API_URL
+import com.kiluss.vemergency.constant.SHOP_COLLECTION
+import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.databinding.ActivityApproveShopBinding
+import com.kiluss.vemergency.network.api.ApiService
+import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.admin.main.AdminMainViewModel
 import com.kiluss.vemergency.ui.user.navigation.NavigationActivity
 import com.kiluss.vemergency.utils.Utils
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ApproveShopActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityApproveShopBinding
 
     // view model ktx
@@ -86,7 +98,7 @@ class ApproveShopActivity : AppCompatActivity() {
             }
             binding.ivDecline.setOnClickListener {
                 showProgressbar()
-                shop.id?.let { it1 -> declineShop(it1) }
+                declineShop(shop)
             }
         }
     }
@@ -97,6 +109,9 @@ class ApproveShopActivity : AppCompatActivity() {
                 .document(uid)
                 .set(shop)
                 .addOnSuccessListener {
+                    shop.fcmToken?.let {
+                        sendAcceptNoti(it)
+                    }
                     deleteShopPending(uid)
                 }
                 .addOnFailureListener { e ->
@@ -126,20 +141,27 @@ class ApproveShopActivity : AppCompatActivity() {
             }
     }
 
-    private fun declineShop(uid: String) {
-        db.collection(SHOP_COLLECTION)
-            .document(uid)
-            .delete()
-            .addOnSuccessListener {
-                deleteShopPending(uid)
-            }
-            .addOnFailureListener { e ->
-                hideProgressbar()
-                Utils.showShortToast(
-                    this@ApproveShopActivity, getString(R.string.fail_to_create_shop)
-                )
-                Log.e(ContentValues.TAG, "Error adding document", e)
-            }
+    private fun declineShop(shop: Shop) {
+        shop.id?.let { id ->
+            db.collection(SHOP_PENDING_COLLECTION)
+                .document(id)
+                .delete()
+                .addOnSuccessListener {
+                    db.collection(SHOP_COLLECTION)
+                        .document(id)
+                        .update("pendingApprove", false)
+                    shop.fcmToken?.let {
+                        sendRejectNoti(it)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    hideProgressbar()
+                    Utils.showShortToast(
+                        this@ApproveShopActivity, getString(R.string.fail_to_create_shop)
+                    )
+                    Log.e(ContentValues.TAG, "Error adding document", e)
+                }
+        }
     }
 
     private fun setUpView() {
@@ -188,6 +210,65 @@ class ApproveShopActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun sendAcceptNoti(fcmToken: String) {
+        val request = JSONObject()
+        request.put("token", fcmToken)
+        RetrofitClient.getInstance(this).getClientUnAuthorize(SEND_NOTI_API_URL)
+            .create(ApiService::class.java)
+            .sendNotiAcceptShop(request.toString().toRequestBody())
+            .enqueue(object : Callback<String> {
+                override fun onResponse(
+                    call: Call<String>,
+                    response: Response<String>
+                ) {
+                    when {
+                        response.isSuccessful -> {
+                            Log.e("acceptShop", response.body().toString())
+                        }
+                        else -> {
+                            Log.e("acceptShop", "fail send notification")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.e("failSendNotiAcceptShop", t.toString())
+                    t.printStackTrace()
+                }
+            })
+    }
+
+    private fun sendRejectNoti(fcmToken: String) {
+        val request = JSONObject()
+        request.put("token", fcmToken)
+        RetrofitClient.getInstance(this).getClientUnAuthorize(SEND_NOTI_API_URL)
+            .create(ApiService::class.java)
+            .sendNotiRejectShop(request.toString().toRequestBody())
+            .enqueue(object : Callback<String> {
+                override fun onResponse(
+                    call: Call<String>,
+                    response: Response<String>
+                ) {
+                    when {
+                        response.isSuccessful -> {
+                            Log.e("rejectShop", response.body().toString())
+                            finish()
+                        }
+                        else -> {
+                            Log.e("rejectShop", "fail send notification")
+                            finish()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.e("failSendNotiRejectShop", t.toString())
+                    t.printStackTrace()
+                    finish()
+                }
+            })
     }
 
     private fun showProgressbar() {

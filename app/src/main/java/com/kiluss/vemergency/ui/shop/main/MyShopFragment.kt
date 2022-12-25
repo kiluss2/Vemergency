@@ -112,6 +112,8 @@ class MyShopFragment : Fragment() {
                         if (shop.pendingApprove == true) {
                             binding.tvPendingApprove.visibility = View.VISIBLE
                             binding.tvPendingApprove.setShadowLayer(2f, 2f, 2f, Color.WHITE);
+                        } else {
+                            binding.tvPendingApprove.visibility = View.GONE
                         }
                         binding.clCreateShop.visibility = View.GONE
                         binding.clMain.visibility = View.VISIBLE

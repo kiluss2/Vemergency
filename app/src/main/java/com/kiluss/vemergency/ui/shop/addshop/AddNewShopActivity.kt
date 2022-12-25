@@ -31,6 +31,7 @@ import com.kiluss.vemergency.constant.CAR_MOTORCYCLE_REPAIR_SERVICE
 import com.kiluss.vemergency.constant.CAR_REPAIR_SERVICE
 import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
 import com.kiluss.vemergency.constant.EXTRA_PICK_LOCATION
+import com.kiluss.vemergency.constant.FCM_DEVICE_TOKEN
 import com.kiluss.vemergency.constant.GEO_HASH
 import com.kiluss.vemergency.constant.IMAGE_API_URL
 import com.kiluss.vemergency.constant.LATITUDE
@@ -47,6 +48,7 @@ import com.kiluss.vemergency.network.api.ApiService
 import com.kiluss.vemergency.network.api.RetrofitClient
 import com.kiluss.vemergency.ui.shop.main.ShopMainActivity
 import com.kiluss.vemergency.ui.user.navigation.PickLocationActivity
+import com.kiluss.vemergency.utils.SharedPrefManager
 import com.kiluss.vemergency.utils.URIPathHelper
 import com.kiluss.vemergency.utils.Utils
 import org.json.JSONObject
@@ -84,7 +86,8 @@ class AddNewShopActivity : AppCompatActivity() {
                 val location =
                     result.data?.getParcelableExtra<com.google.android.gms.maps.model.LatLng>(EXTRA_PICK_LOCATION)
                 this.location = LatLng(location?.latitude, location?.longitude)
-                binding.tvLocationPicked.text = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
+                val locationPick = "${location?.longitude.toString()}, ${location?.latitude.toString()}"
+                binding.tvLocationPicked.text = locationPick
             }
         }
     private val requestReadPermission =
@@ -133,19 +136,28 @@ class AddNewShopActivity : AppCompatActivity() {
 
     private fun upLoadInfo() {
         with(binding) {
+            var valid = true
             if (edtName.text.isEmpty()) {
                 edtName.error = "Name can not empty"
+                valid = false
             }
             if (edtAddress.text.isEmpty()) {
                 edtAddress.error = "Address can not empty"
+                valid = false
             }
             if (edtPhone.text.isEmpty()) {
                 edtPhone.error = "Phone can not empty"
+                valid = false
             }
             if (tvLocationPicked.text.isEmpty()) {
                 Utils.showShortToast(this@AddNewShopActivity, "Please choose location")
+                valid = false
             }
-            if (edtName.text.isNotEmpty() && edtAddress.text.isNotEmpty() && edtPhone.text.isNotEmpty() && tvLocationPicked.text.isNotEmpty()) {
+            if (imageBase64 == null) {
+                Utils.showShortToast(this@AddNewShopActivity, "Please upload shop prove image")
+                valid = false
+            }
+            if (valid) {
                 showProgressbar()
                 uploadShopImage()
             }
@@ -281,6 +293,7 @@ class AddNewShopActivity : AppCompatActivity() {
         shop.lastModifiedTime = Calendar.getInstance().timeInMillis.toDouble()
         FirebaseManager.getAuth()?.uid?.let { uid ->
             shop.id = uid
+            shop.fcmToken = SharedPrefManager.getString(FCM_DEVICE_TOKEN, "")
             db.collection(SHOP_PENDING_COLLECTION)
                 .document(uid)
                 .set(shop)
