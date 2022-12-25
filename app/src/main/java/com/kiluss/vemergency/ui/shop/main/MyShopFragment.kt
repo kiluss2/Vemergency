@@ -160,6 +160,7 @@ class MyShopFragment : Fragment() {
                             .centerCrop()
                             .into(binding.ivCover)
                     } else {
+                        binding.tvPendingApprove.visibility = View.GONE
                         binding.clMain.visibility = View.GONE
                         binding.clCreateShop.visibility = View.VISIBLE
                         binding.tvCreateToManage.visibility = View.VISIBLE

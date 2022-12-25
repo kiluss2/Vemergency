@@ -118,9 +118,6 @@ class AdminSettingFragment : Fragment() {
 
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             viewModel.signOut()
-            Glide.with(this@AdminSettingFragment)
-                .load(R.drawable.ic_account_avatar)
-                .into(binding.profileCircleImageView)
             startActivity(Intent(this@AdminSettingFragment.requireActivity(), LoginActivity::class.java))
             requireActivity().finish()
         }

@@ -9,12 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_CREATED_SHOP
+import com.kiluss.vemergency.constant.EXTRA_CREATE_SHOP
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.ActivityAdminMainBinding
 
 class AdminMainActivity : AppCompatActivity() {
-
     private var backPressPreviousState = false
     private lateinit var binding: ActivityAdminMainBinding
 
@@ -69,8 +68,8 @@ class AdminMainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        if (intent?.getStringExtra(EXTRA_CREATED_SHOP) != null) {
-            // binding.bottomNavigationView.selectedItemId = R.id.myShopFragment
+        if (intent?.getStringExtra(EXTRA_CREATE_SHOP) != null) {
+            binding.bottomNavigationView.selectedItemId = R.id.manageShopFragment
         }
     }
 }

@@ -102,6 +102,12 @@ class LoginFragment : Fragment() {
                                                     ),
                                                     "ready", true
                                                 )
+                                            } else {
+                                                db.collection(collectionRole).document(uid).update(
+                                                    "fcmToken", SharedPrefManager.getString(
+                                                        FCM_DEVICE_TOKEN, ""
+                                                    )
+                                                )
                                             }
                                             loginSuccess()
                                         } else {

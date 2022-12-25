@@ -38,6 +38,7 @@ import com.kiluss.vemergency.constant.LATITUDE
 import com.kiluss.vemergency.constant.LONGITUDE
 import com.kiluss.vemergency.constant.MAX_WIDTH_IMAGE
 import com.kiluss.vemergency.constant.MOTORCYCLE_REPAIR_SERVICE
+import com.kiluss.vemergency.constant.SEND_NOTI_API_URL
 import com.kiluss.vemergency.constant.SHOP_COLLECTION
 import com.kiluss.vemergency.constant.SHOP_PENDING_COLLECTION
 import com.kiluss.vemergency.data.firebase.FirebaseManager
@@ -304,6 +305,7 @@ class AddNewShopActivity : AppCompatActivity() {
                             "pendingApprove", true,
                             "created", false
                         )
+                    sendRequestNoti()
                     hideProgressbar()
                     startActivity(Intent(this@AddNewShopActivity, ShopMainActivity::class.java).apply {
                         putExtra(EXTRA_CREATED_SHOP, "created")
@@ -318,5 +320,31 @@ class AddNewShopActivity : AppCompatActivity() {
                     Log.e(ContentValues.TAG, "Error adding document", e)
                 }
         }
+    }
+
+    private fun sendRequestNoti() {
+        RetrofitClient.getInstance(this).getClientUnAuthorize(SEND_NOTI_API_URL)
+            .create(ApiService::class.java)
+            .createShopRequestNoti()
+            .enqueue(object : Callback<String> {
+                override fun onResponse(
+                    call: Call<String>,
+                    response: Response<String>
+                ) {
+                    when {
+                        response.isSuccessful -> {
+                            Log.e("sent request", response.body().toString())
+                        }
+                        else -> {
+                            Log.e("sent request", "fail send notification")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.e("sent request fail", t.toString())
+                    t.printStackTrace()
+                }
+            })
     }
 }

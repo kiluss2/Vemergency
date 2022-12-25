@@ -30,4 +30,8 @@ interface ApiService {
     fun sendNotiRejectShop(
         @Body params: RequestBody
     ): Call<String>
+
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    @POST("createShopNoti")
+    fun createShopRequestNoti(): Call<String>
 }

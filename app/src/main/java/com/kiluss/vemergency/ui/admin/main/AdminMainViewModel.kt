@@ -465,13 +465,9 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     private fun removeFcmToken() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
-            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "").addOnSuccessListener {
-                FirebaseManager.getAuth()?.signOut() //End user session
-                FirebaseManager.logout()
-            }.addOnFailureListener {
-                FirebaseManager.getAuth()?.signOut() //End user session
-                FirebaseManager.logout()
-            }
+            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+            FirebaseManager.getAuth()?.signOut() //End user session
+            FirebaseManager.logout()
         }
     }
 
