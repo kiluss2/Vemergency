@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -19,6 +20,8 @@ import com.kiluss.vemergency.data.model.Shop
 import com.kiluss.vemergency.data.model.Transaction
 import com.kiluss.vemergency.ui.base.BaseViewModel
 import com.kiluss.vemergency.utils.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Created by sonlv on 10/17/2022
@@ -121,16 +124,14 @@ class ShopMainViewModel(application: Application) : BaseViewModel(application) {
 
     internal fun signOut() {
         removeFcmToken()
+        FirebaseManager.getAuth()?.signOut() //End user session
+        FirebaseManager.logout()
     }
 
     private fun removeFcmToken() {
-        FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
-            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "").addOnSuccessListener {
-                FirebaseManager.getAuth()?.signOut() //End user session
-                FirebaseManager.logout()
-            }.addOnFailureListener {
-                FirebaseManager.getAuth()?.signOut() //End user session
-                FirebaseManager.logout()
+        viewModelScope.launch(Dispatchers.IO) {
+            FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
+                db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
             }
         }
     }

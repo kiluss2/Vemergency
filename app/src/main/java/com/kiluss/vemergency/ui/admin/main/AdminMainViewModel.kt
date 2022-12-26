@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.firebase.firestore.Query
@@ -32,6 +33,8 @@ import com.kiluss.vemergency.data.model.User
 import com.kiluss.vemergency.extension.loadJSONFromAssets
 import com.kiluss.vemergency.ui.base.BaseViewModel
 import com.kiluss.vemergency.utils.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import java.time.Instant
 
@@ -465,7 +468,9 @@ class AdminMainViewModel(application: Application) : BaseViewModel(application) 
 
     private fun removeFcmToken() {
         FirebaseManager.getAuth()?.currentUser?.uid?.let { uid ->
-            db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+            viewModelScope.launch(Dispatchers.IO) {
+                db.collection(Utils.getCollectionRole()).document(uid).update("fcmToken", "")
+            }
             FirebaseManager.getAuth()?.signOut() //End user session
             FirebaseManager.logout()
         }

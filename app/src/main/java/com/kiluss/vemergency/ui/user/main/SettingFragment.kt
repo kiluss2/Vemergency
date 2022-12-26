@@ -12,12 +12,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
 import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
-import com.kiluss.vemergency.constant.EXTRA_EDIT_USER_PROFILE
+import com.kiluss.vemergency.constant.EXTRA_USER_DETAIL
 import com.kiluss.vemergency.constant.EXTRA_USER_PROFILE
 import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentSettingBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
+import com.kiluss.vemergency.ui.user.userprofile.EditUserProfileActivity
 
 class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
@@ -58,11 +59,8 @@ class SettingFragment : Fragment() {
                 })
             }
             tvEditProfile.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
-                    putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_EDIT_USER_PROFILE
-                    )
+                startActivity(Intent(requireActivity(), EditUserProfileActivity::class.java).apply {
+                    putExtra(EXTRA_USER_DETAIL, viewModel.getUserData())
                 })
             }
             tvChangePassword.setOnClickListener {
