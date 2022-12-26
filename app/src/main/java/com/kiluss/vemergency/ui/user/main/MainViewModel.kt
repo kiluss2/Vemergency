@@ -130,7 +130,11 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
                         }
                     }
                 }
-                _nearByShopCount.value = nearByShopNumber
+                if (nearByShopNumber == 0) {
+                    getNearByCloneShop(location, radiusKmRange + radiusKmRange % 10 + 1)
+                } else {
+                    _nearByShopCount.value = nearByShopNumber
+                }
             }
     }
 

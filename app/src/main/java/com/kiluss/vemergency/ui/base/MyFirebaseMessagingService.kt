@@ -124,7 +124,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
             notificationManager.createNotificationChannel(channel)
         }
-
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
     }
 
@@ -155,7 +154,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
             notificationManager.createNotificationChannel(channel)
         }
-
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
     }
 
@@ -187,7 +185,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
             notificationManager.createNotificationChannel(channel)
         }
-
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
     }
 

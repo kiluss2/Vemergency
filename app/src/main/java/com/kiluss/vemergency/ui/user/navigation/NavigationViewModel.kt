@@ -85,7 +85,7 @@ class NavigationViewModel(application: Application) : BaseViewModel(application)
 
     // get clone shop near by
     internal fun getNearByCloneShop(location: Location, radiusKmRange: Int) {
-        if (radiusKmRange < 200) {
+        if (radiusKmRange < 100) {
             val center = GeoLocation(location.latitude, location.longitude)
             // query $radiusKmRange km around the location
             val radiusInM = (radiusKmRange * 1000).toDouble()
