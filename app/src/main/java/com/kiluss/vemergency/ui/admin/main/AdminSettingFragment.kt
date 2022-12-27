@@ -19,6 +19,7 @@ import com.kiluss.vemergency.databinding.FragmentAdminSettingBinding
 import com.kiluss.vemergency.ui.admin.profile.AdminEditProfileActivity
 import com.kiluss.vemergency.ui.admin.profile.AdminProfileActivity
 import com.kiluss.vemergency.ui.login.LoginActivity
+import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
 
 class AdminSettingFragment : Fragment() {
     private var _binding: FragmentAdminSettingBinding? = null
@@ -60,12 +61,7 @@ class AdminSettingFragment : Fragment() {
                 })
             }
             tvChangePassword.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
-                    putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_CHANGE_PASSWORD
-                    )
-                })
+                startActivity(Intent(activity, ChangePasswordActivity::class.java))
             }
         }
     }

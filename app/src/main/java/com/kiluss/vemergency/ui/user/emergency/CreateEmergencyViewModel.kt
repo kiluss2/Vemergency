@@ -82,8 +82,7 @@ class CreateEmergencyViewModel(application: Application) : BaseViewModel(applica
                             val shop = doc.toObject<Shop>()
                             val lat = shop?.location?.getValue(LATITUDE)
                             val lng = shop?.location?.getValue(LONGITUDE)
-                            // We have to filter out a few false positives due to GeoHash
-                            // accuracy, but most will match
+                            // filter out a few false positives due to GeoHash accuracy
                             if (lat != null && lng != null) {
                                 val docLocation = GeoLocation(lat as Double, lng as Double)
                                 val distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center)

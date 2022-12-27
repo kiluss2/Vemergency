@@ -11,13 +11,13 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kiluss.vemergency.R
-import com.kiluss.vemergency.constant.EXTRA_CHANGE_PASSWORD
 import com.kiluss.vemergency.constant.EXTRA_SHOP_DETAIL
-import com.kiluss.vemergency.constant.LOGIN_FRAGMENT_EXTRA
 import com.kiluss.vemergency.data.firebase.FirebaseManager
 import com.kiluss.vemergency.databinding.FragmentShopSettingBinding
 import com.kiluss.vemergency.ui.login.LoginActivity
 import com.kiluss.vemergency.ui.shop.edit.EditShopProfileActivity
+import com.kiluss.vemergency.ui.user.main.ChangePasswordActivity
+import com.kiluss.vemergency.utils.Utils
 
 class ShopSettingFragment : Fragment() {
     private var _binding: FragmentShopSettingBinding? = null
@@ -47,20 +47,19 @@ class ShopSettingFragment : Fragment() {
                 viewModel.navigateToHome()
             }
             tvEditProfile.setOnClickListener {
-                startActivity(Intent(activity, EditShopProfileActivity::class.java).apply {
-                    putExtra(
-                        EXTRA_SHOP_DETAIL,
-                        viewModel.getShopData()
-                    )
-                })
+                if (viewModel.myShop?.created == true) {
+                    startActivity(Intent(activity, EditShopProfileActivity::class.java).apply {
+                        putExtra(
+                            EXTRA_SHOP_DETAIL,
+                            viewModel.getShopData()
+                        )
+                    })
+                } else {
+                    Utils.showShortToast(requireContext(), "Create shop to edit information")
+                }
             }
             tvChangePassword.setOnClickListener {
-                startActivity(Intent(activity, LoginActivity::class.java).apply {
-                    putExtra(
-                        LOGIN_FRAGMENT_EXTRA,
-                        EXTRA_CHANGE_PASSWORD
-                    )
-                })
+                startActivity(Intent(activity, ChangePasswordActivity::class.java))
             }
         }
     }
